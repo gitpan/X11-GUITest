@@ -14,10 +14,10 @@
 
 	<li><a href="#name">NAME</a></li>
 	<li><a href="#version">VERSION</a></li>
-	<li><a href="#synopsis">SYNOPSIS</a></li>
-	<li><a href="#installation">INSTALLATION</a></li>
-	<li><a href="#dependencies">DEPENDENCIES</a></li>
 	<li><a href="#description">DESCRIPTION</a></li>
+	<li><a href="#dependencies">DEPENDENCIES</a></li>
+	<li><a href="#installation">INSTALLATION</a></li>
+	<li><a href="#synopsis">SYNOPSIS</a></li>
 	<li><a href="#functions">FUNCTIONS</a></li>
 	<li><a href="#other_documentation">OTHER DOCUMENTATION</a></li>
 	<li><a href="#copyright">COPYRIGHT</a></li>
@@ -36,9 +36,41 @@
 </p>
 <hr />
 <h1><a name="version">VERSION</a></h1>
-<p>0.16</p>
+<p>0.17</p>
 <p>Please consult 'docs/Changes' for the list of changes between
 module revisions.</p>
+<p>
+</p>
+<hr />
+<h1><a name="description">DESCRIPTION</a></h1>
+<p>This Perl package is intended to facilitate the testing of GUI applications
+by means of user emulation.  It can be used to test/interact with GUI
+applications; which have been built upon the X library or toolkits
+(i.e., GTK+, Xt, Qt, Motif, etc.) that ``wrap'' the X library's functionality.</p>
+<p>
+</p>
+<hr />
+<h1><a name="dependencies">DEPENDENCIES</a></h1>
+<p>An X server with the XTest extensions enabled.  This seems to be the
+norm.  If it is not enabled, it usually can be by modifying the X
+server configuration (i.e., XF86Config).</p>
+<p>Also, the standard DISPLAY environment variable is utilized to determine
+the host, display, and screen to work with.  By default it is usually set
+to ``:0.0'' for the localhost.  However, by altering this variable one can
+interact with applications under a remote host's X server.  To change this 
+from a terminal window, one can utilize the following basic syntax: 
+export DISPLAY=&lt;hostname-or-ipaddress&gt;:&lt;display&gt;.&lt;screen&gt;  Please note that
+under most circumstances, xhost will need to be executed properly on the remote
+host as well.</p>
+<p>
+</p>
+<hr />
+<h1><a name="installation">INSTALLATION</a></h1>
+<pre>
+  perl Makefile.PL
+  make
+  make test
+  make install</pre>
 <p>
 </p>
 <hr />
@@ -65,46 +97,14 @@ sub-directory.</p>
   SendKeys(&quot;Hello, how are you?\n&quot;);</pre>
 <pre>
   # Close Application (Alt-f, q).
-  SendKeys(&quot;%(f)q&quot;);</pre>
+  SendKeys('%(f)q');</pre>
 <pre>
   # Handle gedit's Question window if it comes up when closing.  Wait
   # at most 5 seconds for it.
   if (WaitWindowViewable('Question', undef, 5)) {
     # DoN't Save (Alt-n)
-    SendKeys(&quot;%(n)&quot;);
+    SendKeys('%(n)');
   }</pre>
-<p>
-</p>
-<hr />
-<h1><a name="installation">INSTALLATION</a></h1>
-<pre>
-  perl Makefile.PL
-  make
-  make test
-  make install</pre>
-<p>
-</p>
-<hr />
-<h1><a name="dependencies">DEPENDENCIES</a></h1>
-<p>An X server with the XTest extensions enabled.  This seems to be the
-norm.  If it is not enabled, it usually can be by modifying the X
-server configuration (i.e., XF86Config).</p>
-<p>Also, the standard DISPLAY environment variable is utilized to determine
-the host, display, and screen to work with.  By default it is usually set
-to ``:0.0'' for the localhost.  However, by altering this variable one can
-interact with applications under a remote host's X server.  To change this 
-from a terminal window, one can utilize the following basic syntax: 
-export DISPLAY=&lt;hostname-or-ipaddress&gt;:&lt;display&gt;.&lt;screen&gt;  Please note that
-under most circumstances, xhost will need to be executed properly on the remote
-host as well.</p>
-<p>
-</p>
-<hr />
-<h1><a name="description">DESCRIPTION</a></h1>
-<p>This Perl package is intended to facilitate the testing of GUI applications
-by means of user emulation.  It can be used to test/interact with GUI
-applications; which have been built upon the X library or toolkits
-(i.e., GTK+, Xt, Qt, Motif, etc.) that ``wrap'' the X library's functionality.</p>
 <p>
 </p>
 <hr />
@@ -832,7 +832,7 @@ it under the terms of the GNU General Public License.</p>
 </p>
 <hr />
 <h1><a name="author">AUTHOR</a></h1>
-<p>Dennis K. Paulsen &lt;<a href="mailto:ctrondlp@users.sourceforge.net">ctrondlp@users.sourceforge.net</a>&gt;
+<p>Dennis K. Paulsen &lt;<a href="mailto:ctrondlp@users.sourceforge.net">ctrondlp@users.sourceforge.net</a>&gt; (Anthon, Iowa USA)
 
 </p>
 <p>

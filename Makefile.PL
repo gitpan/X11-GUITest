@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# X11::GUITest ($Id: Makefile.PL,v 1.11 2003/08/03 19:50:01 ctrondlp Exp $)
+# X11::GUITest ($Id: Makefile.PL,v 1.13 2003/08/17 23:24:06 ctrondlp Exp $)
 
 use strict;
 use warnings;
@@ -14,7 +14,7 @@ WriteDocumentation();
 WriteMakefile(
 	'NAME' => 'X11::GUITest',
 	($] ge '5.005') ? (
-		'AUTHOR' => 'Dennis K. Paulsen (ctrondlp@users.sourceforge.net)',
+		'AUTHOR' => 'Dennis K. Paulsen <ctrondlp@users.sourceforge.net>',
 		'ABSTRACT' => 'Collection of functions for X11 GUI testing/interaction.',
 	) : (),
 	'VERSION_FROM' => 'GUITest.pm', # Finds $VERSION
@@ -23,8 +23,8 @@ WriteMakefile(
 	'DEFINE' => '-DNDEBUG', # e.g., '-DHAVE_SOMETHING'
 	'INC'   => '-I/usr/X11R6/include', # e.g., '-I/usr/include/other'
 	'clean' => {FILES => 'X11-GUITest.POD~'},
-	#'CCFLAGS' => '-Werror -Wall',
-	#'OPTIMIZE' => '-Od'
+	'CCFLAGS' => '-Wall',
+	'OPTIMIZE' => '-O2'
 );
 
 
@@ -52,12 +52,13 @@ sub WriteDocumentation {
 	system("pod2text $podfile docs/X11-GUITest.txt");
 	system("pod2html --infile=$podfile --outfile=docs/X11-GUITest.html");
 
-	# If symlink is supported, create the README link
+	# If symlink subroutine is supported, create the README link
 	if ( eval {symlink('', ''); 1} ) {
 		symlink('docs/X11-GUITest.txt', 'README');
 	}
 
-	# Clean Up.  Leaving X11-GUITest.POD~ around for Makefile use
+	# Clean up misc. files.  Leaving X11-GUITest.POD~ around for
+	# Makefile use
 	unlink <pod*.x??>;
 	
 	return(1);	

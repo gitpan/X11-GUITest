@@ -1,4 +1,4 @@
-/* X11::GUITest ($Id: GUITest.h,v 1.7 2003/07/20 14:43:57 ctrondlp Exp $)
+/* X11::GUITest ($Id: GUITest.h,v 1.8 2003/09/06 15:22:39 ctrondlp Exp $)
  *  
  * Copyright (c) 2003  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@users.sourceforge.net
@@ -35,13 +35,11 @@
 #define NUL '\0'
 
 #define MAX_REG_KEY 2
-#define DEF_EVENT_SEND_DELAY 10 /* X server No-No if < 10 */
+#define DEF_EVENT_SEND_DELAY 10 /* Value < 10 not recommended */
 #define DEF_KEY_SEND_DELAY 0 
 #define KEYMAP_VECTOR_SIZE 32
 #define KEYMAP_BIT_COUNT 8
 
-
-enum {INIT = 1, GROW = 2}; /* Memory Allocation */
 
 typedef struct WindowTable {
 	Window *Ids;

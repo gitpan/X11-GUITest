@@ -1,4 +1,4 @@
-# X11::GUITest ($Id: GUITest.pm,v 1.27 2003/08/03 19:56:40 ctrondlp Exp $) 
+# X11::GUITest ($Id: GUITest.pm,v 1.30 2003/09/06 16:28:45 ctrondlp Exp $) 
 #  
 # Copyright (c) 2003  Dennis K. Paulsen, All Rights Reserved.
 # Email: ctrondlp@users.sourceforge.net
@@ -27,10 +27,39 @@ Developed by Dennis K. Paulsen
 
 =head1 VERSION
 
-0.16
+0.17
 
 Please consult 'docs/Changes' for the list of changes between
 module revisions.
+
+=head1 DESCRIPTION
+
+This Perl package is intended to facilitate the testing of GUI applications
+by means of user emulation.  It can be used to test/interact with GUI
+applications; which have been built upon the X library or toolkits
+(i.e., GTK+, Xt, Qt, Motif, etc.) that "wrap" the X library's functionality.
+
+=head1 DEPENDENCIES
+
+An X server with the XTest extensions enabled.  This seems to be the
+norm.  If it is not enabled, it usually can be by modifying the X
+server configuration (i.e., XF86Config).
+
+Also, the standard DISPLAY environment variable is utilized to determine
+the host, display, and screen to work with.  By default it is usually set
+to ":0.0" for the localhost.  However, by altering this variable one can
+interact with applications under a remote host's X server.  To change this 
+from a terminal window, one can utilize the following basic syntax: 
+export DISPLAY=<hostname-or-ipaddress>:<display>.<screen>  Please note that
+under most circumstances, xhost will need to be executed properly on the remote
+host as well.
+
+=head1 INSTALLATION
+
+  perl Makefile.PL
+  make
+  make test
+  make install
 
 =head1 SYNOPSIS
 
@@ -56,43 +85,14 @@ sub-directory.
   SendKeys("Hello, how are you?\n");
 
   # Close Application (Alt-f, q).
-  SendKeys("%(f)q");
+  SendKeys('%(f)q');
 
   # Handle gedit's Question window if it comes up when closing.  Wait
   # at most 5 seconds for it.
   if (WaitWindowViewable('Question', undef, 5)) {
     # DoN't Save (Alt-n)
-    SendKeys("%(n)");
+    SendKeys('%(n)');
   }
-
-=head1 INSTALLATION
-
-  perl Makefile.PL
-  make
-  make test
-  make install
-
-=head1 DEPENDENCIES
-
-An X server with the XTest extensions enabled.  This seems to be the
-norm.  If it is not enabled, it usually can be by modifying the X
-server configuration (i.e., XF86Config).
-
-Also, the standard DISPLAY environment variable is utilized to determine
-the host, display, and screen to work with.  By default it is usually set
-to ":0.0" for the localhost.  However, by altering this variable one can
-interact with applications under a remote host's X server.  To change this 
-from a terminal window, one can utilize the following basic syntax: 
-export DISPLAY=<hostname-or-ipaddress>:<display>.<screen>  Please note that
-under most circumstances, xhost will need to be executed properly on the remote
-host as well.
-
-=head1 DESCRIPTION
-
-This Perl package is intended to facilitate the testing of GUI applications
-by means of user emulation.  It can be used to test/interact with GUI
-applications; which have been built upon the X library or toolkits
-(i.e., GTK+, Xt, Qt, Motif, etc.) that "wrap" the X library's functionality.
 
 =cut
 
@@ -166,7 +166,7 @@ require DynaLoader;
 
 Exporter::export_ok_tags(keys %EXPORT_TAGS);
 
-$VERSION = '0.16';
+$VERSION = '0.17';
 
 # Module Constants 
 sub DEF_WAIT() { 10; }
@@ -495,7 +495,7 @@ sub StartApp {
 	# this function to return before application is finished running.
 	# RegExp: [&][zero or more whitespace][anchor, nothing to follow whitespace]
 	if ($cmdline !~ /\&\s*$/) {
-		$cmdline .= " &"; 
+		$cmdline .= ' &'; 
 	}
 	local $! = 0;
 	system($cmdline);

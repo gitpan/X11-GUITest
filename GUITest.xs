@@ -1,4 +1,4 @@
-/* X11::GUITest ($Id: GUITest.xs,v 1.29 2003/08/03 19:50:01 ctrondlp Exp $)
+/* X11::GUITest ($Id: GUITest.xs,v 1.31 2003/09/06 15:22:39 ctrondlp Exp $)
  *  
  * Copyright (c) 2003  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@users.sourceforge.net
@@ -54,7 +54,7 @@ static ULONG KeySendDelay = DEF_KEY_SEND_DELAY;
  */
 static int IgnoreBadWindow(Display *display, XErrorEvent *error)
 {
-	/* Ignore bad window errors, handle elsewhere */
+	/* Ignore bad window errors here, handle elsewhere */
 	if (error->request_code != BadWindow) {
 		XSetErrorHandler(NULL);
 	}
@@ -151,7 +151,7 @@ static BOOL GetKeySym(const char *name, KeySym *sym)
 		{"%", XK_percent},			{"&", XK_ampersand}, 		{"'", XK_quoteright},
 		{"*", XK_asterisk},			{"+", XK_plus},				{",", XK_comma},
 		{"-", XK_minus},			{".", XK_period}, 			{"?", XK_question},
-		{"<", XK_greater},			{">", XK_less},				{"=", XK_equal},
+		{"<", XK_less},				{">", XK_greater},			{"=", XK_equal},
 		{"@", XK_at},				{":", XK_colon},			{";", XK_semicolon},
 		{"\\", XK_backslash}, 		{"`", XK_grave},			{"{", XK_braceleft},
 		{"}", XK_braceright},		{"|", XK_bar},				{"^", XK_asciicircum},
@@ -266,7 +266,7 @@ static BOOL IsShiftNeeded(KeySym sym)
 		return(FALSE);
 	}
 
-	/* kc(grave) = kss(grave, asciitilde) */	
+	/* kc(grave) = kss(grave, asciitilde, ) */	
 	kss = XGetKeyboardMapping(TheXDisplay, kc, 1, &syms);
 
 	XConvertCase(sym, &ksl, &ksu);
@@ -466,7 +466,8 @@ static BOOL SendKeysImp(const char *keys)
 			break;
 		case '(': modlock = TRUE; break;
 		case ')': modlock = FALSE; break;
-		default: /* Regular Key? (a, b, c, 1, 2, 3, _, *, %), etc. */
+		/* Regular Key? (a, b, c, 1, 2, 3, _, *, %), etc. */
+		default:
 			regkey[0] = keys[i];
 			if (!GetKeySym(regkey, &sym)) {
 				return(FALSE);
@@ -529,9 +530,12 @@ static BOOL IsWindowImp(Window win)
  */
 static BOOL AddChildWindow(Window win)
 {
+	enum {INIT = 1, GROW = 2}; /* Memory Allocation */
+
 	if (!win) {
 		return(FALSE);
 	}
+
 	if (ChildWindows.Ids == NULL) {
 		/* Initialize */
 		ChildWindows.Ids = (Window *)safemalloc(INIT * sizeof(Window));
@@ -1669,7 +1673,7 @@ it under the terms of the GNU General Public License.
 
 =head1 AUTHOR
 
-Dennis K. Paulsen <ctrondlp@users.sourceforge.net>
+Dennis K. Paulsen <ctrondlp@users.sourceforge.net> (Anthon, Iowa USA)
 
 =head1 CREDITS
 

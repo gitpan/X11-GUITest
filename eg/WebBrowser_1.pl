@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #----------------------------------------------------------------------#
-# X11::GUITest ($Id: WebBrowser_1.pl,v 1.1 2003/07/28 01:35:53 ctrondlp Exp $)
+# X11::GUITest ($Id: WebBrowser_1.pl,v 1.2 2003/08/17 22:44:15 ctrondlp Exp $)
 # Notes: Basic interaction with Mozilla (Web Browser).  Tested using
 #        v1.2.1 of the application under the English language.
 #----------------------------------------------------------------------#
@@ -58,7 +58,7 @@ SendKeys("http://sourceforge.net/projects/x11guitest\n");
 WaitWindowViewable('X11::GUITest') or die('Could not find website page!');
 # Give page time to finish loading, so we can interact with the shortcut keys
 # again.  Hopefully we can find a better way in the future rather then hard waits.
-sleep(10);
+sleep(15);
 
 # Open About Mozilla Window
 SendKeys('%(h)a'); # Alt-h, a
