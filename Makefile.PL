@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# X11::GUITest ($Id: Makefile.PL,v 1.8 2003/06/26 19:18:36 ctrondlp Exp $)
+# X11::GUITest ($Id: Makefile.PL,v 1.11 2003/08/03 19:50:01 ctrondlp Exp $)
 
 use strict;
 use warnings;
@@ -18,12 +18,12 @@ WriteMakefile(
 		'ABSTRACT' => 'Collection of functions for X11 GUI testing/interaction.',
 	) : (),
 	'VERSION_FROM' => 'GUITest.pm', # Finds $VERSION
-	'MAN3PODS' => (-r 'GUITest.POD~') ? {'GUITest.POD~' => '$(INST_MAN3DIR)/X11::GUITest.$(MAN3EXT)'} : {},
+	'MAN3PODS' => (-r 'X11-GUITest.POD~') ? {'X11-GUITest.POD~' => '$(INST_MAN3DIR)/X11::GUITest.$(MAN3EXT)'} : {},
 	'LIBS'  => ['-L/usr/X11R6/lib -lX11 -lXtst'], # e.g., '-lm'
 	'DEFINE' => '-DNDEBUG', # e.g., '-DHAVE_SOMETHING'
 	'INC'   => '-I/usr/X11R6/include', # e.g., '-I/usr/include/other'
-	'clean' => {FILES => 'GUITest.POD~'},
-	#'CCFLAGS' => '-Werror', 
+	'clean' => {FILES => 'X11-GUITest.POD~'},
+	#'CCFLAGS' => '-Werror -Wall',
 	#'OPTIMIZE' => '-Od'
 );
 
@@ -34,7 +34,7 @@ WriteMakefile(
 #			   in HTML/plain-text formats, and support the
 #			   Makefile's MAN3 transformation/installation.
 sub WriteDocumentation {
-	my $podfile = 'GUITest.POD~';
+	my $podfile = 'X11-GUITest.POD~';
 	
 	# Combine POD containing files into one.  Don't love
 	# the system() calls, but acceptable as short-term.
@@ -52,12 +52,12 @@ sub WriteDocumentation {
 	system("pod2text $podfile docs/X11-GUITest.txt");
 	system("pod2html --infile=$podfile --outfile=docs/X11-GUITest.html");
 
-	# If symlink is supported, create the README
+	# If symlink is supported, create the README link
 	if ( eval {symlink('', ''); 1} ) {
 		symlink('docs/X11-GUITest.txt', 'README');
 	}
 
-	# Clean Up.  Leaving GUITest.POD~ around for Makefile use
+	# Clean Up.  Leaving X11-GUITest.POD~ around for Makefile use
 	unlink <pod*.x??>;
 	
 	return(1);	

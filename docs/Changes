@@ -1,7 +1,27 @@
-X11::GUITest ($Id: Changes,v 1.20 2003/06/28 22:43:57 ctrondlp Exp $)
+X11::GUITest ($Id: Changes,v 1.30 2003/08/03 19:56:40 ctrondlp Exp $)
 
 This is the list of module changes between revisions.
 --------------------------------------------------------------------
+
+0.16 Sun Aug 03 2003 15:00
+
+  - Added PressMouseButton, ReleaseMouseButton.
+
+  - Added WebBrowser_1.pl example script.
+
+  - Added more SendKeys examples, i.e. Ctrl-Shift-l
+
+  - Added SetWindowName function.
+
+  - Added documentation for DISPLAY environment
+    variable alteration for the purpose of interacting
+    with applications on remote X servers.
+
+  - test.t modified to accommodate scenarios when
+    there are no windows present that have a WM_NAME
+    property set.
+
+  - Other minor documentation enhancements.
 
 0.15 Sat Jun 28 2003 17:45
 

@@ -36,7 +36,7 @@
 </p>
 <hr />
 <h1><a name="version">VERSION</a></h1>
-<p>0.15</p>
+<p>0.16</p>
 <p>Please consult 'docs/Changes' for the list of changes between
 module revisions.</p>
 <p>
@@ -49,7 +49,6 @@ sub-directory.</p>
   use X11::GUITest qw/
     StartApp
     WaitWindowViewable
-    SetInputFocus
     SendKeys
   /;</pre>
 <pre>
@@ -61,9 +60,6 @@ sub-directory.</p>
   if (!$GEditWinId) {
     die(&quot;Couldn't find gedit window in time!&quot;);
   }</pre>
-<pre>
-  # Ensure input focus is set to the window
-  SetInputFocus($GEditWinId);</pre>
 <pre>
   # Send text to it
   SendKeys(&quot;Hello, how are you?\n&quot;);</pre>
@@ -93,14 +89,22 @@ sub-directory.</p>
 <p>An X server with the XTest extensions enabled.  This seems to be the
 norm.  If it is not enabled, it usually can be by modifying the X
 server configuration (i.e., XF86Config).</p>
+<p>Also, the standard DISPLAY environment variable is utilized to determine
+the host, display, and screen to work with.  By default it is usually set
+to ``:0.0'' for the localhost.  However, by altering this variable one can
+interact with applications under a remote host's X server.  To change this 
+from a terminal window, one can utilize the following basic syntax: 
+export DISPLAY=&lt;hostname-or-ipaddress&gt;:&lt;display&gt;.&lt;screen&gt;  Please note that
+under most circumstances, xhost will need to be executed properly on the remote
+host as well.</p>
 <p>
 </p>
 <hr />
 <h1><a name="description">DESCRIPTION</a></h1>
 <p>This Perl package is intended to facilitate the testing of GUI applications
 by means of user emulation.  It can be used to test/interact with GUI
-applications; which have been built upon the X toolkit or other toolkits
-(i.e., GTK) that ``wrap'' X toolkit's functionality.</p>
+applications; which have been built upon the X library or toolkits
+(i.e., GTK+, Xt, Qt, Motif, etc.) that ``wrap'' the X library's functionality.</p>
 <p>
 </p>
 <hr />
@@ -215,10 +219,6 @@ tag.</p>
 <dd>
 <p>zero is returned on failure, non-zero for success</p>
 </dd>
-<dd>
-<pre>
-  ClickWindow('gedit');</pre>
-</dd>
 <p></p></dl>
 <dl>
 <dt><strong><a name="item_ischild_parentwindowid_windowid">IsChild PARENTWINDOWID WINDOWID</a></strong><br />
@@ -283,6 +283,19 @@ to indicate a failure in starting the program.</p>
 </dd>
 <p></p></dl>
 <dl>
+<dt><strong><a name="item_clickmousebutton_button">ClickMouseButton BUTTON</a></strong><br />
+</dt>
+<dd>
+Clicks the specified mouse button.  Available mouse buttons
+are: M_LEFT, M_MIDDLE, M_RIGHT.  Also, you could use the logical
+Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5.  These
+are all available through the :CONST export tag.
+</dd>
+<dd>
+<p>zero is returned on failure, non-zero for success.</p>
+</dd>
+<p></p></dl>
+<dl>
 <dt><strong><a name="item_%3cdocumentation_continued%2e%2e%2e%3e">&lt;Documentation Continued...&gt;</a></strong><br />
 </dt>
 </dl>
@@ -338,6 +351,16 @@ is returned if name could not be obtained.
 </dd>
 <p></p></dl>
 <dl>
+<dt><strong><a name="item_setwindowname_windowid%2c_name">SetWindowName WINDOWID, NAME</a></strong><br />
+</dt>
+<dd>
+Sets the window name for the specified window Id.
+</dd>
+<dd>
+<p>zero is returned on failure, non-zero for success.</p>
+</dd>
+<p></p></dl>
+<dl>
 <dt><strong><a name="item_getrootwindow">GetRootWindow</a></strong><br />
 </dt>
 <dd>
@@ -375,10 +398,23 @@ Returns an array containing the position of the mouse cursor.
 </dd>
 <p></p></dl>
 <dl>
-<dt><strong><a name="item_clickmousebutton_button">ClickMouseButton BUTTON</a></strong><br />
+<dt><strong><a name="item_pressmousebutton_button">PressMouseButton BUTTON</a></strong><br />
 </dt>
 <dd>
-Clicks the specified mouse button.  Available mouse buttons
+Presses the specified mouse button.  Available mouse buttons
+are: M_LEFT, M_MIDDLE, M_RIGHT.  Also, you could use the logical
+Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5.  These
+are all available through the :CONST export tag.
+</dd>
+<dd>
+<p>zero is returned on failure, non-zero for success.</p>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_releasemousebutton_button">ReleaseMouseButton BUTTON</a></strong><br />
+</dt>
+<dd>
+Releases the specified mouse button.  Available mouse buttons
 are: M_LEFT, M_MIDDLE, M_RIGHT.  Also, you could use the logical
 Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5.  These
 are all available through the :CONST export tag.
@@ -428,6 +464,7 @@ have special meaning, they are:</p>
         SendKeys('%(f)q'); # Alt-f, then press q
         SendKeys('%(fa)^(m)'); # Alt-f, Alt-a, Ctrl-m
         SendKeys('+(abc)'); # Uppercase ABC using shift modifier
+        SendKeys('^(+(l))'); # Ctrl-Shift-l
         SendKeys('+'); # Press shift</pre>
 </dd>
 <dd>
@@ -538,12 +575,10 @@ Presses the specified key.
 </dd>
 <dd>
 <p>One can utilize the abbreviated key names from the table
-listed above as outlined in the following example:
-</p>
+listed above as outlined in the following example:</p>
 </dd>
 <dd>
 <pre>
-
   # Alt-n
   PressKey('LAL'); # Left Alt
   PressKey('n');
@@ -554,7 +589,7 @@ listed above as outlined in the following example:
 <pre>
   # Uppercase a
   PressKey('LSH'); # Left Shift
-  PressKey('a'); # could use 'a' or 'A'
+  PressKey('a'); 
   ReleaseKey('a');
   ReleaseKey('LSH');</pre>
 </dd>
@@ -574,12 +609,10 @@ Releases the specified key.  Normally follows a PressKey call.
 </dd>
 <dd>
 <p>One can utilize the abbreviated key names from the table
-listed above.
-</p>
+listed above.</p>
 </dd>
 <dd>
 <pre>
-
   ReleaseKey('n');</pre>
 </dd>
 <dd>
@@ -794,9 +827,7 @@ Returns the color depth for the screen.
 <h1><a name="copyright">COPYRIGHT</a></h1>
 <p><code>Copyright(c)</code> 2003 Dennis K. Paulsen, All Rights Reserved.  This
 program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License.
-
-</p>
+it under the terms of the GNU General Public License.</p>
 <p>
 </p>
 <hr />

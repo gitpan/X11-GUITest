@@ -1,4 +1,4 @@
-/* X11::GUITest ($Id: GUITest.xs,v 1.18 2003/06/28 22:33:31 ctrondlp Exp $)
+/* X11::GUITest ($Id: GUITest.xs,v 1.29 2003/08/03 19:50:01 ctrondlp Exp $)
  *  
  * Copyright (c) 2003  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@users.sourceforge.net
@@ -39,9 +39,9 @@ extern "C" {
 #include <X11/extensions/XTest.h>
 #include "GUITest.h"
 
-/* Module Level Variables */
+/* File Level Variables */
 static Display *TheXDisplay = NULL;
-static int LocalScreen = 0;
+static int TheScreen = 0;
 static WindowTable ChildWindows = {0};
 static ULONG EventSendDelay = DEF_EVENT_SEND_DELAY;
 static ULONG KeySendDelay = DEF_KEY_SEND_DELAY;
@@ -54,7 +54,7 @@ static ULONG KeySendDelay = DEF_KEY_SEND_DELAY;
  */
 static int IgnoreBadWindow(Display *display, XErrorEvent *error)
 {
-	/* Ignore bad window errors */
+	/* Ignore bad window errors, handle elsewhere */
 	if (error->request_code != BadWindow) {
 		XSetErrorHandler(NULL);
 	}
@@ -83,8 +83,7 @@ static void SetupXDisplay(void)
 			  DisplayString(TheXDisplay));
 	}
 
-	/* Obtain local screen. */	
-	LocalScreen = DefaultScreen(TheXDisplay);
+	TheScreen = DefaultScreen(TheXDisplay);
 
 	/* Discard current events in queue. */	
 	XSync(TheXDisplay, True);
@@ -132,7 +131,7 @@ static BOOL IsNumber(const char *str)
  */
 static BOOL GetKeySym(const char *name, KeySym *sym)
 {
-	static const KeyNameSymTable KNSTable[] = { /* {Name, Sym}, */
+	static const KeyNameSymTable kns_table[] = { /* {Name, Sym}, */
 		{"BAC", XK_BackSpace},		{"BS", XK_BackSpace},		{"BKS", XK_BackSpace},
  		{"BRE", XK_Break},			{"CAN", XK_Cancel}, 		{"CAP", XK_Caps_Lock},
 		{"DEL", XK_Delete},			{"DOW", XK_Down},			{"END", XK_End},
@@ -175,10 +174,10 @@ static BOOL GetKeySym(const char *name, KeySym *sym)
 		return(TRUE);
 	}
 	/* Do case insensitive search for specified name to obtain the KeySym from table */
-	for (i = 0; i < (sizeof(KNSTable) / sizeof(KeyNameSymTable)); i++) {
-		if (strcasecmp(KNSTable[i].Name, name) == 0) {
+	for (i = 0; i < (sizeof(kns_table) / sizeof(KeyNameSymTable)); i++) {
+		if (strcasecmp(kns_table[i].Name, name) == 0) {
 			/* Found It */
-			*sym = KNSTable[i].Sym;
+			*sym = kns_table[i].Sym;
 			return(TRUE);
 		}
 	}
@@ -195,14 +194,14 @@ static BOOL GetKeySym(const char *name, KeySym *sym)
 static BOOL PressKeyImp(KeySym sym)
 {
 	KeyCode kc = 0;
-	int retval = 0;
+	BOOL retval = 0;
 
 	kc = XKeysymToKeycode(TheXDisplay, sym);
 	if (kc == 0) {
 		return(FALSE);
 	}
 
-	retval = XTestFakeKeyEvent(TheXDisplay, kc, True, EventSendDelay);
+	retval = (BOOL)XTestFakeKeyEvent(TheXDisplay, kc, True, EventSendDelay);
 	
 	XFlush(TheXDisplay);
 	return(retval);
@@ -216,14 +215,14 @@ static BOOL PressKeyImp(KeySym sym)
 static BOOL ReleaseKeyImp(KeySym sym)
 {
 	KeyCode kc = 0;
-	int retval = 0;
+	BOOL retval = 0;
 	
 	kc = XKeysymToKeycode(TheXDisplay, sym);
 	if (kc == 0) {
 		return(FALSE);
 	}
 
-	retval = XTestFakeKeyEvent(TheXDisplay, kc, False, EventSendDelay);
+	retval = (BOOL)XTestFakeKeyEvent(TheXDisplay, kc, False, EventSendDelay);
 
 	XFlush(TheXDisplay);
 	return(retval);
@@ -244,7 +243,7 @@ static BOOL PressReleaseKeyImp(KeySym sym)
 	}
 	/* Possibly wait between(after) keystrokes */ 
 	if (KeySendDelay > 0) {
-		/* usleep(500 * 1000) = 500ms */
+		/* usleep(500 * 1000) = ~500ms */
 		usleep(KeySendDelay * 1000);
 	}
 	return(TRUE);
@@ -415,8 +414,8 @@ static BOOL ProcessBraceSet(const char *braceset, size_t *len)
 				/* Fail, we have a count, but an unknown command! */
 				safefree(buffer);
 				return(FALSE);
-			};
-		}
+			}; /* switch (cmd) { */
+		} /* if (count > 0) { */
 	} while ( (token = strtok(NULL, " ")) );	
 	
 	safefree(buffer);
@@ -516,10 +515,10 @@ static BOOL SendKeysImp(const char *keys)
  */
 static BOOL IsWindowImp(Window win)
 {
-	XWindowAttributes wattrs;
+	XWindowAttributes wattrs = {0};
 	
 	XSetErrorHandler(IgnoreBadWindow);
-	return( XGetWindowAttributes(TheXDisplay, win, &wattrs) );
+	return( (BOOL)XGetWindowAttributes(TheXDisplay, win, &wattrs) );
 }
 
 /* Function: AddChildWindow
@@ -567,7 +566,9 @@ static BOOL AddChildWindow(Window win)
  */
 static void ClearChildWindows(void)
 {
-	memset(ChildWindows.Ids, 0, ChildWindows.Max * sizeof(Window));
+	if (ChildWindows.Ids) {
+		memset(ChildWindows.Ids, 0, ChildWindows.Max * sizeof(Window));
+	}
 	ChildWindows.NVals = 0;
 }
 
@@ -602,7 +603,6 @@ static void EnumChildWindows(Window win)
 	}
 
 	/* get list of child windows */
-	XSetErrorHandler(IgnoreBadWindow);
 	if (XQueryTree(TheXDisplay, win, &root, &parent, &children, 
 				   &childcount)) {
 	   	for (i = 0; i < childcount; i++) {
@@ -743,8 +743,7 @@ GetWindowName(win)
 PREINIT:
 	char *name = NULL;
 CODE:
-	XSetErrorHandler(IgnoreBadWindow);
-	if (XFetchName(TheXDisplay, win, &name)) {
+	if (IsWindowImp(win) && XFetchName(TheXDisplay, win, &name)) {
 		RETVAL = newSVpv(name, strlen(name));
 		XFree(name);
 	} else {
@@ -752,6 +751,56 @@ CODE:
 	}
 OUTPUT:
 	RETVAL		
+
+
+=over 8
+
+=item SetWindowName WINDOWID, NAME
+
+Sets the window name for the specified window Id.
+
+zero is returned on failure, non-zero for success.
+
+=back
+
+=cut
+
+BOOL
+SetWindowName(win, name)
+	Window win
+	char *name
+PREINIT:
+	XTextProperty textprop = {0};
+	size_t namelen = 0;
+	Atom utf8_string = 0;
+	Atom net_wm_name = 0;
+	Atom net_wm_icon_name = 0;
+CODE:
+	RETVAL = FALSE;
+	if (IsWindowImp(win)) {
+		if (XStringListToTextProperty(&name, 1, &textprop)) {
+			XSetWMName(TheXDisplay, win, &textprop);
+			XSetWMIconName(TheXDisplay, win, &textprop);
+			XFree(textprop.value);
+			RETVAL = TRUE;
+		}
+		/* These UTF8 window name properties can be the properties
+		 * that get displayed, so we set them too. */
+		utf8_string = XInternAtom(TheXDisplay, "UTF8_STRING", True);
+		if (utf8_string != None) {
+			net_wm_name = XInternAtom(TheXDisplay, "_NET_WM_NAME", True);
+			net_wm_icon_name = XInternAtom(TheXDisplay, "_NET_WM_ICON_NAME", True);
+			if (net_wm_name != None && net_wm_icon_name != None) {
+				namelen = strlen(name);
+				XChangeProperty(TheXDisplay, win, net_wm_name, utf8_string, 8,
+								PropModeReplace, (unsigned char *)name, namelen);
+				XChangeProperty(TheXDisplay, win, net_wm_icon_name, utf8_string, 8,
+								PropModeReplace, (unsigned char *)name, namelen);
+			}
+		}
+	}	
+OUTPUT:
+	RETVAL
 
 
 =over 8
@@ -768,7 +817,7 @@ all other windows are under.
 Window
 GetRootWindow()
 CODE:
-	RETVAL = RootWindow(TheXDisplay, LocalScreen);
+	RETVAL = RootWindow(TheXDisplay, TheScreen);
 OUTPUT:
 	RETVAL 
 
@@ -814,7 +863,7 @@ MoveMouseAbs(x, y)
 	int x
 	int y
 CODE:
-	RETVAL = XTestFakeMotionEvent(TheXDisplay, LocalScreen, x, y, 
+	RETVAL = (BOOL)XTestFakeMotionEvent(TheXDisplay, TheScreen, x, y, 
 								  EventSendDelay);
 	XFlush(TheXDisplay);
 OUTPUT:
@@ -841,7 +890,7 @@ PREINIT:
 	int win_x = 0, win_y = 0;
 	UINT mask = 0;
 PPCODE:
-	if (XQueryPointer(TheXDisplay, RootWindow(TheXDisplay, LocalScreen),
+	if (XQueryPointer(TheXDisplay, RootWindow(TheXDisplay, TheScreen),
 					  &root, &child, &root_x, &root_y,
 					  &win_x, &win_y, &mask)) {
 		XPUSHs( sv_2mortal(newSViv((IV)root_x)) );
@@ -851,9 +900,9 @@ PPCODE:
 
 =over 8
 
-=item ClickMouseButton BUTTON
+=item PressMouseButton BUTTON
 
-Clicks the specified mouse button.  Available mouse buttons
+Presses the specified mouse button.  Available mouse buttons
 are: M_LEFT, M_MIDDLE, M_RIGHT.  Also, you could use the logical
 Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5.  These
 are all available through the :CONST export tag.
@@ -865,16 +914,35 @@ zero is returned on failure, non-zero for success.
 =cut
 
 BOOL
-ClickMouseButton(button)
+PressMouseButton(button)
 	int button
 CODE:
-	RETVAL = TRUE;
-	if (!XTestFakeButtonEvent(TheXDisplay, button, True, EventSendDelay)) {
-		RETVAL = FALSE;
-	}
-	if (!XTestFakeButtonEvent(TheXDisplay, button, False, EventSendDelay)) {
-		RETVAL = FALSE;
-	}	
+	RETVAL = (BOOL)XTestFakeButtonEvent(TheXDisplay, button, True, EventSendDelay);
+	XFlush(TheXDisplay);
+OUTPUT:
+	RETVAL
+
+
+=over 8
+
+=item ReleaseMouseButton BUTTON
+
+Releases the specified mouse button.  Available mouse buttons
+are: M_LEFT, M_MIDDLE, M_RIGHT.  Also, you could use the logical
+Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5.  These
+are all available through the :CONST export tag.
+
+zero is returned on failure, non-zero for success.
+
+=back
+
+=cut
+
+BOOL
+ReleaseMouseButton(button)
+	int button
+CODE:
+	RETVAL = (BOOL)XTestFakeButtonEvent(TheXDisplay, button, False, EventSendDelay);
 	XFlush(TheXDisplay);
 OUTPUT:
 	RETVAL
@@ -910,6 +978,7 @@ Parenthesis allow a modifier to work on one or more characters.  For example:
         SendKeys('%(f)q'); # Alt-f, then press q
         SendKeys('%(fa)^(m)'); # Alt-f, Alt-a, Ctrl-m
         SendKeys('+(abc)'); # Uppercase ABC using shift modifier
+        SendKeys('^(+(l))'); # Ctrl-Shift-l
         SendKeys('+'); # Press shift
 
 Braces are used to quote special characters, for utilizing aliased key
@@ -1013,7 +1082,7 @@ Presses the specified key.
 
 One can utilize the abbreviated key names from the table
 listed above as outlined in the following example:
-  
+
   # Alt-n
   PressKey('LAL'); # Left Alt
   PressKey('n');
@@ -1022,7 +1091,7 @@ listed above as outlined in the following example:
 
   # Uppercase a
   PressKey('LSH'); # Left Shift
-  PressKey('a'); # could use 'a' or 'A'
+  PressKey('a'); 
   ReleaseKey('a');
   ReleaseKey('LSH');
 
@@ -1057,7 +1126,7 @@ Releases the specified key.  Normally follows a PressKey call.
 
 One can utilize the abbreviated key names from the table
 listed above.
-  
+
   ReleaseKey('n');
 
 zero is returned on failure, non-zero for success.
@@ -1211,7 +1280,7 @@ PREINIT:
 	int win_x = 0, win_y = 0;
 	UINT mask = 0;
 CODE:
-	XQueryPointer(TheXDisplay, RootWindow(TheXDisplay, LocalScreen),
+	XQueryPointer(TheXDisplay, RootWindow(TheXDisplay, TheScreen),
 				  &root, &child, &root_x, &root_y,
 				  &win_x, &win_y, &mask);
 	switch (button) {
@@ -1274,7 +1343,7 @@ BOOL
 IsWindowViewable(win)
 	Window win
 PREINIT:
-	XWindowAttributes wattrs;
+	XWindowAttributes wattrs = {0};
 CODE:
 	XSetErrorHandler(IgnoreBadWindow);
 	if (!XGetWindowAttributes(TheXDisplay, win, &wattrs)) {
@@ -1353,7 +1422,7 @@ IconifyWindow(win)
 	Window win
 CODE:
 	XSetErrorHandler(IgnoreBadWindow);
-	RETVAL = XIconifyWindow(TheXDisplay, win, LocalScreen);
+	RETVAL = XIconifyWindow(TheXDisplay, win, TheScreen);
 	XFlush(TheXDisplay);
 OUTPUT:
 	RETVAL
@@ -1501,7 +1570,7 @@ void
 GetWindowPos(win)
 	Window win
 PREINIT:
-	XWindowAttributes wattrs;
+	XWindowAttributes wattrs = {0};
 	Window child = 0, parent = 0, *children = NULL, root = 0;
 	UINT childcount = 0; 
 	int x = 0, y = 0;
@@ -1536,8 +1605,8 @@ GetScreenRes()
 PREINIT:
 	int x = 0, y = 0;
 PPCODE:
-	x = DisplayWidth(TheXDisplay, LocalScreen);
-	y = DisplayHeight(TheXDisplay, LocalScreen);
+	x = DisplayWidth(TheXDisplay, TheScreen);
+	y = DisplayHeight(TheXDisplay, TheScreen);
 	XPUSHs( sv_2mortal(newSViv((IV)x)) );
 	XPUSHs( sv_2mortal(newSViv((IV)y)) );
 
@@ -1559,7 +1628,7 @@ Value is represented as bits, i.e. 16.
 int
 GetScreenDepth()
 CODE:
-	RETVAL = DefaultDepth(TheXDisplay, LocalScreen);
+	RETVAL = DefaultDepth(TheXDisplay, TheScreen);
 OUTPUT:
 	RETVAL
 

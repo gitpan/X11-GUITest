@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# X11::GUITest ($Id: test.t,v 1.14 2003/06/28 22:33:31 ctrondlp Exp $)
+# X11::GUITest ($Id: test.t,v 1.17 2003/08/03 19:50:01 ctrondlp Exp $)
 # Note: Functions that might be intrusive are not checked
 
 BEGIN { $| = 1; print "1..18\n"; }
@@ -46,15 +46,20 @@ print "ok 5\n";
 # GetKeySendDelay
 
 # GetWindowName
-my $WinName = '';
-foreach my $win (FindWindowLike(".*")) {
+my $WinName = ''; 
+# Note: Only worry about windows that have a name
+# RegExp: ".+" = one or more characters
+foreach my $win (FindWindowLike(".+")) {
+	# If call fails, WinName will be set to undef
 	$WinName = GetWindowName($win);
-	if (defined($WinName)) {
+	if (not defined($WinName)) {
 		last;
 	}
 }
 print "not " unless defined($WinName);
 print "ok 6\n";
+
+# SetWindowName
 
 # GetRootWindow
 print "not " unless GetRootWindow();
@@ -91,14 +96,14 @@ print "ok 11\n";
 # Raise Window
 # LowerWindow
 
+# SetInputFocus
+
 # GetInputFocus
 print "not " unless GetInputFocus();
 print "ok 12\n";
 
-# SetInputFocus
-
 # GetWindowPos
-my ($x, $y, $width, $height) = GetWindowPos(GetInputFocus());
+my ($x, $y, $width, $height) = GetWindowPos(GetRootWindow());
 print "not " unless (defined($x) and defined($y) and
 					 defined($width) and defined($height));
 print "ok 13\n";
@@ -136,4 +141,6 @@ print "ok 18\n";
 # PressKey
 # ReleaseKey
 # PressReleaseKey
+# PressMouseButton
+# ReleaseMouseButton
 

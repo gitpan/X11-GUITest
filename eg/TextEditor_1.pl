@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #----------------------------------------------------------------------#
-# X11::GUITest ($Id: TextEditor_1.pl,v 1.3 2003/06/26 19:18:36 ctrondlp Exp $)
+# X11::GUITest ($Id: TextEditor_1.pl,v 1.4 2003/07/28 01:35:53 ctrondlp Exp $)
 # Notes: Example of interaction with gedit (Text Editor).  Tested with
 # 		 version 2.2.0 of the editor application using the English
 #		 language.
@@ -28,6 +28,7 @@ my $GEAboutWin = 0;
 
 
 ## Core ##
+print "$0 : Script Start\n";
 
 # Start the text editor
 StartApp('gedit');
@@ -63,5 +64,6 @@ SendKeys('%(n)') or die('Unable to select Don\'t Save button!');
 # Ensure main window gets closed
 WaitWindowClose($GEMainWin) or die('The editor window did not close!');
 
+print "$0 : Script End (Success)\n";
 
 ## Subroutines ##

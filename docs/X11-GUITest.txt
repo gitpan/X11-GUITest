@@ -4,7 +4,7 @@ NAME
     Developed by Dennis K. Paulsen
 
 VERSION
-    0.15
+    0.16
 
     Please consult 'docs/Changes' for the list of changes between module
     revisions.
@@ -15,7 +15,6 @@ SYNOPSIS
       use X11::GUITest qw/
         StartApp
         WaitWindowViewable
-        SetInputFocus
         SendKeys
       /;
 
@@ -27,9 +26,6 @@ SYNOPSIS
       if (!$GEditWinId) {
         die("Couldn't find gedit window in time!");
       }
-
-      # Ensure input focus is set to the window
-      SetInputFocus($GEditWinId);
 
       # Send text to it
       SendKeys("Hello, how are you?\n");
@@ -55,11 +51,21 @@ DEPENDENCIES
     norm. If it is not enabled, it usually can be by modifying the X server
     configuration (i.e., XF86Config).
 
+    Also, the standard DISPLAY environment variable is utilized to determine
+    the host, display, and screen to work with. By default it is usually set
+    to ":0.0" for the localhost. However, by altering this variable one can
+    interact with applications under a remote host's X server. To change
+    this from a terminal window, one can utilize the following basic syntax:
+    export DISPLAY=<hostname-or-ipaddress>:<display>.<screen> Please note
+    that under most circumstances, xhost will need to be executed properly
+    on the remote host as well.
+
 DESCRIPTION
     This Perl package is intended to facilitate the testing of GUI
     applications by means of user emulation. It can be used to test/interact
-    with GUI applications; which have been built upon the X toolkit or other
-    toolkits (i.e., GTK) that "wrap" X toolkit's functionality.
+    with GUI applications; which have been built upon the X library or
+    toolkits (i.e., GTK+, Xt, Qt, Motif, etc.) that "wrap" the X library's
+    functionality.
 
 FUNCTIONS
     Parameters enclosed within [] are optional.
@@ -147,8 +153,6 @@ FUNCTIONS
 
             zero is returned on failure, non-zero for success
 
-              ClickWindow('gedit');
-
     IsChild PARENTWINDOWID WINDOWID
             Determines if the specified window is a child of the specified
             parent.
@@ -186,6 +190,14 @@ FUNCTIONS
 
               RunApp('/work/myapp');
 
+    ClickMouseButton BUTTON
+            Clicks the specified mouse button. Available mouse buttons are:
+            M_LEFT, M_MIDDLE, M_RIGHT. Also, you could use the logical Id
+            for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5. These
+            are all available through the :CONST export tag.
+
+            zero is returned on failure, non-zero for success.
+
     <Documentation Continued...>
 
     SetEventSendDelay DELAYINMILLISECONDS
@@ -215,6 +227,11 @@ FUNCTIONS
               # Return the name of the window that has the input focus.
               my $WinName = GetWindowName(GetInputFocus());
 
+    SetWindowName WINDOWID, NAME
+            Sets the window name for the specified window Id.
+
+            zero is returned on failure, non-zero for success.
+
     GetRootWindow
             Returns the root window Id. This is the top/root level window
             that all other windows are under.
@@ -233,10 +250,18 @@ FUNCTIONS
 
               my ($x, $y) = GetMousePos(); 
 
-    ClickMouseButton BUTTON
-            Clicks the specified mouse button. Available mouse buttons are:
+    PressMouseButton BUTTON
+            Presses the specified mouse button. Available mouse buttons are:
             M_LEFT, M_MIDDLE, M_RIGHT. Also, you could use the logical Id
             for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5. These
+            are all available through the :CONST export tag.
+
+            zero is returned on failure, non-zero for success.
+
+    ReleaseMouseButton BUTTON
+            Releases the specified mouse button. Available mouse buttons
+            are: M_LEFT, M_MIDDLE, M_RIGHT. Also, you could use the logical
+            Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5. These
             are all available through the :CONST export tag.
 
             zero is returned on failure, non-zero for success.
@@ -269,6 +294,7 @@ FUNCTIONS
                     SendKeys('%(f)q'); # Alt-f, then press q
                     SendKeys('%(fa)^(m)'); # Alt-f, Alt-a, Ctrl-m
                     SendKeys('+(abc)'); # Uppercase ABC using shift modifier
+                    SendKeys('^(+(l))'); # Ctrl-Shift-l
                     SendKeys('+'); # Press shift
 
             Braces are used to quote special characters, for utilizing
@@ -369,7 +395,7 @@ FUNCTIONS
 
               # Uppercase a
               PressKey('LSH'); # Left Shift
-              PressKey('a'); # could use 'a' or 'A'
+              PressKey('a'); 
               ReleaseKey('a');
               ReleaseKey('LSH');
 

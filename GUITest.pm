@@ -1,4 +1,4 @@
-# X11::GUITest ($Id: GUITest.pm,v 1.19 2003/06/28 22:43:57 ctrondlp Exp $) 
+# X11::GUITest ($Id: GUITest.pm,v 1.27 2003/08/03 19:56:40 ctrondlp Exp $) 
 #  
 # Copyright (c) 2003  Dennis K. Paulsen, All Rights Reserved.
 # Email: ctrondlp@users.sourceforge.net
@@ -27,7 +27,7 @@ Developed by Dennis K. Paulsen
 
 =head1 VERSION
 
-0.15
+0.16
 
 Please consult 'docs/Changes' for the list of changes between
 module revisions.
@@ -40,7 +40,6 @@ sub-directory.
   use X11::GUITest qw/
     StartApp
     WaitWindowViewable
-    SetInputFocus
     SendKeys
   /;
 
@@ -52,9 +51,6 @@ sub-directory.
   if (!$GEditWinId) {
     die("Couldn't find gedit window in time!");
   }
-
-  # Ensure input focus is set to the window
-  SetInputFocus($GEditWinId);
 
   # Send text to it
   SendKeys("Hello, how are you?\n");
@@ -82,12 +78,21 @@ An X server with the XTest extensions enabled.  This seems to be the
 norm.  If it is not enabled, it usually can be by modifying the X
 server configuration (i.e., XF86Config).
 
+Also, the standard DISPLAY environment variable is utilized to determine
+the host, display, and screen to work with.  By default it is usually set
+to ":0.0" for the localhost.  However, by altering this variable one can
+interact with applications under a remote host's X server.  To change this 
+from a terminal window, one can utilize the following basic syntax: 
+export DISPLAY=<hostname-or-ipaddress>:<display>.<screen>  Please note that
+under most circumstances, xhost will need to be executed properly on the remote
+host as well.
+
 =head1 DESCRIPTION
 
 This Perl package is intended to facilitate the testing of GUI applications
 by means of user emulation.  It can be used to test/interact with GUI
-applications; which have been built upon the X toolkit or other toolkits
-(i.e., GTK) that "wrap" X toolkit's functionality.
+applications; which have been built upon the X library or toolkits
+(i.e., GTK+, Xt, Qt, Motif, etc.) that "wrap" the X library's functionality.
 
 =cut
 
@@ -133,16 +138,19 @@ require DynaLoader;
 	MoveMouseAbs
 	MoveWindow
 	PressKey
+	PressMouseButton
 	PressReleaseKey
 	QuoteStringForSendKeys
 	RaiseWindow
 	ReleaseKey
+	ReleaseMouseButton
 	ResizeWindow
 	RunApp
 	SendKeys
 	SetEventSendDelay
 	SetInputFocus
 	SetKeySendDelay
+	SetWindowName
 	StartApp
 	UnIconifyWindow
 	WaitWindowClose
@@ -150,7 +158,7 @@ require DynaLoader;
 	WaitWindowViewable
 );
 
-# (:ALL, etc.)
+# Tags (:ALL, etc.)
 %EXPORT_TAGS = (
 	'ALL' => \@EXPORT_OK,
 	'CONST' => [qw(DEF_WAIT M_LEFT M_MIDDLE M_RIGHT M_BTN1 M_BTN2 M_BTN3 M_BTN4 M_BTN5)],
@@ -158,7 +166,7 @@ require DynaLoader;
 
 Exporter::export_ok_tags(keys %EXPORT_TAGS);
 
-$VERSION = '0.15';
+$VERSION = '0.16';
 
 # Module Constants 
 sub DEF_WAIT() { 10; }
@@ -384,8 +392,6 @@ tag.
 
 zero is returned on failure, non-zero for success
 
-  ClickWindow('gedit');
-
 =back
 
 =cut
@@ -456,7 +462,7 @@ Returns the quoted string, undef is returned on error.
 =cut
 
 sub QuoteStringForSendKeys {
-	my $str = shift || return(undef);
+	my $str = shift or return(undef);
 
 	# Quote {} special characters (^, %, (, {, etc.)
 	$str =~ s/(\^|\%|\+|\~|\(|\)|\{|\})/\{$1\}/gm;
@@ -498,6 +504,7 @@ sub StartApp {
 	return( (length($!) == 0) );
 }
 
+
 =over 8
 
 =item RunApp COMMANDLINE
@@ -518,6 +525,31 @@ sub RunApp {
 	return( system($cmdline) );
 }
 
+
+=over 8
+
+=item ClickMouseButton BUTTON
+
+Clicks the specified mouse button.  Available mouse buttons
+are: M_LEFT, M_MIDDLE, M_RIGHT.  Also, you could use the logical
+Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5.  These
+are all available through the :CONST export tag.
+
+zero is returned on failure, non-zero for success.
+
+=back
+
+=cut
+
+sub ClickMouseButton {
+	my $button = shift;
+
+	if (!PressMouseButton($button) ||
+		!ReleaseMouseButton($button)) {
+		return(0);
+	}
+	return(1);
+}
 
 # Subroutine: INIT
 # Description: Used to initialize the underlying mechanisms

@@ -11,5 +11,6 @@ docs/ToDo
 docs/X11-GUITest.html
 docs/X11-GUITest.txt
 eg/TextEditor_1.pl
+eg/WebBrowser_1.pl
 t/test.t
 typemap
