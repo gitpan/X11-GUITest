@@ -1,4 +1,4 @@
-# X11::GUITest ($Id: GUITest.pm,v 1.37 2003/12/13 17:37:04 ctrondlp Exp $) 
+# X11::GUITest ($Id: GUITest.pm,v 1.41 2004/02/14 15:43:00 ctrondlp Exp $) 
 #  
 # Copyright (c) 2003-2004  Dennis K. Paulsen, All Rights Reserved.
 # Email: ctrondlp@users.sourceforge.net
@@ -21,13 +21,19 @@
 
 =head1 NAME
 
-X11::GUITest - Provides GUI testing/interaction facilities.
+B<X11::GUITest> - Provides GUI testing/interaction facilities.
 
 Developed by Dennis K. Paulsen
 
 =head1 VERSION
 
-0.19
+0.20
+
+Updates are made available at the following sites:
+
+  http://sourceforge.net/projects/x11guitest (Primary) 
+  http://www.freshmeat.net (Linked)
+  http://www.cpan.org (Secondary)
 
 Please consult 'docs/Changes' for the list of changes between
 module revisions.
@@ -168,7 +174,7 @@ require DynaLoader;
 
 Exporter::export_ok_tags(keys %EXPORT_TAGS);
 
-$VERSION = '0.19';
+$VERSION = '0.20';
 
 # Module Constants 
 sub DEF_WAIT() { 10; }

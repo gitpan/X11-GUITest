@@ -1,9 +1,20 @@
 #!/usr/bin/perl
-# X11::GUITest ($Id: test.t,v 1.19 2003/09/22 15:10:50 ctrondlp Exp $)
+# X11::GUITest ($Id: test.t,v 1.21 2004/02/14 15:08:50 ctrondlp Exp $)
 # Note: Functions that might be intrusive are not checked
 
-BEGIN { $| = 1; print "1..23\n"; }
-END {print "not ok 1\n" unless $loaded;}
+BEGIN {
+	# Is X running? 
+	if (length $ENV{'DISPLAY'}) {
+		# It should be, so plan on running the tests.
+		$| = 1; print "1..23\n";
+	} else {
+		warn "X11::GUITest - X Windows not running or DISPLAY not set.\n"; 
+		exit(0);
+	} 
+}
+END {
+	print "not ok 1\n" unless $loaded;
+}
 use X11::GUITest qw/
 	:ALL
 /;

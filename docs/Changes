@@ -1,7 +1,19 @@
-X11::GUITest ($Id: Changes,v 1.48 2003/12/13 17:37:04 ctrondlp Exp $)
+X11::GUITest ($Id: Changes,v 1.51 2004/02/14 15:43:00 ctrondlp Exp $)
 
 This is the list of module changes between revisions.
 --------------------------------------------------------------------
+
+0.20 Sat Feb 14 2004 09:43
+  
+  - Now linking to Xext when building to support
+    HP-UX 11 and possibly other OSs.
+
+  - Added links into the documentation to the various
+    project distribution sites.
+
+  - test.t checks are now skipped if X Windows isn't
+    running.  An appropriate warning message accompanies
+    this.
 
 0.19 Sat Dec 13 2003 11:28
 

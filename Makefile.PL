@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# X11::GUITest ($Id: Makefile.PL,v 1.14 2003/09/19 02:20:37 ctrondlp Exp $)
+# X11::GUITest ($Id: Makefile.PL,v 1.15 2004/01/16 23:41:42 ctrondlp Exp $)
 
 use strict;
 use warnings;
@@ -19,7 +19,7 @@ WriteMakefile(
 	) : (),
 	'VERSION_FROM' => 'GUITest.pm', # Finds $VERSION
 	'MAN3PODS' => (-r 'X11-GUITest.POD~') ? {'X11-GUITest.POD~' => '$(INST_MAN3DIR)/X11::GUITest.$(MAN3EXT)'} : {},
-	'LIBS'  => ['-L/usr/X11R6/lib -L/usr/X/lib -lX11 -lXtst'], # e.g., '-lm'
+	'LIBS'  => ['-L/usr/X11R6/lib -L/usr/X/lib -lX11 -lXtst -lXext'], # e.g., '-lm'
 	'DEFINE' => '-DNDEBUG', # e.g., '-DHAVE_SOMETHING'
 	'INC'   => '-I/usr/X11R6/include -I/usr/X/include', # e.g., '-I/usr/include/other'
 	'clean' => {FILES => 'X11-GUITest.POD~'},

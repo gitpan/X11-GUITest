@@ -4,7 +4,13 @@ NAME
     Developed by Dennis K. Paulsen
 
 VERSION
-    0.19
+    0.20
+
+    Updates are made available at the following sites:
+
+      http://sourceforge.net/projects/x11guitest (Primary) 
+      http://www.freshmeat.net (Linked)
+      http://www.cpan.org (Secondary)
 
     Please consult 'docs/Changes' for the list of changes between module
     revisions.
@@ -550,7 +556,9 @@ AUTHOR
     Dennis K. Paulsen <ctrondlp@users.sourceforge.net> (Anthon, Iowa USA)
 
 CREDITS
-    Thanks to the following people for patches, suggestions, etc.:
+    Thanks to everyone; including those specifically mentioned below for
+    patches, suggestions, etc.:
 
-    Richard Clamp
+      Richard Clamp
+      Gustav Larsson
 

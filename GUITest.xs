@@ -1,4 +1,4 @@
-/* X11::GUITest ($Id: GUITest.xs,v 1.39 2003/12/13 17:11:46 ctrondlp Exp $)
+/* X11::GUITest ($Id: GUITest.xs,v 1.40 2004/01/16 23:41:42 ctrondlp Exp $)
  *  
  * Copyright (c) 2003-2004  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@users.sourceforge.net
@@ -1728,8 +1728,10 @@ Dennis K. Paulsen <ctrondlp@users.sourceforge.net> (Anthon, Iowa USA)
 
 =head1 CREDITS
 
-Thanks to the following people for patches, suggestions, etc.:
+Thanks to everyone; including those specifically mentioned below for patches,
+suggestions, etc.:
 
-Richard Clamp
+  Richard Clamp
+  Gustav Larsson
 
 =cut
