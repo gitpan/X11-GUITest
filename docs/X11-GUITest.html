@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>X11::GUITest - Provides GUI testing/interaction facilities</title>
+<title>X11::GUITest - Provides GUI testing/interaction facilities.</title>
 <link rev="made" href="mailto:root@localhost" />
 </head>
 
@@ -13,12 +13,11 @@
 <ul>
 
 	<li><a href="#name">NAME</a></li>
+	<li><a href="#version">VERSION</a></li>
 	<li><a href="#synopsis">SYNOPSIS</a></li>
 	<li><a href="#installation">INSTALLATION</a></li>
 	<li><a href="#dependencies">DEPENDENCIES</a></li>
 	<li><a href="#description">DESCRIPTION</a></li>
-	<li><a href="#version">VERSION</a></li>
-	<li><a href="#changes">CHANGES</a></li>
 	<li><a href="#functions">FUNCTIONS</a></li>
 	<li><a href="#other_documentation">OTHER DOCUMENTATION</a></li>
 	<li><a href="#copyright">COPYRIGHT</a></li>
@@ -31,8 +30,15 @@
 <p>
 </p>
 <h1><a name="name">NAME</a></h1>
-<p>X11::GUITest - Provides GUI testing/interaction facilities</p>
+<p>X11::GUITest - Provides GUI testing/interaction facilities.</p>
 <p>Developed by Dennis K. Paulsen</p>
+<p>
+</p>
+<hr />
+<h1><a name="version">VERSION</a></h1>
+<p>0.12</p>
+<p>Please consult 'docs/Changes' for the list of changes between
+module revisions.</p>
 <p>
 </p>
 <hr />
@@ -82,7 +88,7 @@
 </p>
 <hr />
 <h1><a name="dependencies">DEPENDENCIES</a></h1>
-<p>An  X server with the XTest extensions enabled.  This seems to be the
+<p>An X server with the XTest extensions enabled.  This seems to be the
 norm.  If it is not enabled, it usually can be by modifying the X
 server configuration (i.e., XF86Config).</p>
 <p>
@@ -93,28 +99,6 @@ server configuration (i.e., XF86Config).</p>
 by means of user emulation.  It can be used to test/interact with GUI
 applications; which have been built upon the X toolkit or other toolkits
 (i.e., GTK) that ``wrap'' X toolkit's functionality.</p>
-<p>
-</p>
-<hr />
-<h1><a name="version">VERSION</a></h1>
-<p>0.11</p>
-<p>
-</p>
-<hr />
-<h1><a name="changes">CHANGES</a></h1>
-<p>0.10 Tue Mar 05 2003 18:00</p>
-<pre>
-  - Initial Release.</pre>
-<p>0.11 Sun Mar 09 2003 16:01</p>
-<pre>
-  - Fixed aliased {PGU} and {PGD} keys.</pre>
-<pre>
-  - Added GetMousePos, IsChild functions.</pre>
-<pre>
-  - Now packaging as X11-GUITest-[VERSION].tar.gz versus
-    x11guitest-[VERSION].tar.gz</pre>
-<pre>
-  - Made enhancements to the documentation.</pre>
 <p>
 </p>
 <hr />
@@ -205,8 +189,10 @@ parameters one can specify a different position to be clicked on.</p>
 </dd>
 <dd>
 <p>One can also specify an alternative button.  The default button is
-M_LEFT, but M_MIDDLE and M_RIGHT are also available through the
-:CONST export tag.</p>
+M_LEFT, but M_MIDDLE and M_RIGHT may be specified too.  Also,
+you could use the logical Id for the button: M_BTN1, M_BTN2, M_BTN3,
+M_BTN4, M_BTN5.  These are all available through the :CONST export
+tag.</p>
 </dd>
 <dd>
 <p>zero is returned on failure, non-zero for success</p>
@@ -225,6 +211,25 @@ specified parent.
 </dd>
 <dd>
 <p>zero is returned for false, non-zero for true.</p>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_quotestringforsendkeys_string">QuoteStringForSendKeys STRING</a></strong><br />
+</dt>
+<dd>
+Quotes {} characters in the specified string that would be interpreted
+as having special meaning if sent to SendKeys directly.  This function
+would be useful if you had a text file in which you wanted to use each
+line of the file as input to the SendKeys function, but didn't want
+any special interpretation of the characters in the file.
+</dd>
+<dd>
+<p>Returns the quoted string, undef is returned on error.</p>
+</dd>
+<dd>
+<pre>
+  # Quote  ~, %, etc.  as  {~}, {%}, etc for literal use in SendKeys. 
+  SendKeys( QuoteStringForSendKeys('Hello: ~%^(){}+') );</pre>
 </dd>
 <p></p></dl>
 <dl>
@@ -264,7 +269,7 @@ to indicate a failure in starting the program.</p>
 </dt>
 <dd>
 Sets the milliseconds of delay between events being sent to the
-X display.
+X display.  It is usually not a good idea to set this to 0.
 </dd>
 <dd>
 <p>Please note that this delay will also affect SendKeys.</p>
@@ -352,8 +357,9 @@ Returns an array containing the position of the mouse cursor.
 </dt>
 <dd>
 Clicks the specified mouse button.  Available mouse buttons
-are: M_LEFT, M_MIDDLE, M_RIGHT  These are available through
-the :CONST export tag.
+are: M_LEFT, M_MIDDLE, M_RIGHT.  Also, you could use the logical
+Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5.  These
+are all available through the :CONST export tag.
 </dd>
 <dd>
 <p>zero is returned on failure, non-zero for success.</p>
@@ -489,6 +495,47 @@ if you really wanted to.</p>
 </dd>
 <dd>
 <p>zero is returned on failure, non-zero for success.</p>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_iskeypressed_key">IsKeyPressed KEY</a></strong><br />
+</dt>
+<dd>
+Determines if the specified key is currently being pressed.
+</dd>
+<dd>
+<p>You can specify such things as 'bac' or the unabbreviated form 'BackSpace' as
+covered in the SendKeys information.  Brace forms such as '{bac}' are
+unsupported.  A '{' is taken literally and letters are case sensitive.</p>
+</dd>
+<dd>
+<pre>
+  if (IsKeyPressed('esc')) {  # Is Escape pressed?
+  if (IsKeyPressed('a')) { # Is a pressed?
+  if (IsKeyPressed('A')) { # Is A pressed?</pre>
+</dd>
+<dd>
+<p>Returns non-zero for true, zero for false.</p>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_ismousebuttonpressed_button">IsMouseButtonPressed BUTTON</a></strong><br />
+</dt>
+<dd>
+Determines if the specified mouse button is currently being pressed.
+</dd>
+<dd>
+<p>Available mouse buttons are: M_LEFT, M_MIDDLE, M_RIGHT.  Also, you
+could use the logical Id for the button: M_BTN1, M_BTN2, M_BTN3,
+M_BTN4, M_BTN5.  These are all available through the :CONST export
+tag.</p>
+</dd>
+<dd>
+<pre>
+  if (IsMouseButtonPressed(M_LEFT)) { # Is left button pressed?</pre>
+</dd>
+<dd>
+<p>Returns non-zero for true, zero for false.</p>
 </dd>
 <p></p></dl>
 <dl>
@@ -628,10 +675,11 @@ Returns the color depth for the screen.
 </p>
 <hr />
 <h1><a name="other_documentation">OTHER DOCUMENTATION</a></h1>
-<a href='Copying'>Copy of the GPL License</a><br>
+<a href='Changes'>Module Changes</a><br>
 <a href='CodingStyle'>Coding-Style Guidelines</a><br>
 <a href='ToDo'>ToDo List</a><br>
-<a href='Packaging'>Some Packaging Information</a><br><p>
+<a href='Packaging'>Some Packaging Information</a><br>
+<a href='Copying'>Copy of the GPL License</a><br><p>
 </p>
 <hr />
 <h1><a name="copyright">COPYRIGHT</a></h1>

@@ -7,10 +7,11 @@ WriteMakefile(
 			'AUTHOR'        => 'Dennis K. Paulsen',
 			'ABSTRACT'      => 'Collection of functions for X11 GUI testing/interaction.',
 		) : (),
-	    'VERSION_FROM' => 'GUITest.pm', # finds $VERSION
+	    'VERSION_FROM' => 'GUITest.pm', # Finds $VERSION
+		'MAN3PODS' => {},
         'LIBS'  => ['-L/usr/X11R6/lib -lX11 -lXtst'], # e.g., '-lm'
         'DEFINE' => '-DNDEBUG',     # e.g., '-DHAVE_SOMETHING'
         'INC'   => '-I/usr/X11R6/include',     # e.g., '-I/usr/include/other'
-	    'CCFLAGS' => '-Werror', 
-#    'OPTIMIZE' => '-Od'
+	    #'CCFLAGS' => '-Werror', 
+		#'OPTIMIZE' => '-Od'
 );

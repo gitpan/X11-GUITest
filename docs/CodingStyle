@@ -1,5 +1,5 @@
-X11::GUITest (CodingStyle) 
-Last Updated: 03/05/03
+X11::GUITest ($Id: CodingStyle,v 1.4 2003/03/11 02:55:59 ctrondlp Exp $)
+
 This is a short list of coding style guidelines to be used when
 developing for this project.
 --------------------------------------------------------------------

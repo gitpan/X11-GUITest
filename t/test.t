@@ -2,7 +2,7 @@
 
 use warnings;
 
-BEGIN { $| = 1; print "1..19\n"; }
+BEGIN { $| = 1; print "1..16\n"; }
 END {print "not ok 1\n" unless $loaded;}
 use X11::GUITest qw/
 	:ALL
@@ -32,11 +32,6 @@ print "not " unless not WaitWindowViewable($BadWinTitle, undef, 1);
 print "ok 4\n";
 
 # ClickWindow
-@Windows = WaitWindowViewable(".*");
-print "not " unless ClickWindow($Windows[0]);
-# Ensure it fails for a bad window id
-print "not " unless not ClickWindow($BadWinId);
-print "ok 5\n";
 
 # StartApp
 # RunApp
@@ -54,41 +49,35 @@ foreach my $win (FindWindowLike(".*")) {
 	}
 }
 print "not " unless defined($WinName);
-print "ok 6\n";
+print "ok 5\n";
 
 # GetRootWindow
 print "not " unless GetRootWindow();
-print "ok 7\n";
+print "ok 6\n";
 
 # GetChildWindows
 print "not " unless GetChildWindows(GetRootWindow());
-print "ok 8\n";
+print "ok 7\n";
 
 # MoveMouseAbs
 print "not " unless MoveMouseAbs(2, 2);
 print "not " unless MoveMouseAbs(1, 1);
-print "ok 9\n";
+print "ok 8\n";
 
 # ClickMouseButton
-print "not " unless ClickMouseButton(M_LEFT);
-print "ok 10\n";
 
 # SendKeys
-print "not " unless SendKeys('{ESC}');
-print "not " unless not SendKeys('{}'); # Invalid brace use
-print "not " unless not SendKeys('{ChickenKey}'); # Invalid key name
-print "ok 11\n";
 
 # IsWindow
 print "not " unless IsWindow(GetRootWindow());
 print "not " unless not IsWindow($BadWinId);
-print "ok 12\n";
+print "ok 9\n";
 
 # IsWindowViewable
 @Windows = WaitWindowViewable(".*");
 print "not " unless IsWindowViewable($Windows[0]);
 print "not " unless not IsWindowViewable($BadWinId);
-print "ok 13\n";
+print "ok 10\n";
 
 # MoveWindow
 # ResizeWindow
@@ -99,7 +88,7 @@ print "ok 13\n";
 
 # GetInputFocus
 print "not " unless GetInputFocus();
-print "ok 14\n";
+print "ok 11\n";
 
 # SetInputFocus
 
@@ -107,19 +96,19 @@ print "ok 14\n";
 my ($x, $y, $width, $height) = GetWindowPos(GetInputFocus());
 print "not " unless (defined($x) and defined($y) and
 					 defined($width) and defined($height));
-print "ok 15\n";
+print "ok 12\n";
 
 # GetScreenRes
 print "not " unless GetScreenRes();
-print "ok 16\n";
+print "ok 13\n";
 
 # GetScreenDepth
 print "not " unless GetScreenDepth();
-print "ok 17\n";
+print "ok 14\n";
 
 # GetMousePos
 print "not " unless GetMousePos();
-print "ok 18\n";
+print "ok 15\n";
 
 # IsChild
 foreach my $win ( GetChildWindows(GetRootWindow()) ) {
@@ -128,5 +117,8 @@ foreach my $win ( GetChildWindows(GetRootWindow()) ) {
 		last;
 	}
 }
-print "ok 19\n";
+print "ok 16\n";
 
+# IsKeyPressed
+# IsMouseButtonPressed
+# QuoteStringForSendKeys

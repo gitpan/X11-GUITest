@@ -1,5 +1,5 @@
-X11::GUITest (ToDo)
-Last Updated: 03/09/03
+X11::GUITest ($Id: ToDo,v 1.7 2003/03/21 08:42:24 ctrondlp Exp $)
+
 This is a list of Todo items. 
 --------------------------------------------------------------------
 
@@ -19,6 +19,10 @@ This is a list of Todo items.
 
 - Add some semi-generic example scripts
 
-- Function like: IsKeyPressed
+- Reenable man3 POD generation in Makefile.PL once a pristine method
+  is found for generating one manual page from the XS and PM file.
+
+- Need to ensure all ASCII characters (besides the common ones) can
+  be interpreted for SendKeys.
 
 --------------------------------------------------------------------

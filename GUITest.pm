@@ -1,4 +1,4 @@
-# X11::GUITest - GUITest.pm
+# X11::GUITest ($Id: GUITest.pm,v 1.11 2003/03/21 08:42:24 ctrondlp Exp $) 
 #  
 # Copyright (c) 2003  Dennis K. Paulsen, All Rights Reserved.
 # Email: ctrondlp@users.sourceforge.net
@@ -21,9 +21,16 @@
 
 =head1 NAME
 
-X11::GUITest - Provides GUI testing/interaction facilities
+X11::GUITest - Provides GUI testing/interaction facilities.
 
 Developed by Dennis K. Paulsen
+
+=head1 VERSION
+
+0.12
+
+Please consult 'docs/Changes' for the list of changes between
+module revisions.
 
 =head1 SYNOPSIS
 
@@ -68,7 +75,7 @@ Developed by Dennis K. Paulsen
 
 =head1 DEPENDENCIES
 
-An  X server with the XTest extensions enabled.  This seems to be the
+An X server with the XTest extensions enabled.  This seems to be the
 norm.  If it is not enabled, it usually can be by modifying the X
 server configuration (i.e., XF86Config).
 
@@ -78,27 +85,6 @@ This Perl package is intended to facilitate the testing of GUI applications
 by means of user emulation.  It can be used to test/interact with GUI
 applications; which have been built upon the X toolkit or other toolkits
 (i.e., GTK) that "wrap" X toolkit's functionality.
-
-=head1 VERSION
-
-0.11
-
-=head1 CHANGES
-
-0.10 Tue Mar 05 2003 18:00
-
-  - Initial Release.
-
-0.11 Sun Mar 09 2003 16:01
-
-  - Fixed aliased {PGU} and {PGD} keys.
-
-  - Added GetMousePos, IsChild functions.
-
-  - Now packaging as X11-GUITest-[VERSION].tar.gz versus
-    x11guitest-[VERSION].tar.gz
-
-  - Made enhancements to the documentation.
 
 =cut
 
@@ -136,11 +122,14 @@ require AutoLoader;
 	GetWindowPos
 	IconifyWindow
 	IsChild
+	IsKeyPressed
+	IsMouseButtonPressed
 	IsWindow
 	IsWindowViewable
 	LowerWindow
 	MoveMouseAbs
 	MoveWindow
+	QuoteStringForSendKeys
 	RaiseWindow
 	ResizeWindow
 	RunApp
@@ -157,12 +146,12 @@ require AutoLoader;
 # (:ALL, etc.)
 %EXPORT_TAGS = (
 	'ALL' => \@EXPORT_OK,
-	'CONST' => [qw(DEF_WAIT M_LEFT M_MIDDLE M_RIGHT)]
+	'CONST' => [qw(DEF_WAIT M_LEFT M_MIDDLE M_RIGHT M_BTN1 M_BTN2 M_BTN3 M_BTN4 M_BTN5)],
 );
 
 Exporter::export_ok_tags(keys %EXPORT_TAGS);
 
-$VERSION = '0.11';
+$VERSION = '0.12';
 
 # Module Constants
 # Module Variables
@@ -174,9 +163,14 @@ bootstrap X11::GUITest $VERSION;
 # sub [NAME]() { [VALUE]; }
 sub DEF_WAIT() { 10; }
 # Mouse Buttons
-sub M_LEFT() { 1; }
-sub M_MIDDLE() { 2; }
-sub M_RIGHT() { 3; }
+sub M_BTN1() { 1; }
+sub M_BTN2() { 2; }
+sub M_BTN3() { 3; }
+sub M_BTN4() { 4; }
+sub M_BTN5() { 5; }
+sub M_LEFT() { M_BTN1; }
+sub M_MIDDLE() { M_BTN2; }
+sub M_RIGHT() { M_BTN3; }
 
 =head1 FUNCTIONS
 
@@ -340,8 +334,10 @@ the top left corner of the window is clicked on, with these two
 parameters one can specify a different position to be clicked on.
 
 One can also specify an alternative button.  The default button is
-M_LEFT, but M_MIDDLE and M_RIGHT are also available through the
-:CONST export tag.
+M_LEFT, but M_MIDDLE and M_RIGHT may be specified too.  Also,
+you could use the logical Id for the button: M_BTN1, M_BTN2, M_BTN3,
+M_BTN4, M_BTN5.  These are all available through the :CONST export
+tag.
 
 zero is returned on failure, non-zero for success
 
@@ -399,6 +395,35 @@ sub IsChild {
 
 =over 8
 
+=item QuoteStringForSendKeys STRING
+
+Quotes {} characters in the specified string that would be interpreted
+as having special meaning if sent to SendKeys directly.  This function
+would be useful if you had a text file in which you wanted to use each
+line of the file as input to the SendKeys function, but didn't want
+any special interpretation of the characters in the file.
+
+Returns the quoted string, undef is returned on error.
+
+  # Quote  ~, %, etc.  as  {~}, {%}, etc for literal use in SendKeys. 
+  SendKeys( QuoteStringForSendKeys('Hello: ~%^(){}+') );
+
+=back
+
+=cut
+
+sub QuoteStringForSendKeys {
+	my $str = shift || return(undef);
+
+	# Quote {} special characters (^, %, (, {, etc.)
+	$str =~ s/(\^|\%|\+|\~|\(|\)|\{|\})/\{$1\}/g;
+	
+	return($str);
+}
+
+
+=over 8
+
 =item StartApp COMMANDLINE
 
 Uses the shell to execute a program.  A primative method is used
@@ -415,16 +440,16 @@ zero is returned on failure, non-zero for success
 =cut
 
 sub StartApp {
-	my $CmdLine = shift;
+	my $cmdline = shift;
 
 	# Add ampersand if not present to detach program from shell, allowing
 	# this function to return before application is finished running.
 	# RegExp: [&][zero or more whitespace][anchor, nothing to follow whitespace]
-	if ($CmdLine !~ /\&\s*$/) {
-		$CmdLine .= " &"; 
+	if ($cmdline !~ /\&\s*$/) {
+		$cmdline .= " &"; 
 	}
 	local $! = 0;
-	system($CmdLine);
+	system($cmdline);
 
 	# Limited to catching specific problems due to detachment from shell
 	return( (length($!) == 0) );
@@ -446,8 +471,8 @@ to indicate a failure in starting the program.
 =cut
 
 sub RunApp {
-	my $CmdLine = shift;
-	return( system($CmdLine) );
+	my $cmdline = shift;
+	return( system($cmdline) );
 }
 
 

@@ -1,7 +1,13 @@
 NAME
-    X11::GUITest - Provides GUI testing/interaction facilities
+    X11::GUITest - Provides GUI testing/interaction facilities.
 
     Developed by Dennis K. Paulsen
+
+VERSION
+    0.12
+
+    Please consult 'docs/Changes' for the list of changes between module
+    revisions.
 
 SYNOPSIS
       use X11::GUITest qw/
@@ -52,25 +58,6 @@ DESCRIPTION
     applications by means of user emulation. It can be used to test/interact
     with GUI applications; which have been built upon the X toolkit or other
     toolkits (i.e., GTK) that "wrap" X toolkit's functionality.
-
-VERSION
-    0.11
-
-CHANGES
-    0.10 Tue Mar 05 2003 18:00
-
-      - Initial Release.
-
-    0.11 Sun Mar 09 2003 16:01
-
-      - Fixed aliased {PGU} and {PGD} keys.
-
-      - Added GetMousePos, IsChild functions.
-
-      - Now packaging as X11-GUITest-[VERSION].tar.gz versus
-        x11guitest-[VERSION].tar.gz
-
-      - Made enhancements to the documentation.
 
 FUNCTIONS
     Parameters enclosed within [] are optional.
@@ -140,8 +127,10 @@ FUNCTIONS
             clicked on.
 
             One can also specify an alternative button. The default button
-            is M_LEFT, but M_MIDDLE and M_RIGHT are also available through
-            the :CONST export tag.
+            is M_LEFT, but M_MIDDLE and M_RIGHT may be specified too. Also,
+            you could use the logical Id for the button: M_BTN1, M_BTN2,
+            M_BTN3, M_BTN4, M_BTN5. These are all available through the
+            :CONST export tag.
 
             zero is returned on failure, non-zero for success
 
@@ -152,6 +141,19 @@ FUNCTIONS
             parent.
 
             zero is returned for false, non-zero for true.
+
+    QuoteStringForSendKeys STRING
+            Quotes {} characters in the specified string that would be
+            interpreted as having special meaning if sent to SendKeys
+            directly. This function would be useful if you had a text file
+            in which you wanted to use each line of the file as input to the
+            SendKeys function, but didn't want any special interpretation of
+            the characters in the file.
+
+            Returns the quoted string, undef is returned on error.
+
+              # Quote  ~, %, etc.  as  {~}, {%}, etc for literal use in SendKeys. 
+              SendKeys( QuoteStringForSendKeys('Hello: ~%^(){}+') );
 
     StartApp COMMANDLINE
             Uses the shell to execute a program. A primative method is used
@@ -173,7 +175,7 @@ FUNCTIONS
 
     SetEventSendDelay DELAYINMILLISECONDS
             Sets the milliseconds of delay between events being sent to the
-            X display.
+            X display. It is usually not a good idea to set this to 0.
 
             Please note that this delay will also affect SendKeys.
 
@@ -218,8 +220,9 @@ FUNCTIONS
 
     ClickMouseButton BUTTON
             Clicks the specified mouse button. Available mouse buttons are:
-            M_LEFT, M_MIDDLE, M_RIGHT These are available through the :CONST
-            export tag.
+            M_LEFT, M_MIDDLE, M_RIGHT. Also, you could use the logical Id
+            for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5. These
+            are all available through the :CONST export tag.
 
             zero is returned on failure, non-zero for success.
 
@@ -328,6 +331,33 @@ FUNCTIONS
 
             zero is returned on failure, non-zero for success.
 
+    IsKeyPressed KEY
+            Determines if the specified key is currently being pressed.
+
+            You can specify such things as 'bac' or the unabbreviated form
+            'BackSpace' as covered in the SendKeys information. Brace forms
+            such as '{bac}' are unsupported. A '{' is taken literally and
+            letters are case sensitive.
+
+              if (IsKeyPressed('esc')) {  # Is Escape pressed?
+              if (IsKeyPressed('a')) { # Is a pressed?
+              if (IsKeyPressed('A')) { # Is A pressed?
+
+            Returns non-zero for true, zero for false.
+
+    IsMouseButtonPressed BUTTON
+            Determines if the specified mouse button is currently being
+            pressed.
+
+            Available mouse buttons are: M_LEFT, M_MIDDLE, M_RIGHT. Also,
+            you could use the logical Id for the button: M_BTN1, M_BTN2,
+            M_BTN3, M_BTN4, M_BTN5. These are all available through the
+            :CONST export tag.
+
+              if (IsMouseButtonPressed(M_LEFT)) { # Is left button pressed?
+
+            Returns non-zero for true, zero for false.
+
     IsWindow WINDOWID
             zero is returned if the specified window Id is not for something
             that can be recognized as a window. non-zero is returned if it
@@ -399,10 +429,11 @@ FUNCTIONS
 OTHER DOCUMENTATION
 Available under the docs sub-directory.
 
-      Copying (Copy of the GPL License)
+      Changes (Module Changes)
       CodingStyle (Coding-Style Guidelines)
       ToDo (ToDo List)
       Packaging (Some Packaging Information)
+      Copying (Copy of the GPL License)
 
 COPYRIGHT
     Copyright(c) 2003 Dennis K. Paulsen, All Rights Reserved. This program

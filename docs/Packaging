@@ -1,7 +1,11 @@
-X11::GUITest (Packaging)
-Last Updated: 03/08/03
+X11::GUITest ($Id: Packaging,v 1.4 2003/03/11 13:20:08 ctrondlp Exp $)
+
 --------------------------------------------------------------------
 
+Created with:
 tar -czf X11-GUITest-[VERSION].tar.gz X11-GUITest
+
+Extracted with:
+tar zxvf X11-GUITest-[VERSION].tar.gz
 
 --------------------------------------------------------------------

@@ -1,4 +1,4 @@
-/* X11::GUITest - GUITest.h
+/* X11::GUITest ($Id: GUITest.h,v 1.3 2003/03/11 13:20:07 ctrondlp Exp $)
  *  
  * Copyright (c) 2003  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@users.sourceforge.net
@@ -31,6 +31,8 @@
 #define MAX_REG_KEY 2
 #define DEF_EVENT_SEND_DELAY 10
 #define DEF_KEY_SEND_DELAY 0 
+#define KEYMAP_VECTOR_SIZE 32
+#define KEYMAP_BIT_COUNT 8
 
 #define NUL '\0'
 

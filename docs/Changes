@@ -1,0 +1,38 @@
+X11::GUITest ($Id: Changes,v 1.5 2003/03/21 08:42:24 ctrondlp Exp $)
+
+This is the list of module changes between revisions.
+--------------------------------------------------------------------
+
+0.12 Fri Mar 21 2003 02:35
+
+  - Added IsKeyPressed
+
+  - Added logical mouse button Ids to :CONST export tag: 
+    M_BTN1 - M_BTN5
+
+  - Added IsMouseButtonPressed
+
+  - Updated documentation
+
+  - Added QuoteStringForSendKeys
+
+  - Disabled man3 POD generation in Makefile.PL until I
+    find a pristine method of generating one manual
+    page from the PM and XS file.  Currently I'm using
+    MakeDocs.sh to construct the core text/html
+    documentation.
+
+0.11 Sun Mar 09 2003 16:01
+
+  - Fixed aliased {PGU} and {PGD} keys.
+
+  - Added GetMousePos, IsChild functions.
+
+  - Now packaging as X11-GUITest-[VERSION].tar.gz versus
+    x11guitest-[VERSION].tar.gz
+
+  - Made enhancements to the documentation.
+
+0.10 Tue Mar 05 2003 18:00
+
+  - Initial Release.

@@ -1,4 +1,4 @@
-/* X11::GUITest - GUITest.xs
+/* X11::GUITest ($Id: GUITest.xs,v 1.9 2003/03/21 08:42:24 ctrondlp Exp $)
  *  
  * Copyright (c) 2003  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@users.sourceforge.net
@@ -426,6 +426,8 @@ static BOOL ProcessBraceSet(const char *str, size_t *len)
  * Description: Underlying implementation of the SendKeys routine.  Read
  * 				the SendKeys documentation below for some specifics.
  * Note: Returns TRUE (non-zero) on success, FALSE (zero) on failure.
+ *       Also, if you add special character handling below, also ensure
+ * 		 the QuoteStringForSendKeys function is accurate in GUITest.pm.
  */
 static BOOL SendKeysImp(const char *keys)
 {
@@ -654,7 +656,7 @@ PPCODE:
 =item SetEventSendDelay DELAYINMILLISECONDS
 
 Sets the milliseconds of delay between events being sent to the
-X display.
+X display.  It is usually not a good idea to set this to 0.
 
 Please note that this delay will also affect SendKeys.
 
@@ -865,8 +867,9 @@ PPCODE:
 =item ClickMouseButton BUTTON
 
 Clicks the specified mouse button.  Available mouse buttons
-are: M_LEFT, M_MIDDLE, M_RIGHT  These are available through
-the :CONST export tag.
+are: M_LEFT, M_MIDDLE, M_RIGHT.  Also, you could use the logical
+Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5.  These
+are all available through the :CONST export tag.
 
 zero is returned on failure, non-zero for success.
 
@@ -1002,6 +1005,131 @@ SendKeys(keys)
 	char *keys
 CODE:
 	RETVAL = SendKeysImp(keys);
+OUTPUT:
+	RETVAL
+
+
+=over 8
+
+=item IsKeyPressed KEY
+
+Determines if the specified key is currently being pressed.  
+
+You can specify such things as 'bac' or the unabbreviated form 'BackSpace' as
+covered in the SendKeys information.  Brace forms such as '{bac}' are
+unsupported.  A '{' is taken literally and letters are case sensitive.
+
+  if (IsKeyPressed('esc')) {  # Is Escape pressed?
+  if (IsKeyPressed('a')) { # Is a pressed?
+  if (IsKeyPressed('A')) { # Is A pressed?
+
+Returns non-zero for true, zero for false.
+
+=back
+
+=cut
+
+BOOL
+IsKeyPressed(key)
+	char *key
+PREINIT:
+	int pos = 0;
+	KeySym sym = 0;
+	KeyCode kc = 0, skc = 0;
+	BOOL keyon = FALSE, shifton = FALSE;
+	char keys_return[KEYMAP_VECTOR_SIZE] = "";
+CODE:
+	if (key && GetKeySym(key, &sym)) {
+		kc = XKeysymToKeycode(TheXDisplay, sym);
+		skc = XKeysymToKeycode(TheXDisplay, XK_Shift_L); 
+		XQueryKeymap(TheXDisplay, keys_return);
+		for (pos = 0; pos < (KEYMAP_VECTOR_SIZE * KEYMAP_BIT_COUNT); pos++) {
+			/* For the derived keycode, are we at the correct bit position for it? */
+			if (kc == pos) {
+				/* Check the bit at this position to determine the state of the key */
+				if ( keys_return[pos / KEYMAP_BIT_COUNT] & (1 << (pos % KEYMAP_BIT_COUNT)) ) {
+					/* Bit On, so key is pressed */
+					keyon = TRUE;
+				}
+			}
+			/* For the shift keycode, ... */
+			if (skc == pos) {
+				/* Check the bit at this position to determine the state of the shift key */
+				if ( keys_return[pos / KEYMAP_BIT_COUNT] & (1 << (pos % KEYMAP_BIT_COUNT)) ) {
+					/* Bit On, so shift is pressed */
+					shifton = TRUE;
+				}
+			}
+		} /* for (pos = 0; pos < (KEYMAP_VECTOR_SIZE * KEYMAP_BIT_COUNT); pos++) { */
+	} /* if (key && GetKeySym(key, &sym)) { */
+	
+	/* Determine result */
+	if (keyon) {
+		/* Key is on, so use its keysym to determine if shift modifier needs to be verified also */
+		if (IsShiftNeeded(sym)) {
+			RETVAL = (shifton);
+		} else {
+			RETVAL = (!shifton);	
+		}
+	} else {
+		/* Key not on, so it is not pressed */
+		RETVAL = FALSE;
+	}
+OUTPUT:
+	RETVAL
+
+
+=over 8
+
+=item IsMouseButtonPressed BUTTON
+
+Determines if the specified mouse button is currently being pressed.  
+
+Available mouse buttons are: M_LEFT, M_MIDDLE, M_RIGHT.  Also, you
+could use the logical Id for the button: M_BTN1, M_BTN2, M_BTN3,
+M_BTN4, M_BTN5.  These are all available through the :CONST export
+tag.
+
+  if (IsMouseButtonPressed(M_LEFT)) { # Is left button pressed?
+
+Returns non-zero for true, zero for false.
+
+=back
+
+=cut
+
+BOOL
+IsMouseButtonPressed(button)
+	int button
+PREINIT:
+	Window root = 0, child = 0;
+	int root_x = 0, root_y = 0;
+	int win_x = 0, win_y = 0;
+	UINT mask = 0;
+CODE:
+	XQueryPointer(TheXDisplay, RootWindow(TheXDisplay, LocalScreen),
+				  &root, &child, &root_x, &root_y,
+				  &win_x, &win_y, &mask);
+	switch (button) {
+	case Button1:
+		RETVAL = (mask & Button1Mask);
+		break;
+	case Button2:
+		RETVAL = (mask & Button2Mask);
+		break;
+	case Button3:
+		RETVAL = (mask & Button3Mask);
+		break;
+	case Button4:
+		RETVAL = (mask & Button4Mask);
+		break;
+	case Button5:
+		RETVAL = (mask & Button5Mask);
+		break;
+	default:
+		RETVAL = FALSE;
+		break;
+	};
 OUTPUT:
 	RETVAL
 
@@ -1336,10 +1464,11 @@ OUTPUT:
 
 =begin html
 
-<a href='Copying'>Copy of the GPL License</a><br>
+<a href='Changes'>Module Changes</a><br>
 <a href='CodingStyle'>Coding-Style Guidelines</a><br>
 <a href='ToDo'>ToDo List</a><br>
 <a href='Packaging'>Some Packaging Information</a><br>
+<a href='Copying'>Copy of the GPL License</a><br>
 
 =end html
 
@@ -1347,10 +1476,11 @@ OUTPUT:
 
 Available under the docs sub-directory.
 
-  Copying (Copy of the GPL License)
+  Changes (Module Changes)
   CodingStyle (Coding-Style Guidelines)
   ToDo (ToDo List)
   Packaging (Some Packaging Information)
+  Copying (Copy of the GPL License)
 
 =end text
 
