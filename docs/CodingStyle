@@ -1,4 +1,4 @@
-X11::GUITest ($Id: CodingStyle,v 1.4 2003/03/11 02:55:59 ctrondlp Exp $)
+X11::GUITest ($Id: CodingStyle,v 1.5 2003/11/30 17:20:30 ctrondlp Exp $)
 
 This is a short list of coding style guidelines to be used when
 developing for this project.
@@ -37,7 +37,7 @@ Variables:
 
 Functions/Subroutines:
 - Utilize mixed case, first character of each word capitalized
-- Noun and Verb ordering of function names should be consistent 
+- Noun, Verb, etc. ordering of function names should be consistent 
   (i.e., GetThis, SetThat)
 
 Commenting:

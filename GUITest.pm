@@ -1,6 +1,6 @@
-# X11::GUITest ($Id: GUITest.pm,v 1.34 2003/09/28 22:48:29 ctrondlp Exp $) 
+# X11::GUITest ($Id: GUITest.pm,v 1.37 2003/12/13 17:37:04 ctrondlp Exp $) 
 #  
-# Copyright (c) 2003  Dennis K. Paulsen, All Rights Reserved.
+# Copyright (c) 2003-2004  Dennis K. Paulsen, All Rights Reserved.
 # Email: ctrondlp@users.sourceforge.net
 #
 # This program is free software; you can redistribute it and/or
@@ -27,7 +27,7 @@ Developed by Dennis K. Paulsen
 
 =head1 VERSION
 
-0.18
+0.19
 
 Please consult 'docs/Changes' for the list of changes between
 module revisions.
@@ -64,7 +64,7 @@ host as well.
 =head1 SYNOPSIS
 
 For additional examples, please look under the 'eg/'
-sub-directory.
+sub-directory from the installation folder.
 
   use X11::GUITest qw/
     StartApp
@@ -168,7 +168,7 @@ require DynaLoader;
 
 Exporter::export_ok_tags(keys %EXPORT_TAGS);
 
-$VERSION = '0.18';
+$VERSION = '0.19';
 
 # Module Constants 
 sub DEF_WAIT() { 10; }

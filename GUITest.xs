@@ -1,6 +1,6 @@
-/* X11::GUITest ($Id: GUITest.xs,v 1.32 2003/09/14 14:04:51 ctrondlp Exp $)
+/* X11::GUITest ($Id: GUITest.xs,v 1.39 2003/12/13 17:11:46 ctrondlp Exp $)
  *  
- * Copyright (c) 2003  Dennis K. Paulsen, All Rights Reserved.
+ * Copyright (c) 2003-2004  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@users.sourceforge.net
  *
  * This program is free software; you can redistribute it and/or
@@ -26,6 +26,11 @@ extern "C" {
 #include "XSUB.h"
 #ifdef __cplusplus
 }
+#endif
+
+/* Added for pre-v5.6.x Perl */
+#ifndef newSVuv
+#define newSVuv newSViv
 #endif
 
 #include <stdlib.h>
@@ -97,6 +102,7 @@ static void CloseXDisplay(void)
 	if (TheXDisplay) {
 		XFlush(TheXDisplay);
 		XCloseDisplay(TheXDisplay);
+		TheXDisplay = NULL;
 	}
 }
 
@@ -184,6 +190,24 @@ static BOOL GetKeySym(const char *name, KeySym *sym)
 	/* Not Found */	
 	*sym = NoSymbol;
 	return(FALSE);
+}
+
+/* Function: GetRegKeySym
+ * Description: Given a regular key name as a single character(i.e., a), this
+ *				function obtains the appropriate keysym by calling GetKeySym(). 
+ * Note: Returns TRUE (non-zero) on success, FALSE (zero) on failure.  Also,
+ *       on success, sym gets set to the appropriate keysym. On failure, sym
+ * 		 will get set to NoSymbol.
+ */
+static BOOL GetRegKeySym(const char name, KeySym *sym)
+{
+	#define MAX_REG_KEY 2
+	static char key[MAX_REG_KEY] = "";
+	
+	key[0] = name;
+	key[1] = NUL;
+
+	return( GetKeySym(key, sym) );
 }
 
 /* Function: PressKeyImp
@@ -431,7 +455,6 @@ static BOOL ProcessBraceSet(const char *braceset, size_t *len)
  */
 static BOOL SendKeysImp(const char *keys)
 {
-	char regkey[MAX_REG_KEY] = "";
 	KeySym sym = 0;
 	size_t bracelen = 0;
 	int i = 0;
@@ -468,8 +491,7 @@ static BOOL SendKeysImp(const char *keys)
 		case ')': modlock = FALSE; break;
 		/* Regular Key? (a, b, c, 1, 2, 3, _, *, %), etc. */
 		default:
-			regkey[0] = keys[i];
-			if (!GetKeySym(regkey, &sym)) {
+			if (!GetRegKeySym(keys[i], &sym)) {
 				return(FALSE);
 			}
 			/* Use shift if needed */
@@ -586,6 +608,7 @@ static void FreeChildWindows(void)
 {
 	if (ChildWindows.Ids) {
 		safefree(ChildWindows.Ids);
+		ChildWindows.Ids = NULL;
 	}
 	ChildWindows.NVals = 0;
 	ChildWindows.Max = 0;
@@ -1016,8 +1039,8 @@ Combinations
 
 The following abbreviated key names are currently recognized within a brace set.  If you
 don't see the desired key, you can still use the unabbreviated name for the key.  If you
-are unsure of this name, utilize the xev (X event view) tool, press the button you
-need and look at the tools output for the name of the key.  Names that are in the list
+are unsure of this name, utilize the xev (X event view) tool, press the key you
+want and look at the tools output for the name of that key.  Names that are in the list
 below can be utilized regardless of case.  Ones that aren't in this list are going to be
 case sensitive and also not abbreviated.  For example, using 'xev' you will find that the
 name of the backspace key is BackSpace, so you could use {BackSpace} in place of {bac}
@@ -1695,9 +1718,9 @@ Not installed.
 
 =head1 COPYRIGHT
 
-Copyright(c) 2003 Dennis K. Paulsen, All Rights Reserved.  This
-program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License.
+Copyright(c) 2003-2004 Dennis K. Paulsen, All Rights Reserved.  This
+program is free software; you can redistribute it and/or modify it 
+under the terms of the GNU General Public License.
 
 =head1 AUTHOR
 

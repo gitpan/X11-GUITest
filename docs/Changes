@@ -1,7 +1,24 @@
-X11::GUITest ($Id: Changes,v 1.40 2003/09/28 22:48:29 ctrondlp Exp $)
+X11::GUITest ($Id: Changes,v 1.48 2003/12/13 17:37:04 ctrondlp Exp $)
 
 This is the list of module changes between revisions.
 --------------------------------------------------------------------
+
+0.19 Sat Dec 13 2003 11:28
+
+  - Added FindWindowLike.pl example script.
+
+  - Fixed a SendKeys bug spotted on RedHat 7.3 
+    systems.
+
+  - Added eg/templates/ScriptTemplate.pl for the
+    purpose of constructing future example scripts.
+
+  - Enhanced to help support Perl v5.5.3 (older; doesn't
+    have newSVuv defined).
+
+  - Various enhancements to the documentation.
+
+  - Updated copyrights for new year.
 
 0.18 Sun Sep 28 2003 17:45
 

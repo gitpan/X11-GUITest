@@ -10,7 +10,9 @@ docs/Copying
 docs/ToDo
 docs/X11-GUITest.html
 docs/X11-GUITest.txt
+eg/FindWindowLike.pl
 eg/TextEditor_1.pl
 eg/WebBrowser_1.pl
+eg/templates/ScriptTemplate.pl
 t/test.t
 typemap

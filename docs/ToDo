@@ -1,4 +1,4 @@
-X11::GUITest ($Id: ToDo,v 1.10 2003/03/31 01:34:17 ctrondlp Exp $)
+X11::GUITest ($Id: ToDo,v 1.12 2003/11/30 17:43:58 ctrondlp Exp $)
 
 This is a list of Todo items. 
 --------------------------------------------------------------------
@@ -14,5 +14,8 @@ This is a list of Todo items.
   XtGetValues.  The EditRes protocol is not generic enough and
   requires the support of the client application.  Could look
   at spying on the X server to find this information.
+
+- Ensure alternatively mapped mouse buttons are handled
+  appropriately.
 
 --------------------------------------------------------------------
