@@ -1,4 +1,4 @@
-/* X11::GUITest ($Id: GUITest.xs,v 1.31 2003/09/06 15:22:39 ctrondlp Exp $)
+/* X11::GUITest ($Id: GUITest.xs,v 1.32 2003/09/14 14:04:51 ctrondlp Exp $)
  *  
  * Copyright (c) 2003  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@users.sourceforge.net
@@ -1590,6 +1590,34 @@ PPCODE:
 		XPUSHs( sv_2mortal(newSViv((IV)wattrs.width)) );
 		XPUSHs( sv_2mortal(newSViv((IV)wattrs.height)) );
 	}
+
+
+=over 8
+
+=item GetParentWindow WINDOWID
+
+Returns the parent of the specified window.
+
+zero is returned if parent couldn't be determined (i.e., root window).
+
+=back
+
+=cut
+
+Window
+GetParentWindow(win)
+	Window win
+PREINIT:
+	Window parent = 0, *children = NULL, root = 0;
+	UINT childcount = 0; 
+CODE:
+	RETVAL = 0;
+	if (XQueryTree(TheXDisplay, win, &root, &parent, &children, &childcount)) {
+		XFree(children);
+		RETVAL = parent;		
+	}
+OUTPUT:
+	RETVAL
 
 
 =over 8

@@ -4,7 +4,7 @@ NAME
     Developed by Dennis K. Paulsen
 
 VERSION
-    0.17
+    0.18
 
     Please consult 'docs/Changes' for the list of changes between module
     revisions.
@@ -153,7 +153,12 @@ FUNCTIONS
 
             zero is returned on failure, non-zero for success
 
-    IsChild PARENTWINDOWID WINDOWID
+    GetWindowFromPoint X, Y
+            Returns the window that is at the specified point.
+
+            zero is returned if there are no matches (i.e., off screen).
+
+    IsChild PARENTWINDOWID, WINDOWID
             Determines if the specified window is a child of the specified
             parent.
 
@@ -508,6 +513,12 @@ FUNCTIONS
             specified window.
 
               my ($x, $y, $width, $height) = GetWindowPos(GetRootWindow());
+
+    GetParentWindow WINDOWID
+            Returns the parent of the specified window.
+
+            zero is returned if parent couldn't be determined (i.e., root
+            window).
 
     GetScreenRes
             Returns the screen resolution.

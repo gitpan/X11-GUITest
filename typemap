@@ -1,4 +1,4 @@
-# X11::GUITest ($Id: typemap,v 1.3 2003/06/26 19:18:36 ctrondlp Exp $)
+# X11::GUITest ($Id: typemap,v 1.4 2003/09/28 03:13:51 ctrondlp Exp $)
 BOOL			T_IV
 Window			T_UV
 UINT			T_UV

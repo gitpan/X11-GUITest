@@ -36,7 +36,7 @@
 </p>
 <hr />
 <h1><a name="version">VERSION</a></h1>
-<p>0.17</p>
+<p>0.18</p>
 <p>Please consult 'docs/Changes' for the list of changes between
 module revisions.</p>
 <p>
@@ -221,7 +221,17 @@ tag.</p>
 </dd>
 <p></p></dl>
 <dl>
-<dt><strong><a name="item_ischild_parentwindowid_windowid">IsChild PARENTWINDOWID WINDOWID</a></strong><br />
+<dt><strong><a name="item_getwindowfrompoint_x%2c_y">GetWindowFromPoint X, Y</a></strong><br />
+</dt>
+<dd>
+Returns the window that is at the specified point.
+</dd>
+<dd>
+<p>zero is returned if there are no matches (i.e., off screen).</p>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_ischild_parentwindowid%2c_windowid">IsChild PARENTWINDOWID, WINDOWID</a></strong><br />
 </dt>
 <dd>
 Determines if the specified window is a child of the
@@ -787,6 +797,16 @@ window.
 <dd>
 <pre>
   my ($x, $y, $width, $height) = GetWindowPos(GetRootWindow());</pre>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_getparentwindow_windowid">GetParentWindow WINDOWID</a></strong><br />
+</dt>
+<dd>
+Returns the parent of the specified window.
+</dd>
+<dd>
+<p>zero is returned if parent couldn't be determined (i.e., root window).</p>
 </dd>
 <p></p></dl>
 <dl>

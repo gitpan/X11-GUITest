@@ -1,4 +1,4 @@
-# X11::GUITest ($Id: GUITest.pm,v 1.30 2003/09/06 16:28:45 ctrondlp Exp $) 
+# X11::GUITest ($Id: GUITest.pm,v 1.34 2003/09/28 22:48:29 ctrondlp Exp $) 
 #  
 # Copyright (c) 2003  Dennis K. Paulsen, All Rights Reserved.
 # Email: ctrondlp@users.sourceforge.net
@@ -27,7 +27,7 @@ Developed by Dennis K. Paulsen
 
 =head1 VERSION
 
-0.17
+0.18
 
 Please consult 'docs/Changes' for the list of changes between
 module revisions.
@@ -123,9 +123,11 @@ require DynaLoader;
 	GetInputFocus
 	GetKeySendDelay
 	GetMousePos
+	GetParentWindow
 	GetRootWindow
 	GetScreenDepth
 	GetScreenRes
+	GetWindowFromPoint
 	GetWindowName
 	GetWindowPos
 	IconifyWindow
@@ -166,7 +168,7 @@ require DynaLoader;
 
 Exporter::export_ok_tags(keys %EXPORT_TAGS);
 
-$VERSION = '0.17';
+$VERSION = '0.18';
 
 # Module Constants 
 sub DEF_WAIT() { 10; }
@@ -418,7 +420,43 @@ sub ClickWindow {
 
 =over 8
 
-=item IsChild PARENTWINDOWID WINDOWID
+=item GetWindowFromPoint X, Y 
+
+Returns the window that is at the specified point.
+
+zero is returned if there are no matches (i.e., off screen).
+
+=back
+
+=cut
+
+sub GetWindowFromPoint {
+	my $x = shift;
+	my $y = shift;
+	my $lastmatch = 0;
+
+	# Note: Windows are returned in current stacking order, therefore
+	# the last match should be the top-most window.	
+	foreach my $win ( GetChildWindows(GetRootWindow()) ) {
+		my ($w_x1, $w_y1, $w_w, $w_h) = GetWindowPos($win);
+		my $w_x2 = ($w_x1 + $w_w);
+		my $w_y2 = ($w_y1 + $w_h);
+		# Is window position invalid?
+		if ($w_x1 < 0 || $w_y1 < 0) {
+			next;
+		}
+		# Does window match our point?
+		if ($x >= $w_x1 && $x <= $w_x2 && $y >= $w_y1 && $y <= $w_y2) {
+			$lastmatch = $win;
+		}
+	}
+	return($lastmatch);
+}
+
+
+=over 8
+
+=item IsChild PARENTWINDOWID, WINDOWID
 
 Determines if the specified window is a child of the
 specified parent.
@@ -434,7 +472,7 @@ sub IsChild {
 	my $win = shift;
 
 	foreach my $child ( GetChildWindows($parent) ) {
-		if ($child != $parent && $child == $win) {
+		if ($child == $win && $child != $parent) {
 			return(1);
 		}
 	}

@@ -1,8 +1,8 @@
 #!/usr/bin/perl
-# X11::GUITest ($Id: test.t,v 1.17 2003/08/03 19:50:01 ctrondlp Exp $)
+# X11::GUITest ($Id: test.t,v 1.19 2003/09/22 15:10:50 ctrondlp Exp $)
 # Note: Functions that might be intrusive are not checked
 
-BEGIN { $| = 1; print "1..18\n"; }
+BEGIN { $| = 1; print "1..23\n"; }
 END {print "not ok 1\n" unless $loaded;}
 use X11::GUITest qw/
 	:ALL
@@ -17,6 +17,7 @@ use warnings;
 my $BadWinTitle = 'BadWindowNameNotToBeFound';
 my $BadWinId = '898989899';
 my @Windows = ();
+
 
 # FindWindowLike
 print "not " unless FindWindowLike(".*");
@@ -137,6 +138,21 @@ print "ok 17\n";
 # QuoteStringForSendKeys
 print "not " unless defined( QuoteStringForSendKeys('~!@#$%^&*()_+') );
 print "ok 18\n";
+print "not " unless not defined ( QuoteStringForSendKeys(undef) );
+print "ok 19\n";
+
+# GetParentWindow
+print "not " unless not GetParentWindow(GetRootWindow());
+print "ok 20\n";
+print "not " unless GetParentWindow($Windows[0]);
+print "ok 21\n";
+
+# GetWindowFromPoint
+# Note: Using invalid window position of (-1500 x -1500) for testing. 
+print "not " unless not GetWindowFromPoint(-1500, -1500);
+print "ok 22\n";
+print "not " unless GetWindowFromPoint(0, 0);
+print "ok 23\n";
 
 # PressKey
 # ReleaseKey
