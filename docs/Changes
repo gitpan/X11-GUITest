@@ -1,7 +1,40 @@
-X11::GUITest ($Id: Changes,v 1.8 2003/05/18 18:05:29 ctrondlp Exp $)
+X11::GUITest ($Id: Changes,v 1.20 2003/06/28 22:43:57 ctrondlp Exp $)
 
 This is the list of module changes between revisions.
 --------------------------------------------------------------------
+
+0.15 Sat Jun 28 2003 17:45
+
+  - Quote string function will now handle data
+    present after any embedded newline characters.
+
+  - Enhanced TextEditor_1.pl example.
+
+  - Added additional checks in test.t
+
+  - Pristinized the typemap.
+
+  - Misc. code/documentation enhancements.
+
+  - Removed docs/Packaging file. Note: Now using
+    `make tardist` to generate new module builds.
+
+  - Removed MakeDocs.sh..  Now handled in Makefile.PL
+
+  - Added a note that goes into man page concerning other
+    documentation.
+
+  - For those websites that grab only the POD from
+    GUITest.pm, I've added a note into the documentation
+    intended to relay that there is more then just that
+    available for documentation.
+
+  - Added LSH (Shift_L), RSH (Shift_R), LCT (Control_L),
+    RCT (Control_R), LAL (Alt_L), RAL (Alt_R) abbreviated
+    key names.
+
+  - Added PressKey and ReleaseKey per suggestion.  Also
+    included PressReleaseKey.
 
 0.14 Sun May 18 2003 11:53
 

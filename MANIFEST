@@ -1,0 +1,15 @@
+GUITest.h
+GUITest.pm
+GUITest.xs
+MANIFEST			This list of files
+Makefile.PL
+README
+docs/Changes
+docs/CodingStyle
+docs/Copying
+docs/ToDo
+docs/X11-GUITest.html
+docs/X11-GUITest.txt
+eg/TextEditor_1.pl
+t/test.t
+typemap

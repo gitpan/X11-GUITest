@@ -1,4 +1,4 @@
-# X11::GUITest ($Id: GUITest.pm,v 1.13 2003/05/18 18:05:27 ctrondlp Exp $) 
+# X11::GUITest ($Id: GUITest.pm,v 1.19 2003/06/28 22:43:57 ctrondlp Exp $) 
 #  
 # Copyright (c) 2003  Dennis K. Paulsen, All Rights Reserved.
 # Email: ctrondlp@users.sourceforge.net
@@ -27,7 +27,7 @@ Developed by Dennis K. Paulsen
 
 =head1 VERSION
 
-0.14
+0.15
 
 Please consult 'docs/Changes' for the list of changes between
 module revisions.
@@ -99,7 +99,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
 require Exporter;
 require DynaLoader;
-require AutoLoader;
+#require AutoLoader;
 
 @ISA = qw(Exporter DynaLoader);
 # Items to export into callers namespace by default. Note: do not export
@@ -132,8 +132,11 @@ require AutoLoader;
 	LowerWindow
 	MoveMouseAbs
 	MoveWindow
+	PressKey
+	PressReleaseKey
 	QuoteStringForSendKeys
 	RaiseWindow
+	ReleaseKey
 	ResizeWindow
 	RunApp
 	SendKeys
@@ -155,16 +158,9 @@ require AutoLoader;
 
 Exporter::export_ok_tags(keys %EXPORT_TAGS);
 
-$VERSION = '0.14';
+$VERSION = '0.15';
 
-# Module Constants
-# Module Variables
-
-
-bootstrap X11::GUITest $VERSION;
-
-# Constants
-# sub [NAME]() { [VALUE]; }
+# Module Constants 
 sub DEF_WAIT() { 10; }
 # Mouse Buttons
 sub M_BTN1() { 1; }
@@ -175,6 +171,11 @@ sub M_BTN5() { 5; }
 sub M_LEFT() { M_BTN1; }
 sub M_MIDDLE() { M_BTN2; }
 sub M_RIGHT() { M_BTN3; }
+
+# Module Variables
+
+
+bootstrap X11::GUITest $VERSION;
 
 =head1 FUNCTIONS
 
@@ -214,15 +215,15 @@ sub FindWindowLike {
 	my $winname = '';
 	my @wins = ();
 
-	# Match the root window???
-	$winname = GetWindowName($start) || "";
+	# Match the starting window???
+	$winname = GetWindowName($start) || '';
 	if ($winname =~ /$titlerx/i) {
 		push @wins, $start;
 	}
 	
 	# Match a child window?
 	foreach my $child (GetChildWindows($start)) {
-		my $winname = GetWindowName($child) || "";
+		my $winname = GetWindowName($child) || '';
 		if ($winname =~ /$titlerx/i) {
 			push @wins, $child;
 		}
@@ -267,7 +268,7 @@ sub WaitWindowLike {
 	my @wins = ();
 
 	# For each second we $wait, look for window title
-	# twice (2 lookups * 500ms = 1 second).
+	# twice (2 lookups * 500ms = ~1 second).
 	for (my $i = 0; $i < ($wait * 2); $i++) {
 		my @wins = FindWindowLike($titlerx, $start);
 		if (@wins) {
@@ -306,9 +307,9 @@ sub WaitWindowViewable {
 	my @wins = ();
 
 	# For each second we $wait, look for window title
-	# twice (2 lookups * 500ms = 1 second).
+	# twice (2 lookups * 500ms = ~1 second).
 	for (my $i = 0; $i < ($wait * 2); $i++) {
-		# Find windows and recognizes only those that are viewable
+		# Find windows, but recognize only those that are viewable
 		foreach my $win (FindWindowLike($titlerx, $start)) {
 			if (IsWindowViewable($win)) {
 				push @wins, $win;
@@ -349,7 +350,7 @@ sub WaitWindowClose {
 	my $wait = shift || DEF_WAIT;
 
 	# For each second we $wait, check window Id 
-	# twice (2 lookups * 500ms = 1 second).
+	# twice (2 lookups * 500ms = ~1 second).
 	for (my $i = 0; $i < ($wait * 2); $i++) {
 		if (not IsWindow($win)) {
 			# Success, window isn't recognized
@@ -367,7 +368,7 @@ sub WaitWindowClose {
 
 =over 8
 
-=item ClickWindow  WINDOWID [, X Offset] [, Y Offset] [, Button]
+=item ClickWindow WINDOWID [, X Offset] [, Y Offset] [, Button]
 
 Clicks on the specified window with the mouse.
 
@@ -458,7 +459,7 @@ sub QuoteStringForSendKeys {
 	my $str = shift || return(undef);
 
 	# Quote {} special characters (^, %, (, {, etc.)
-	$str =~ s/(\^|\%|\+|\~|\(|\)|\{|\})/\{$1\}/g;
+	$str =~ s/(\^|\%|\+|\~|\(|\)|\{|\})/\{$1\}/gm;
 	
 	return($str);
 }
@@ -533,6 +534,14 @@ sub INIT {
 sub END {
 	DeInitGUITest();
 }
+
+=over 8
+
+=item <Documentation Continued...>
+
+=back
+
+=cut
 
 # Autoload methods go after __END__, and are processed by the autosplit program.
 

@@ -1,31 +1,65 @@
 #!/usr/bin/perl
+# X11::GUITest ($Id: Makefile.PL,v 1.8 2003/06/26 19:18:36 ctrondlp Exp $)
 
 use strict;
 use warnings;
-
 use ExtUtils::MakeMaker;
 
 
-# If executable, call MakeDocs.sh to ensure GUITest.POD is
-# created to use for man3 page generation.
-if (-x 'MakeDocs.sh') {
-	system('./MakeDocs.sh');
-}
+# Write core documentation and the POD that Makefile uses.
+WriteDocumentation();
 
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 WriteMakefile(
 	'NAME' => 'X11::GUITest',
 	($] ge '5.005') ? (
-		'AUTHOR' => 'Dennis K. Paulsen',
+		'AUTHOR' => 'Dennis K. Paulsen (ctrondlp@users.sourceforge.net)',
 		'ABSTRACT' => 'Collection of functions for X11 GUI testing/interaction.',
 	) : (),
 	'VERSION_FROM' => 'GUITest.pm', # Finds $VERSION
-	'MAN3PODS' => (-r 'GUITest.POD') ? {'GUITest.POD' => '$(INST_MAN3DIR)/X11::GUITest.$(MAN3EXT)'} : {},
+	'MAN3PODS' => (-r 'GUITest.POD~') ? {'GUITest.POD~' => '$(INST_MAN3DIR)/X11::GUITest.$(MAN3EXT)'} : {},
 	'LIBS'  => ['-L/usr/X11R6/lib -lX11 -lXtst'], # e.g., '-lm'
 	'DEFINE' => '-DNDEBUG', # e.g., '-DHAVE_SOMETHING'
 	'INC'   => '-I/usr/X11R6/include', # e.g., '-I/usr/include/other'
-	'clean' => {FILES => 'GUITest.POD'},
+	'clean' => {FILES => 'GUITest.POD~'},
 	#'CCFLAGS' => '-Werror', 
 	#'OPTIMIZE' => '-Od'
 );
+
+
+# Subroutine: WriteDocumentation 
+# Description: This function is implemented to combine the
+#			   files containing POD, generate the documentation
+#			   in HTML/plain-text formats, and support the
+#			   Makefile's MAN3 transformation/installation.
+sub WriteDocumentation {
+	my $podfile = 'GUITest.POD~';
+	
+	# Combine POD containing files into one.  Don't love
+	# the system() calls, but acceptable as short-term.
+	system("cat GUITest.pm >$podfile");
+	system("cat GUITest.xs >>$podfile");
+
+	# Check POD
+	if ( system("podchecker $podfile &>/dev/null") != 0 ) {
+		print "POD validation failed!  Documentation will not be written.\n";
+		return(0);	
+	}
+	
+	# Generate Text and HTML documents
+	print "Writing documentation for X11::GUITest\n";
+	system("pod2text $podfile docs/X11-GUITest.txt");
+	system("pod2html --infile=$podfile --outfile=docs/X11-GUITest.html");
+
+	# If symlink is supported, create the README
+	if ( eval {symlink('', ''); 1} ) {
+		symlink('docs/X11-GUITest.txt', 'README');
+	}
+
+	# Clean Up.  Leaving GUITest.POD~ around for Makefile use
+	unlink <pod*.x??>;
+	
+	return(1);	
+}
+

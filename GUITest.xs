@@ -1,4 +1,4 @@
-/* X11::GUITest ($Id: GUITest.xs,v 1.10 2003/05/18 17:42:50 ctrondlp Exp $)
+/* X11::GUITest ($Id: GUITest.xs,v 1.18 2003/06/28 22:33:31 ctrondlp Exp $)
  *  
  * Copyright (c) 2003  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@users.sourceforge.net
@@ -42,12 +42,12 @@ extern "C" {
 /* Module Level Variables */
 static Display *TheXDisplay = NULL;
 static int LocalScreen = 0;
-static WindowTable ChildWindows;
+static WindowTable ChildWindows = {0};
 static ULONG EventSendDelay = DEF_EVENT_SEND_DELAY;
 static ULONG KeySendDelay = DEF_KEY_SEND_DELAY;
 
 
-/* Non Exported Utility Functions */
+/* Non Exported Utility Functions: */
 
 /* Function: IgnoreBadWindow
  * Description: User defined error handler callback for X event errors.
@@ -83,7 +83,7 @@ static void SetupXDisplay(void)
 			  DisplayString(TheXDisplay));
 	}
 
-	/* Obtain local screen.  Note: Return values are not known */	
+	/* Obtain local screen. */	
 	LocalScreen = DefaultScreen(TheXDisplay);
 
 	/* Discard current events in queue. */	
@@ -120,8 +120,8 @@ static BOOL IsNumber(const char *str)
 }
 
 /* Function: GetKeySym
- * Description: Given a regular(a) or special(Tab) key name, this
- *              function obtains the appropriate keysym by first
+ * Description: Given a regular(i.e., a) or special(i.e., Tab) key name,
+ *              this function obtains the appropriate keysym by first
  *              checking the XStringToKeysym (case sensitive) library
  *        		function.  If the key is not recognized by that function,
  *				an internal table to this function is utilized for the
@@ -157,7 +157,9 @@ static BOOL GetKeySym(const char *name, KeySym *sym)
 		{"\\", XK_backslash}, 		{"`", XK_grave},			{"{", XK_braceleft},
 		{"}", XK_braceright},		{"|", XK_bar},				{"^", XK_asciicircum},
 		{"(", XK_parenleft},		{")", XK_parenright}, 		{" ", XK_space},
-		{"/", XK_slash},			{"\t", XK_Tab},				{"\n", XK_Return}, 
+		{"/", XK_slash},			{"\t", XK_Tab},				{"\n", XK_Return},
+		{"LSH", XK_Shift_L},		{"RSH", XK_Shift_R},		{"LCT", XK_Control_L},
+		{"RCT", XK_Control_R},		{"LAL", XK_Alt_L},			{"RAL", XK_Alt_R}, 
 	};
 	int i = 0;
 
@@ -185,11 +187,12 @@ static BOOL GetKeySym(const char *name, KeySym *sym)
 	return(FALSE);
 }
 
-/* Function: PressKey 
- * Description: Presses the key for the specified keysym
+/* Function: PressKeyImp
+ * Description: Presses the key for the specified keysym.  Lower-level
+ * 				implementation.
  * Note: Returns TRUE (non-zero) on success, FALSE (zero) on failure.
  */
-static BOOL PressKey(KeySym sym)
+static BOOL PressKeyImp(KeySym sym)
 {
 	KeyCode kc = 0;
 	int retval = 0;
@@ -205,11 +208,12 @@ static BOOL PressKey(KeySym sym)
 	return(retval);
 }
 
-/* Function: ReleaseKey 
- * Description: Releases the key for the specified keysym
+/* Function: ReleaseKeyImp 
+ * Description: Releases the key for the specified keysym.  Lower-level
+ *			 	implementation.
  * Note: Returns TRUE (non-zero) on success, FALSE (zero) on failure.
  */
-static BOOL ReleaseKey(KeySym sym)
+static BOOL ReleaseKeyImp(KeySym sym)
 {
 	KeyCode kc = 0;
 	int retval = 0;
@@ -225,17 +229,23 @@ static BOOL ReleaseKey(KeySym sym)
 	return(retval);
 }
 
-/* Function: PressReleaseKey 
- * Description: Presses and releases the key for the specified keysym
+/* Function: PressReleaseKeyImp
+ * Description: Presses and releases the key for the specified keysym.
+ * 				Also implements key send delay.  Lower-level implementation.
  * Note: Returns TRUE (non-zero) on success, FALSE (zero) on failure.
  */
-static BOOL PressReleaseKey(KeySym sym)
+static BOOL PressReleaseKeyImp(KeySym sym)
 {
-	if (!PressKey(sym)) {
+	if (!PressKeyImp(sym)) {
 		return(FALSE);
 	}
-	if (!ReleaseKey(sym)) {
+	if (!ReleaseKeyImp(sym)) {
 		return(FALSE);
+	}
+	/* Possibly wait between(after) keystrokes */ 
+	if (KeySendDelay > 0) {
+		/* usleep(500 * 1000) = 500ms */
+		usleep(KeySendDelay * 1000);
 	}
 	return(TRUE);
 }
@@ -278,71 +288,68 @@ static BOOL IsShiftNeeded(KeySym sym)
 }
 
 /* Function: ProcessBraceSet
- * Description: Takes a brace set such as: {Tab} or {Tab 3} or
- *				{Tab Tab a b c} or {Tab 3 Tab 2} or {PAUSE 500} or
- *				{PAUSE 500 Tab} , etc. and breaks it into components
- *				and then proceeds to press the appropriate keys or
- *				perform the	special functionality requested (PAUSE).
- *				Numeric elements are used in the special functionality
- *				or simply to ensure the previous key element gets
- *				pressed the specified number of times.
+ * Description: Takes a brace set such as: {Tab}, {Tab 3},
+ *				{Tab Tab a b c}, {PAUSE 500}, {PAUSE 500 Tab}, etc.
+ *              and breaks it into components, then proceeds to press 
+ *				the appropriate keys or perform the	special functionality
+ *				requested (i.e., PAUSE).  Numeric elements are used in the
+ *				special functionality or simply to ensure the previous key
+ *				element gets pressed the specified number of times.
  * Note: Returns TRUE (non-zero) on success, FALSE (zero) on failure.
  */
-static BOOL ProcessBraceSet(const char *str, size_t *len)
+static BOOL ProcessBraceSet(const char *braceset, size_t *len)
 {
 	enum {NONE, PAUSE, KEY}; /* Various Functionalities */
-	char *tmpstr = NULL, *endb = NULL, *token = NULL;
-	int count = 0, i = 0; 
-	int cmd = NONE;
-	KeySym sym = 0;
+	int cmd = NONE, count = 0, i = 0;
 	BOOL needshift = FALSE;
+	char *buffer = NULL, *endbrc = NULL, *token = NULL;
+	KeySym sym = 0;
 
-	assert(str != NULL);
+	assert(braceset != NULL);
 	assert(len != NULL);
 
-	/* Fail if there isn't a valid brace set in the input string */
-	if (*str != '{' || !strchr(str, '}')) {
+	/* Fail if there isn't a valid brace set */
+	if (*braceset != '{' || !strchr(braceset, '}')) {
 		return(FALSE);
 	}
 
-	tmpstr = (char *)safemalloc(strlen(str) + 1);
-	if (tmpstr == NULL) {
+	/* Create backup buffer because we are using strtok */
+	buffer = (char *)safemalloc(strlen(braceset));
+	if (buffer == NULL) {
 		return(FALSE);
 	}
-	/* Make copy of input string, but ignore beginning { char */
-	strcpy(tmpstr, &str[1]);
+	/* Ignore beginning { char */
+	strcpy(buffer, &braceset[1]);
 
-	/* Get brace end in tmpstr */
-	endb = strstr(tmpstr, "}");
-	if (endb == NULL) {
-		safefree(tmpstr);
+	/* Get brace end in buffer */
+	endbrc = strchr(buffer, '}');
+	if (endbrc == NULL) {
+		safefree(buffer);
 		return(FALSE);
 	}
-	/* If we have a quoted }, i.e. {}} move to end brace */
-	if (endb[1] == '}') {
-		endb++;
+	/* If we have a quoted }, move over one character */
+	if (endbrc[1] == '}') {
+		endbrc++;
 	}
-	/* Terminate tmpstr at brace end (TAB} = TAB\0) */
-	*endb = NUL;
+	/* Terminate brace set */
+	*endbrc = NUL;
 
-	/* Store brace set length.  Include 2 for length of {} chars
-	 * ignored from above */	
-	*len = strlen(tmpstr) + 2;
+	/* Store brace set length for calling function.  Include
+	 * 2 for {} we ignored */
+	*len = strlen(buffer) + 2;
 	
-	/* Work on the space delimited items in the brace set.
-	 * (example tmpstr after work above: "TAB" or "TAB PAUSE 200 F1 TAB 2") */  
-	token = strtok(tmpstr, " ");
-	if (!token) {
-		safefree(tmpstr);
+	/* Work on the space delimited items in the buffer. */
+	if ( !(token = strtok(buffer, " ")) ) {
+		safefree(buffer);
 		return(FALSE);
 	}
-	do {
+	
+	do { /* } while ( (token = strtok(NULL, " ")) ); */
 		count = 0;
 		if (IsNumber(token)) {
 			/* Yes, a number, so convert it for key depresses or for command specific use */
-			count = atoi(token);
-			if (count <= 0) {
-				safefree(tmpstr);
+			if ( (count = atoi(token)) <= 0 ) {
+				safefree(buffer);
 				return(FALSE);
 			}	
 		} else {
@@ -356,26 +363,23 @@ static BOOL ProcessBraceSet(const char *str, size_t *len)
 				/* No, just a key, so get symbol */
 				cmd = KEY;
 				if (!GetKeySym(token, &sym)) {
-					safefree(tmpstr);
+					safefree(buffer);
 					return(FALSE);
 				}
-				/* Use shift if needed */
 				needshift = IsShiftNeeded(sym);
 				if (needshift) {
-					PressKey(XK_Shift_L);
+					PressKeyImp(XK_Shift_L);
 				}
 				/* Press key */
-				if (!PressReleaseKey(sym)) {
-					safefree(tmpstr);
-					/* Release shift if needed */
+				if (!PressReleaseKeyImp(sym)) {
 					if (needshift) {
-						ReleaseKey(XK_Shift_L);
+						ReleaseKeyImp(XK_Shift_L);
 					}
+					safefree(buffer);
 					return(FALSE);
 				}		
-				/* Release shift if needed */
 				if (needshift) {
-					ReleaseKey(XK_Shift_L);
+					ReleaseKeyImp(XK_Shift_L);
 				}
 			}
 		}
@@ -391,34 +395,31 @@ static BOOL ProcessBraceSet(const char *str, size_t *len)
 				 * because we have already depressed key once up above */
 				/* Use shift if needed */
 				if (needshift) {
-					PressKey(XK_Shift_L);
+					PressKeyImp(XK_Shift_L);
 				}
 				for (i = 2; i <= count; i++) {
 					/* Use sym that was already stored from above */
-					if (!PressReleaseKey(sym)) {
-						safefree(tmpstr);
-						/* Release shift if needed */
+					if (!PressReleaseKeyImp(sym)) {
 						if (needshift) {
-							ReleaseKey(XK_Shift_L);
+							ReleaseKeyImp(XK_Shift_L);
 						}
+						safefree(buffer);
 						return(FALSE);
 					}
 				}
-				/* Release shift if needed */
 				if (needshift) {
-					ReleaseKey(XK_Shift_L);
+					ReleaseKeyImp(XK_Shift_L);
 				}
 				break;
 			default:
 				/* Fail, we have a count, but an unknown command! */
-				safefree(tmpstr);
+				safefree(buffer);
 				return(FALSE);
-				break;
 			};
 		}
 	} while ( (token = strtok(NULL, " ")) );	
 	
-	safefree(tmpstr);
+	safefree(buffer);
 	return(TRUE);
 }
  
@@ -438,6 +439,8 @@ static BOOL SendKeysImp(const char *keys)
 	BOOL retval = FALSE, shift = FALSE, ctrl = FALSE, 
 		 alt = FALSE, modlock = FALSE, needshift = FALSE;
 
+	assert(keys != NULL);
+
 	for (i = 0; i < strlen(keys); i++) {
 		switch (keys[i]) {
 		/* Brace Set? of quoted/special characters (i.e. {{}, {TAB}, {F1 F2}, {PAUSE 200}) */
@@ -449,30 +452,18 @@ static BOOL SendKeysImp(const char *keys)
 			i += (bracelen - 1);
 			continue;
 		/* Modifiers? */
-		case '~': retval = PressReleaseKey(XK_Return); break;
+		case '~': retval = PressReleaseKeyImp(XK_Return); break;
 		case '+': /* Shift */ 
-			retval = PressKey(XK_Shift_L);
+			retval = PressKeyImp(XK_Shift_L);
 			shift = TRUE;
-			/* If modlock coming up next, go to process it */
-			if (keys[i + 1] == '(') {
-				continue;
-			}
 			break;
 		case '^':  /* Control */
-			retval = PressKey(XK_Control_L);
+			retval = PressKeyImp(XK_Control_L);
 			ctrl = TRUE;
-			/* If modlock coming up next, go to process it */
-			if (keys[i + 1] == '(') {
-				continue;
-			}
 			break;
 		case '%': /* Alt */ 
-			retval = PressKey(XK_Alt_L);
+			retval = PressKeyImp(XK_Alt_L);
 			alt = TRUE; 
-			/* If modlock coming up next, go to process it */
-			if (keys[i + 1] == '(') {
-				continue;
-			}
 			break;
 		case '(': modlock = TRUE; break;
 		case ')': modlock = FALSE; break;
@@ -484,37 +475,37 @@ static BOOL SendKeysImp(const char *keys)
 			/* Use shift if needed */
 			needshift = IsShiftNeeded(sym);
 			if (!shift && needshift) {
-				PressKey(XK_Shift_L);
+				PressKeyImp(XK_Shift_L);
 			} 
-			retval = PressReleaseKey(sym);
+			retval = PressReleaseKeyImp(sym);
 			/* Release shift if needed */	
 			if (!shift && needshift) {
-				ReleaseKey(XK_Shift_L);
+				ReleaseKeyImp(XK_Shift_L);
 			} 
 			break;
 		}; /* switch (keys[i]) { */
+		/* If modlock coming up next, go on to process it */
+		if (keys[i + 1] == '(') {
+			continue;
+		}
 		/* Ensure modifiers are clear when needed */
 		if (!modlock && shift) {
-			ReleaseKey(XK_Shift_L); 
+			ReleaseKeyImp(XK_Shift_L); 
 			shift = FALSE; 		
 		}
 		if (!modlock && ctrl) { 
-			ReleaseKey(XK_Control_L); 
+			ReleaseKeyImp(XK_Control_L); 
 			ctrl = FALSE;
 		}	
 		if (!modlock && alt) {
-			ReleaseKey(XK_Alt_L); 
+			ReleaseKeyImp(XK_Alt_L); 
 			alt = FALSE;
 		}
 		if (!retval) {
 			return(FALSE);
 		}
-		/* Possibly wait between/after keystrokes */ 
-		if (KeySendDelay > 0) {
-			/* usleep(500 * 1000) = 500ms */
-			usleep(KeySendDelay * 1000);
-		}
 	} /* for (i = 0; i < strlen(keys); i++) { */
+
 	return(TRUE);
 }
 
@@ -576,11 +567,7 @@ static BOOL AddChildWindow(Window win)
  */
 static void ClearChildWindows(void)
 {
-	int i = 0;
-
-	for (i = 0; i < ChildWindows.Max; i++) {
-		ChildWindows.Ids[i] = 0;
-	}	
+	memset(ChildWindows.Ids, 0, ChildWindows.Max * sizeof(Window));
 	ChildWindows.NVals = 0;
 }
 
@@ -934,7 +921,7 @@ Quote Special Characters
 
         SendKeys('{{}'); # {
         SendKeys('{+}'); # +
-        
+
         You can also use QuoteStringForSendKeys to perform quoting.
 
 Aliased Key Names
@@ -944,14 +931,15 @@ Aliased Key Names
         SendKeys('{TAB 3}'); # Press TAB 3 times
         SendKeys('{SPC 3 a b c}'); # Space 3 times, a, b, c
 
-Special functionality currently available
+Special Functionality
 
         # Pause execution for 500 milliseconds
         SendKeys('{PAUSE 500}');
 
 Combinations
 
-        SendKeys('abc+(abc){TAB PAUSE 500}'); a, b, c, A, B, C, Tab, Pause 500
+        SendKeys('abc+(abc){TAB PAUSE 500}'); # a, b, c, A, B, C, Tab, Pause 500
+        SendKeys('+({a b c})'); # A, B, C
 
 The following abbreviated key names are currently recognized within a brace set.  If you
 don't see the desired key, you can still use the unabbreviated name for the key.  If you
@@ -975,26 +963,32 @@ if you really wanted to.
         END     End
         ENT     Return
         ESC     Escape
+        F1      F1
+        ...     ...
+        F12     F12
         HEL     Help
         HOM     Home
         INS     Insert
+        LAL     Alt_L
+        LCT     Control_L
         LEF     Left
+        LSH     Shift_L
+        LSK     Super_L
+        MNU     Menu
         NUM     Num_Lock
         PGD     Page_Down
         PGU     Page_Up
         PRT     Print
+        RAL     Alt_R
+        RCT     Control_R
         RIG     Right
+        RSH     Shift_R
+        RSK     Super_R
         SCR     Scroll_Lock
+        SPA     Space
+        SPC     Space
         TAB     Tab
         UP      Up
-        F1      F1
-        ...     ...
-        F12     F12
-        SPC     Space
-        SPA     Space
-        LSK     Super_L
-        RSK     Super_R
-        MNU     Menu
 
 zero is returned on failure, non-zero for success.
 
@@ -1007,6 +1001,114 @@ SendKeys(keys)
 	char *keys
 CODE:
 	RETVAL = SendKeysImp(keys);
+OUTPUT:
+	RETVAL
+
+
+=over 8
+
+=item PressKey KEY 
+
+Presses the specified key. 
+
+One can utilize the abbreviated key names from the table
+listed above as outlined in the following example:
+  
+  # Alt-n
+  PressKey('LAL'); # Left Alt
+  PressKey('n');
+  ReleaseKey('n');
+  ReleaseKey('LAL');
+
+  # Uppercase a
+  PressKey('LSH'); # Left Shift
+  PressKey('a'); # could use 'a' or 'A'
+  ReleaseKey('a');
+  ReleaseKey('LSH');
+
+The ReleaseKey calls in the above example are there to set
+both key states back.
+
+zero is returned on failure, non-zero for success.
+
+=back
+
+=cut
+
+BOOL
+PressKey(key)
+	char *key
+PREINIT:
+	KeySym sym = 0;
+CODE:
+	RETVAL = GetKeySym(key, &sym);
+	if (RETVAL) {
+		RETVAL = PressKeyImp(sym);
+	}
+OUTPUT:
+	RETVAL
+
+
+=over 8
+
+=item ReleaseKey KEY 
+
+Releases the specified key.  Normally follows a PressKey call.
+
+One can utilize the abbreviated key names from the table
+listed above.
+  
+  ReleaseKey('n');
+
+zero is returned on failure, non-zero for success.
+
+=back
+
+=cut
+
+BOOL
+ReleaseKey(key)
+	char *key
+PREINIT:
+	KeySym sym = 0;
+CODE:
+	RETVAL = GetKeySym(key, &sym);
+	if (RETVAL) {
+		RETVAL = ReleaseKeyImp(sym);
+	}
+OUTPUT:
+	RETVAL
+
+
+=over 8
+
+=item PressReleaseKey KEY 
+
+Presses and releases the specified key.
+
+One can utilize the abbreviated key names from the table
+listed above.
+
+  PressReleaseKey('n');
+
+This function is effected by the key send delay.
+
+zero is returned on failure, non-zero for success.
+
+=back
+
+=cut
+
+BOOL
+PressReleaseKey(key)
+	char *key
+PREINIT:
+	KeySym sym = 0;
+CODE:
+	RETVAL = GetKeySym(key, &sym);
+	if (RETVAL) {
+		RETVAL = PressReleaseKeyImp(sym);
+	}
 OUTPUT:
 	RETVAL
 
@@ -1469,7 +1571,6 @@ OUTPUT:
 <a href='Changes'>Module Changes</a><br>
 <a href='CodingStyle'>Coding-Style Guidelines</a><br>
 <a href='ToDo'>ToDo List</a><br>
-<a href='Packaging'>Some Packaging Information</a><br>
 <a href='Copying'>Copy of the GPL License</a><br>
 
 =end html
@@ -1481,10 +1582,15 @@ Available under the docs sub-directory.
   Changes (Module Changes)
   CodingStyle (Coding-Style Guidelines)
   ToDo (ToDo List)
-  Packaging (Some Packaging Information)
   Copying (Copy of the GPL License)
 
 =end text
+
+=begin man
+
+Not installed.
+
+=end man
 
 =head1 COPYRIGHT
 
@@ -1494,10 +1600,12 @@ it under the terms of the GNU General Public License.
 
 =head1 AUTHOR
 
-Dennis K. Paulsen (ctrondlp@users.sourceforge.net)
+Dennis K. Paulsen <ctrondlp@users.sourceforge.net>
 
 =head1 CREDITS
 
-None at this time.
+Thanks to the following people for patches, suggestions, etc.:
+
+Richard Clamp
 
 =cut

@@ -4,7 +4,7 @@ NAME
     Developed by Dennis K. Paulsen
 
 VERSION
-    0.14
+    0.15
 
     Please consult 'docs/Changes' for the list of changes between module
     revisions.
@@ -186,6 +186,8 @@ FUNCTIONS
 
               RunApp('/work/myapp');
 
+    <Documentation Continued...>
+
     SetEventSendDelay DELAYINMILLISECONDS
             Sets the milliseconds of delay between events being sent to the
             X display. It is usually not a good idea to set this to 0.
@@ -279,7 +281,7 @@ FUNCTIONS
 
                     SendKeys('{{}'); # {
                     SendKeys('{+}'); # +
-        
+
                     You can also use QuoteStringForSendKeys to perform quoting.
 
             Aliased Key Names
@@ -289,14 +291,15 @@ FUNCTIONS
                     SendKeys('{TAB 3}'); # Press TAB 3 times
                     SendKeys('{SPC 3 a b c}'); # Space 3 times, a, b, c
 
-            Special functionality currently available
+            Special Functionality
 
                     # Pause execution for 500 milliseconds
                     SendKeys('{PAUSE 500}');
 
             Combinations
 
-                    SendKeys('abc+(abc){TAB PAUSE 500}'); a, b, c, A, B, C, Tab, Pause 500
+                    SendKeys('abc+(abc){TAB PAUSE 500}'); # a, b, c, A, B, C, Tab, Pause 500
+                    SendKeys('+({a b c})'); # A, B, C
 
             The following abbreviated key names are currently recognized
             within a brace set. If you don't see the desired key, you can
@@ -323,26 +326,77 @@ FUNCTIONS
                     END     End
                     ENT     Return
                     ESC     Escape
+                    F1      F1
+                    ...     ...
+                    F12     F12
                     HEL     Help
                     HOM     Home
                     INS     Insert
+                    LAL     Alt_L
+                    LCT     Control_L
                     LEF     Left
+                    LSH     Shift_L
+                    LSK     Super_L
+                    MNU     Menu
                     NUM     Num_Lock
                     PGD     Page_Down
                     PGU     Page_Up
                     PRT     Print
+                    RAL     Alt_R
+                    RCT     Control_R
                     RIG     Right
+                    RSH     Shift_R
+                    RSK     Super_R
                     SCR     Scroll_Lock
+                    SPA     Space
+                    SPC     Space
                     TAB     Tab
                     UP      Up
-                    F1      F1
-                    ...     ...
-                    F12     F12
-                    SPC     Space
-                    SPA     Space
-                    LSK     Super_L
-                    RSK     Super_R
-                    MNU     Menu
+
+            zero is returned on failure, non-zero for success.
+
+    PressKey KEY
+            Presses the specified key.
+
+            One can utilize the abbreviated key names from the table listed
+            above as outlined in the following example:
+
+              # Alt-n
+              PressKey('LAL'); # Left Alt
+              PressKey('n');
+              ReleaseKey('n');
+              ReleaseKey('LAL');
+
+              # Uppercase a
+              PressKey('LSH'); # Left Shift
+              PressKey('a'); # could use 'a' or 'A'
+              ReleaseKey('a');
+              ReleaseKey('LSH');
+
+            The ReleaseKey calls in the above example are there to set both
+            key states back.
+
+            zero is returned on failure, non-zero for success.
+
+    ReleaseKey KEY
+            Releases the specified key. Normally follows a PressKey call.
+
+            One can utilize the abbreviated key names from the table listed
+            above.
+
+              ReleaseKey('n');
+
+            zero is returned on failure, non-zero for success.
+
+    PressReleaseKey KEY
+            Presses and releases the specified key.
+
+            One can utilize the abbreviated key names from the table listed
+            above.
+
+              PressReleaseKey('n');
+
+            This function is effected by the key send delay.
 
             zero is returned on failure, non-zero for success.
 
@@ -447,7 +501,6 @@ Available under the docs sub-directory.
       Changes (Module Changes)
       CodingStyle (Coding-Style Guidelines)
       ToDo (ToDo List)
-      Packaging (Some Packaging Information)
       Copying (Copy of the GPL License)
 
 COPYRIGHT
@@ -456,8 +509,10 @@ COPYRIGHT
     terms of the GNU General Public License.
 
 AUTHOR
-    Dennis K. Paulsen (ctrondlp@users.sourceforge.net)
+    Dennis K. Paulsen <ctrondlp@users.sourceforge.net>
 
 CREDITS
-    None at this time.
+    Thanks to the following people for patches, suggestions, etc.:
+
+    Richard Clamp
 

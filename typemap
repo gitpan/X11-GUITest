@@ -1,15 +1,7 @@
+# X11::GUITest ($Id: typemap,v 1.3 2003/06/26 19:18:36 ctrondlp Exp $)
 BOOL			T_IV
 Window			T_UV
 UINT			T_UV
 ULONG			T_UV
 KeySym			T_UV
 
-#############################################################################
-INPUT
-T_UV
-	$var = ($type)SvUV($arg)
-
-#############################################################################
-OUTPUT
-T_UV
-	sv_setuv($arg, (UV)$var);

@@ -1,8 +1,8 @@
 #!/usr/bin/perl
 #----------------------------------------------------------------------#
-# VCS $Id: TextEditor_1.pl,v 1.1 2003/03/31 01:22:23 ctrondlp Exp $
+# X11::GUITest ($Id: TextEditor_1.pl,v 1.3 2003/06/26 19:18:36 ctrondlp Exp $)
 # Notes: Example of interaction with gedit (Text Editor).  Tested with
-# 		 version 2.0.2 of the editor application using the English
+# 		 version 2.2.0 of the editor application using the English
 #		 language.
 #----------------------------------------------------------------------#
 
@@ -41,16 +41,12 @@ SendKeys("Hello, how are you today?\n" x 2) or die('Unable to send text to edito
 # 'modified' word since we sent it text above.
 (GetWindowName($GEMainWin) =~ /modified/i) or die('Editor did not switch its title as expected!');
 
-# Open about box (Alt-h, a) and wait for it
+# Using shortcuts (Alt-h, a), open about box and wait for it
 SendKeys('%(h)a');
 ( ($GEAboutWin) = WaitWindowViewable('About gedit') ) or die('Unable to find about box!');
 
-# We could use an easier method (SendKeys) to close the
-# about box, but we're going to show usage of ClickWindow
-# with hard-coded offsets (Ewww!) instead.  The position
-# offsets below allow the OK button of the about box to
-# be clicked.
-ClickWindow($GEAboutWin, 260, 260) or die('Unable to tell about box to close!');
+# Close about box (Alt-o) using shortcut for OK button. 
+SendKeys('%(o)');
 
 # To be safe, ensure about box is closed before we continue
 WaitWindowClose($GEAboutWin);
