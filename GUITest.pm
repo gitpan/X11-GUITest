@@ -1,4 +1,4 @@
-# X11::GUITest ($Id: GUITest.pm,v 1.11 2003/03/21 08:42:24 ctrondlp Exp $) 
+# X11::GUITest ($Id: GUITest.pm,v 1.12 2003/03/31 01:34:17 ctrondlp Exp $) 
 #  
 # Copyright (c) 2003  Dennis K. Paulsen, All Rights Reserved.
 # Email: ctrondlp@users.sourceforge.net
@@ -27,12 +27,15 @@ Developed by Dennis K. Paulsen
 
 =head1 VERSION
 
-0.12
+0.13
 
 Please consult 'docs/Changes' for the list of changes between
 module revisions.
 
 =head1 SYNOPSIS
+
+For additional examples, please look under the 'eg/'
+sub-directory.
 
   use X11::GUITest qw/
     StartApp
@@ -139,6 +142,7 @@ require AutoLoader;
 	SetKeySendDelay
 	StartApp
 	UnIconifyWindow
+	WaitWindowClose
 	WaitWindowLike
 	WaitWindowViewable
 );
@@ -151,7 +155,7 @@ require AutoLoader;
 
 Exporter::export_ok_tags(keys %EXPORT_TAGS);
 
-$VERSION = '0.12';
+$VERSION = '0.13';
 
 # Module Constants
 # Module Variables
@@ -320,6 +324,44 @@ sub WaitWindowViewable {
 	}	
 	# Nothing
 	return(@wins);
+}
+
+
+=over 8
+
+=item WaitWindowClose WINDOWID [, MAXWAITINSECONDS]
+
+Waits for the specified window to close.
+
+One can optionally specify an alternative wait amount in seconds. The
+window will keep being checked to see if it has closed until this amount
+of time has been reached.  The default amount is defined in the DEF_WAIT
+constant available through the :CONST export tag.
+
+zero is returned if window is not gone, non-zero if it is gone.
+
+=back
+
+=cut
+
+sub WaitWindowClose {
+	my $win = shift;
+	my $wait = shift || DEF_WAIT;
+
+	# For each second we $wait, check window Id 
+	# twice (2 lookups * 500ms = 1 second).
+	for (my $i = 0; $i < ($wait * 2); $i++) {
+		if (not IsWindow($win)) {
+			# Success, window isn't recognized
+			return(1);
+		}
+		# Wait 500 ms in order not to bog down the system.  If one 
+		# changes this, the ($wait * 2) above will want to be changed
+		# in order to represent seconds correctly.
+		select(undef, undef, undef, 0.50);
+	}
+	# Failure
+	return(0);
 }
 
 

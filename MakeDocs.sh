@@ -1,28 +1,25 @@
 #!/bin/sh
 
-# Check Pod
-podchecker  GUITest.pm GUITest.xs
+# Check POD
+podchecker GUITest.pm GUITest.xs &>/dev/null
 if [ $? -ne 0 ] 
 then
-	echo 'POD validation failed!  Documentation will not be processed.'
+	echo "POD validation failed!  Documentation will not be written."
 	exit 1
-else
-	echo 'POD validation passed.  Documentation being processed.'
 fi
 
-# Make Documents
-echo 'Processing POD...'
-cat GUITest.pm >PODTemp
-cat GUITest.xs >>PODTemp
-pod2text PODTemp docs/X11-GUITest.txt
-pod2html --infile=PODTemp --outfile=docs/X11-GUITest.html
-echo 'Finished processing POD.'
+# Combine the POD in the correct order.
+cat GUITest.pm >GUITest.POD
+cat GUITest.xs >>GUITest.POD
+
+# Generate Documents
+echo 'Writing Documentation for X11::GUITest' 
+pod2text GUITest.POD docs/X11-GUITest.txt
+pod2html --infile=GUITest.POD --outfile=docs/X11-GUITest.html
 
 # Make symlink for README
 ln -fs docs/X11-GUITest.txt README
 
-# Clean Up
-echo 'Removing residual files...'
-rm -f pod*.x?? PODTemp
+# Clean Up.  Leaving GUITest.POD around for Makefile to use
+rm -f pod*.x??
 
-echo 'Complete'

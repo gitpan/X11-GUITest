@@ -1,4 +1,4 @@
-X11::GUITest ($Id: ToDo,v 1.7 2003/03/21 08:42:24 ctrondlp Exp $)
+X11::GUITest ($Id: ToDo,v 1.10 2003/03/31 01:34:17 ctrondlp Exp $)
 
 This is a list of Todo items. 
 --------------------------------------------------------------------
@@ -14,15 +14,5 @@ This is a list of Todo items.
   XtGetValues.  The EditRes protocol is not generic enough and
   requires the support of the client application.  Could look
   at spying on the X server to find this information.
-
-- Possibly some debugging mechanisms/tools
-
-- Add some semi-generic example scripts
-
-- Reenable man3 POD generation in Makefile.PL once a pristine method
-  is found for generating one manual page from the XS and PM file.
-
-- Need to ensure all ASCII characters (besides the common ones) can
-  be interpreted for SendKeys.
 
 --------------------------------------------------------------------

@@ -1,7 +1,17 @@
-X11::GUITest ($Id: Changes,v 1.5 2003/03/21 08:42:24 ctrondlp Exp $)
+X11::GUITest ($Id: Changes,v 1.7 2003/03/31 01:34:17 ctrondlp Exp $)
 
 This is the list of module changes between revisions.
 --------------------------------------------------------------------
+
+0.13 Sun Mar 30 2003 19:32
+
+  - Enhanced and reenabled man3 POD generation.
+
+  - Added WaitWindowClose
+
+  - Added TextEditor_1.pl example script.
+
+  - Documentation updates
 
 0.12 Fri Mar 21 2003 02:35
 

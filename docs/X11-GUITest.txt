@@ -4,12 +4,14 @@ NAME
     Developed by Dennis K. Paulsen
 
 VERSION
-    0.12
+    0.13
 
     Please consult 'docs/Changes' for the list of changes between module
     revisions.
 
 SYNOPSIS
+    For additional examples, please look under the 'eg/' sub-directory.
+
       use X11::GUITest qw/
         StartApp
         WaitWindowViewable
@@ -117,6 +119,17 @@ FUNCTIONS
             Likewise, this function will only return an array of the
             matching window Ids for those windows that are viewable. An
             empty array is returned if no matches were found.
+
+    WaitWindowClose WINDOWID [, MAXWAITINSECONDS]
+            Waits for the specified window to close.
+
+            One can optionally specify an alternative wait amount in
+            seconds. The window will keep being checked to see if it has
+            closed until this amount of time has been reached. The default
+            amount is defined in the DEF_WAIT constant available through the
+            :CONST export tag.
+
+            zero is returned if window is not gone, non-zero if it is gone.
 
     ClickWindow WINDOWID [, X Offset] [, Y Offset] [, Button]
             Clicks on the specified window with the mouse.

@@ -36,13 +36,15 @@
 </p>
 <hr />
 <h1><a name="version">VERSION</a></h1>
-<p>0.12</p>
+<p>0.13</p>
 <p>Please consult 'docs/Changes' for the list of changes between
 module revisions.</p>
 <p>
 </p>
 <hr />
 <h1><a name="synopsis">SYNOPSIS</a></h1>
+<p>For additional examples, please look under the 'eg/'
+sub-directory.</p>
 <pre>
   use X11::GUITest qw/
     StartApp
@@ -174,6 +176,22 @@ available for input, so this function is very useful.
 <p>Likewise, this function will only return an array of the matching window Ids for
 those windows that are viewable.  An empty array is returned if no matches were
 found.</p>
+</dd>
+<p></p></dl>
+<dl>
+<dt><strong><a name="item_waitwindowclose_windowid_%5b%2c_maxwaitinseconds%5">WaitWindowClose WINDOWID [, MAXWAITINSECONDS]</a></strong><br />
+</dt>
+<dd>
+Waits for the specified window to close.
+</dd>
+<dd>
+<p>One can optionally specify an alternative wait amount in seconds. The
+window will keep being checked to see if it has closed until this amount
+of time has been reached.  The default amount is defined in the DEF_WAIT
+constant available through the :CONST export tag.</p>
+</dd>
+<dd>
+<p>zero is returned if window is not gone, non-zero if it is gone.</p>
 </dd>
 <p></p></dl>
 <dl>
