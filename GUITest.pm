@@ -1,4 +1,4 @@
-# X11::GUITest ($Id: GUITest.pm,v 1.12 2003/03/31 01:34:17 ctrondlp Exp $) 
+# X11::GUITest ($Id: GUITest.pm,v 1.13 2003/05/18 18:05:27 ctrondlp Exp $) 
 #  
 # Copyright (c) 2003  Dennis K. Paulsen, All Rights Reserved.
 # Email: ctrondlp@users.sourceforge.net
@@ -27,7 +27,7 @@ Developed by Dennis K. Paulsen
 
 =head1 VERSION
 
-0.13
+0.14
 
 Please consult 'docs/Changes' for the list of changes between
 module revisions.
@@ -155,7 +155,7 @@ require AutoLoader;
 
 Exporter::export_ok_tags(keys %EXPORT_TAGS);
 
-$VERSION = '0.13';
+$VERSION = '0.14';
 
 # Module Constants
 # Module Variables

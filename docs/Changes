@@ -1,7 +1,13 @@
-X11::GUITest ($Id: Changes,v 1.7 2003/03/31 01:34:17 ctrondlp Exp $)
+X11::GUITest ($Id: Changes,v 1.8 2003/05/18 18:05:29 ctrondlp Exp $)
 
 This is the list of module changes between revisions.
 --------------------------------------------------------------------
+
+0.14 Sun May 18 2003 11:53
+
+  - Documentation updates
+
+  - Official support for FreeBSD 5.0
 
 0.13 Sun Mar 30 2003 19:32
 

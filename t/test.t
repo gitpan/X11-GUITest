@@ -21,6 +21,8 @@ print "not " unless FindWindowLike(".*");
 print "not " unless not FindWindowLike($BadWinTitle);
 print "ok 2\n";
 
+# WaitWindowClose
+
 # WaitWindowLike
 print "not " unless WaitWindowLike(".*");
 print "not " unless not WaitWindowLike($BadWinTitle, undef, 1);

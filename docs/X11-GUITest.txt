@@ -4,7 +4,7 @@ NAME
     Developed by Dennis K. Paulsen
 
 VERSION
-    0.13
+    0.14
 
     Please consult 'docs/Changes' for the list of changes between module
     revisions.
@@ -279,6 +279,8 @@ FUNCTIONS
 
                     SendKeys('{{}'); # {
                     SendKeys('{+}'); # +
+        
+                    You can also use QuoteStringForSendKeys to perform quoting.
 
             Aliased Key Names
 

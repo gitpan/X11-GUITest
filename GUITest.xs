@@ -1,4 +1,4 @@
-/* X11::GUITest ($Id: GUITest.xs,v 1.9 2003/03/21 08:42:24 ctrondlp Exp $)
+/* X11::GUITest ($Id: GUITest.xs,v 1.10 2003/05/18 17:42:50 ctrondlp Exp $)
  *  
  * Copyright (c) 2003  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@users.sourceforge.net
@@ -934,6 +934,8 @@ Quote Special Characters
 
         SendKeys('{{}'); # {
         SendKeys('{+}'); # +
+        
+        You can also use QuoteStringForSendKeys to perform quoting.
 
 Aliased Key Names
 
