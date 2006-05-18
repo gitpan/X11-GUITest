@@ -1,7 +1,7 @@
-/* X11::GUITest ($Id: GUITest.h,v 1.10 2003/12/07 15:46:31 ctrondlp Exp $)
+/* X11::GUITest ($Id: GUITest.h,v 1.11 2005/12/24 15:50:13 ctrondlp Exp $)
  *  
- * Copyright (c) 2003-2004  Dennis K. Paulsen, All Rights Reserved.
- * Email: ctrondlp@users.sourceforge.net
+ * Copyright (c) 2003-2006  Dennis K. Paulsen, All Rights Reserved.
+ * Email: ctrondlp@cpan.org
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as

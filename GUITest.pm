@@ -1,7 +1,7 @@
-# X11::GUITest ($Id: GUITest.pm,v 1.41 2004/02/14 15:43:00 ctrondlp Exp $) 
+# X11::GUITest ($Id: GUITest.pm,v 1.50 2006/05/06 15:26:17 ctrondlp Exp $) 
 #  
-# Copyright (c) 2003-2004  Dennis K. Paulsen, All Rights Reserved.
-# Email: ctrondlp@users.sourceforge.net
+# Copyright (c) 2003-2006  Dennis K. Paulsen, All Rights Reserved.
+# Email: ctrondlp@cpan.org
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -27,7 +27,7 @@ Developed by Dennis K. Paulsen
 
 =head1 VERSION
 
-0.20
+0.21
 
 Updates are made available at the following sites:
 
@@ -51,7 +51,7 @@ An X server with the XTest extensions enabled.  This seems to be the
 norm.  If it is not enabled, it usually can be by modifying the X
 server configuration (i.e., XF86Config).
 
-Also, the standard DISPLAY environment variable is utilized to determine
+The standard DISPLAY environment variable is utilized to determine
 the host, display, and screen to work with.  By default it is usually set
 to ":0.0" for the localhost.  However, by altering this variable one can
 interact with applications under a remote host's X server.  To change this 
@@ -59,6 +59,12 @@ from a terminal window, one can utilize the following basic syntax:
 export DISPLAY=<hostname-or-ipaddress>:<display>.<screen>  Please note that
 under most circumstances, xhost will need to be executed properly on the remote
 host as well.
+
+There is a known incompatibility between the XTest and Xinerama extensions,
+which causes the XTestFakeMotionEvent() function to misbehave.  When the
+Xinerama (X server) extension is turned on, this (Perl) extension has been
+modified to allow one to invoke an alternative function.  See Makefile.PL for
+details.
 
 =head1 INSTALLATION
 
@@ -123,6 +129,7 @@ require DynaLoader;
 @EXPORT_OK = qw(
 	ClickMouseButton
 	ClickWindow
+	DefaultScreen
 	FindWindowLike
 	GetChildWindows
 	GetEventSendDelay
@@ -154,6 +161,7 @@ require DynaLoader;
 	ReleaseMouseButton
 	ResizeWindow
 	RunApp
+	ScreenCount
 	SendKeys
 	SetEventSendDelay
 	SetInputFocus
@@ -174,7 +182,7 @@ require DynaLoader;
 
 Exporter::export_ok_tags(keys %EXPORT_TAGS);
 
-$VERSION = '0.20';
+$VERSION = '0.21';
 
 # Module Constants 
 sub DEF_WAIT() { 10; }
@@ -225,26 +233,44 @@ array is returned if no matches were found.
 
 =cut
 
-sub FindWindowLike {
+my $FindWindowLikeAux =
+sub {
 	my $titlerx = shift;
-	my $start = shift || GetRootWindow();
+	my $start = shift;
 	my $winname = '';
 	my @wins = ();
 
 	# Match the starting window???
-	$winname = GetWindowName($start) || '';
-	if ($winname =~ /$titlerx/i) {
+	$winname = GetWindowName($start);
+	if (defined $winname && $winname =~ /$titlerx/i) {
 		push @wins, $start;
 	}
 	
 	# Match a child window?
 	foreach my $child (GetChildWindows($start)) {
-		my $winname = GetWindowName($child) || '';
-		if ($winname =~ /$titlerx/i) {
+		$winname = GetWindowName($child);
+		if (defined $winname && $winname =~ /$titlerx/i) {
 			push @wins, $child;
 		}
 	}
 	return(@wins);
+};
+
+sub FindWindowLike {
+	my $titlerx = shift;
+	my $start = shift;
+
+	if (defined $start) {
+		return &$FindWindowLikeAux($titlerx, $start);
+	}
+	else {
+		my @wins = ();
+		for (my $i = ScreenCount() - 1; $i >= 0 ; --$i) {
+			push @wins, &$FindWindowLikeAux($titlerx,
+							GetRootWindow($i));
+		}
+		return(@wins);
+	}
 }
 
 
@@ -279,21 +305,18 @@ array is returned if no matches were found.
 
 sub WaitWindowLike {
 	my $titlerx = shift;
-	my $start = shift || GetRootWindow();
+	my $start = shift;
 	my $wait = shift || DEF_WAIT;
 	my @wins = ();
 
-	# For each second we $wait, look for window title
-	# twice (2 lookups * 500ms = ~1 second).
-	for (my $i = 0; $i < ($wait * 2); $i++) {
+	# For each second we $wait, look for window title once.
+	for (my $i = 0; $i < $wait; $i++) {
 		my @wins = FindWindowLike($titlerx, $start);
 		if (@wins) {
 			return(@wins);
 		}
-		# Wait 500 ms in order not to bog down the system.  If one 
-		# changes this, the ($wait * 2) above will want to be changed
-		# in order to represent seconds correctly.
-		select(undef, undef, undef, 0.50);
+		# Wait 1 sec in order not to bog down the system	
+		select(undef, undef, undef, 1);
 	}	
 	# Nothing
 	return(@wins);
@@ -318,13 +341,12 @@ found.
 
 sub WaitWindowViewable {
 	my $titlerx = shift;
-	my $start = shift || GetRootWindow();
+	my $start = shift;
 	my $wait = shift || DEF_WAIT;
 	my @wins = ();
 
-	# For each second we $wait, look for window title
-	# twice (2 lookups * 500ms = ~1 second).
-	for (my $i = 0; $i < ($wait * 2); $i++) {
+	# For each second we $wait, look for window title once.
+	for (my $i = 0; $i < $wait; $i++) {
 		# Find windows, but recognize only those that are viewable
 		foreach my $win (FindWindowLike($titlerx, $start)) {
 			if (IsWindowViewable($win)) {
@@ -334,10 +356,8 @@ sub WaitWindowViewable {
 		if (@wins) {
 			return(@wins);
 		}
-		# Wait 500 ms in order not to bog down the system.  If one 
-		# changes this, the ($wait * 2) above will want to be changed
-		# in order to represent seconds correctly.
-		select(undef, undef, undef, 0.50);
+		# Wait 1 sec in order not to bog down the system.
+		select(undef, undef, undef, 1);
 	}	
 	# Nothing
 	return(@wins);
@@ -410,11 +430,12 @@ sub ClickWindow {
 	my $y_offset = shift || 0;
 	my $button = shift || M_LEFT;
 
-	my ($x, $y) = GetWindowPos($win);
+	my ($x, $y, $scr);
+	($x, $y, undef, undef, undef, $scr) = GetWindowPos($win);
 	if (!defined($x) or !defined($y)) {
 		return(0);
 	}
-	if (!MoveMouseAbs($x + $x_offset, $y + $y_offset)) {
+	if (!MoveMouseAbs($x + $x_offset, $y + $y_offset, $scr)) {
 		return(0);
 	}
 	if (!ClickMouseButton($button)) {
@@ -426,9 +447,10 @@ sub ClickWindow {
 
 =over 8
 
-=item GetWindowFromPoint X, Y 
+=item GetWindowFromPoint X, Y [, SCREEN]
 
-Returns the window that is at the specified point.
+Returns the window that is at the specified point.  If no screen is given, it
+is taken from the value given when opening the X display.
 
 zero is returned if there are no matches (i.e., off screen).
 
@@ -439,20 +461,25 @@ zero is returned if there are no matches (i.e., off screen).
 sub GetWindowFromPoint {
 	my $x = shift;
 	my $y = shift;
+	my $scr = shift;
 	my $lastmatch = 0;
+
+	if ( ! defined $scr) {
+		$scr = DefaultScreen();
+	}
 
 	# Note: Windows are returned in current stacking order, therefore
 	# the last match should be the top-most window.	
-	foreach my $win ( GetChildWindows(GetRootWindow()) ) {
-		my ($w_x1, $w_y1, $w_w, $w_h) = GetWindowPos($win);
-		my $w_x2 = ($w_x1 + $w_w);
-		my $w_y2 = ($w_y1 + $w_h);
+	foreach my $win ( GetChildWindows(GetRootWindow($scr)) ) {
+		my ($w_x1, $w_y1, $w_w, $w_h, $w_b) = GetWindowPos($win);
 		# Is window position invalid?
-		if ($w_x1 < 0 || $w_y1 < 0) {
+		if (!defined $w_x1) {
 			next;
 		}
+		my $w_x2 = ($w_x1 + $w_w + ($w_b << 1));
+		my $w_y2 = ($w_y1 + $w_h + ($w_b << 1));
 		# Does window match our point?
-		if ($x >= $w_x1 && $x <= $w_x2 && $y >= $w_y1 && $y <= $w_y2) {
+		if ($x >= $w_x1 && $x < $w_x2 && $y >= $w_y1 && $y < $w_y2) {
 			$lastmatch = $win;
 		}
 	}
@@ -476,7 +503,7 @@ zero is returned for false, non-zero for true.
 sub IsChild {
 	my $parent = shift;
 	my $win = shift;
-
+	
 	foreach my $child ( GetChildWindows($parent) ) {
 		if ($child == $win && $child != $parent) {
 			return(1);
@@ -499,7 +526,7 @@ any special interpretation of the characters in the file.
 Returns the quoted string, undef is returned on error.
 
   # Quote  ~, %, etc.  as  {~}, {%}, etc for literal use in SendKeys. 
-  SendKeys( QuoteStringForSendKeys('Hello: ~%^(){}+') );
+  SendKeys( QuoteStringForSendKeys('Hello: ~%^(){}+#') );
 
 =back
 
@@ -519,10 +546,9 @@ sub QuoteStringForSendKeys {
 
 =item StartApp COMMANDLINE
 
-Uses the shell to execute a program.  A primative method is used
-to detach from the shell, so this function returns as soon as the
-program is called.  Useful for starting GUI applications and then
-going on to work with them.
+Uses the shell to execute a program.  This function returns as
+soon as the program is called.  Useful for starting GUI
+applications and then going on to work with them.
 
 zero is returned on failure, non-zero for success
 
@@ -533,19 +559,19 @@ zero is returned on failure, non-zero for success
 =cut
 
 sub StartApp {
-	my $cmdline = shift;
-
-	# Add ampersand if not present to detach program from shell, allowing
-	# this function to return before application is finished running.
-	# RegExp: [&][zero or more whitespace][anchor, nothing to follow whitespace]
-	if ($cmdline !~ /\&\s*$/) {
-		$cmdline .= ' &'; 
+	my @cmd = @_;
+	my $pid = fork;
+	if ($pid) {
+		use POSIX qw(WNOHANG);
+		sleep 1;
+		waitpid($pid, WNOHANG) != $pid 
+			and kill(0, $pid) == 1
+			and return $pid;
+	} elsif (defined $pid) {
+		use POSIX qw(_exit);
+		exec @cmd or _exit(1);
 	}
-	local $! = 0;
-	system($cmdline);
-
-	# Limited to catching specific problems due to detachment from shell
-	return( (length($!) == 0) );
+	return;
 }
 
 

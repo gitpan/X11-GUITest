@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# X11::GUITest ($Id: test.t,v 1.21 2004/02/14 15:08:50 ctrondlp Exp $)
+# X11::GUITest ($Id: test.t,v 1.23 2006/04/23 02:12:58 ctrondlp Exp $)
 # Note: Functions that might be intrusive are not checked
 
 BEGIN {
@@ -83,8 +83,10 @@ print "ok 8\n";
 
 # MoveMouseAbs
 print "not " unless MoveMouseAbs(2, 2);
-print "not " unless MoveMouseAbs(1, 1);
 print "ok 9\n";
+
+# Give some respite to the X server
+sleep 1;
 
 # ClickMouseButton
 
@@ -129,13 +131,14 @@ print "not " unless GetScreenDepth();
 print "ok 15\n";
 
 # GetMousePos
-print "not " unless GetMousePos();
+my @coords = ();
+print "not " unless ( @coords = GetMousePos() );
 print "ok 16\n";
 
 # IsChild
 print "not " unless ( @Windows = GetChildWindows(GetRootWindow()) );
 # Note: Limiting check to a certain number of windows (10)
-foreach my $win ( splice(@Windows, 0, 10) ) {
+foreach my $win ( @Windows[0..(9 < $#Windows ? 9 : $#Windows)] ) {
 	if (!IsChild(GetRootWindow(), $win)) {
 		print "not ";
 		last;

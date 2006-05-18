@@ -4,7 +4,7 @@ NAME
     Developed by Dennis K. Paulsen
 
 VERSION
-    0.20
+    0.21
 
     Updates are made available at the following sites:
 
@@ -27,14 +27,20 @@ DEPENDENCIES
     norm. If it is not enabled, it usually can be by modifying the X server
     configuration (i.e., XF86Config).
 
-    Also, the standard DISPLAY environment variable is utilized to determine
-    the host, display, and screen to work with. By default it is usually set
-    to ":0.0" for the localhost. However, by altering this variable one can
+    The standard DISPLAY environment variable is utilized to determine the
+    host, display, and screen to work with. By default it is usually set to
+    ":0.0" for the localhost. However, by altering this variable one can
     interact with applications under a remote host's X server. To change
     this from a terminal window, one can utilize the following basic syntax:
     export DISPLAY=<hostname-or-ipaddress>:<display>.<screen> Please note
     that under most circumstances, xhost will need to be executed properly
     on the remote host as well.
+
+    There is a known incompatibility between the XTest and Xinerama
+    extensions, which causes the XTestFakeMotionEvent() function to
+    misbehave. When the Xinerama (X server) extension is turned on, this
+    (Perl) extension has been modified to allow one to invoke an alternative
+    function. See Makefile.PL for details.
 
 INSTALLATION
       perl Makefile.PL
@@ -160,8 +166,10 @@ FUNCTIONS
 
             zero is returned on failure, non-zero for success
 
-    GetWindowFromPoint X, Y
-            Returns the window that is at the specified point.
+    GetWindowFromPoint X, Y [, SCREEN]
+            Returns the window that is at the specified point. If no screen
+            is given, it is taken from the value given when opening the X
+            display.
 
             zero is returned if there are no matches (i.e., off screen).
 
@@ -182,13 +190,12 @@ FUNCTIONS
             Returns the quoted string, undef is returned on error.
 
               # Quote  ~, %, etc.  as  {~}, {%}, etc for literal use in SendKeys. 
-              SendKeys( QuoteStringForSendKeys('Hello: ~%^(){}+') );
+              SendKeys( QuoteStringForSendKeys('Hello: ~%^(){}+#') );
 
     StartApp COMMANDLINE
-            Uses the shell to execute a program. A primative method is used
-            to detach from the shell, so this function returns as soon as
-            the program is called. Useful for starting GUI applications and
-            then going on to work with them.
+            Uses the shell to execute a program. This function returns as
+            soon as the program is called. Useful for starting GUI
+            applications and then going on to work with them.
 
             zero is returned on failure, non-zero for success
 
@@ -211,6 +218,14 @@ FUNCTIONS
             zero is returned on failure, non-zero for success.
 
     <Documentation Continued...>
+
+    DefaultScreen
+            Returns the screen number specified in the X display value used
+            to open the display.
+
+    ScreenCount
+            Returns the number of screens in the X display specified when
+            opening it.
 
     SetEventSendDelay DELAYINMILLISECONDS
             Sets the milliseconds of delay between events being sent to the
@@ -244,23 +259,29 @@ FUNCTIONS
 
             zero is returned on failure, non-zero for success.
 
-    GetRootWindow
-            Returns the root window Id. This is the top/root level window
-            that all other windows are under.
+    GetRootWindow [SCREEN]
+            Returns the Id of the root window of the screen. This is the
+            top/root level window that all other windows are under. If no
+            screen is given, it is taken from the value given when opening
+            the X display.
 
     GetChildWindows WINDOWID
             Returns an array of the child windows for the specified window
-            Id.
+            Id. If it detects that the window hierarchy is in transition, it
+            will wait half a second and try again.
 
-    MoveMouseAbs X, Y
-            Moves the mouse cursor to the specified absolute position.
+    MoveMouseAbs X, Y [, SCREEN]
+            Moves the mouse cursor to the specified absolute position in the
+            optionally given screen. If no screen is given, it is taken from
+            the value given when opening the X display.
 
-            zero is returned on failure, non-zero for success.
+            Zero is returned on failure, non-zero for success.
 
     GetMousePos
-            Returns an array containing the position of the mouse cursor.
+            Returns an array containing the position and the screen (number)
+            of the mouse cursor.
 
-              my ($x, $y) = GetMousePos(); 
+              my ($x, $y, $scr_num) = GetMousePos(); 
 
     PressMouseButton BUTTON
             Presses the specified mouse button. Available mouse buttons are:
@@ -281,20 +302,21 @@ FUNCTIONS
     SendKeys KEYS
             Sends keystrokes to the window that has the input focus.
 
-            The keystrokes to send are those specified in KEYS. Some
-            characters have special meaning, they are:
+            The keystrokes to send are those specified in KEYS parameter.
+            Some characters have special meaning, they are:
 
                     Modifier Keys:
                     ^       CTRL
                     %       ALT
                     +       SHIFT
+                    #       META
 
                     Other Keys:
                     ~       ENTER
                     \n      ENTER
                     \t      TAB
-                    ( and ) MODIFIER USAGE
-                    { and } QUOTE CHARACTERS
+                    ( and ) MODIFIER GROUPING
+                    { and } QUOTE / ESCAPE CHARACTERS
 
             Simply, one can send a text string like so:
 
@@ -319,6 +341,7 @@ FUNCTIONS
 
                     SendKeys('{{}'); # {
                     SendKeys('{+}'); # +
+                    SendKeys('{#}'); # #
 
                     You can also use QuoteStringForSendKeys to perform quoting.
 
@@ -371,6 +394,7 @@ FUNCTIONS
                     HOM     Home
                     INS     Insert
                     LAL     Alt_L
+                    LMA     Meta_L
                     LCT     Control_L
                     LEF     Left
                     LSH     Shift_L
@@ -381,6 +405,7 @@ FUNCTIONS
                     PGU     Page_Up
                     PRT     Print
                     RAL     Alt_R
+                    RMA     Meta_R
                     RCT     Control_R
                     RIG     Right
                     RSH     Shift_R
@@ -391,7 +416,9 @@ FUNCTIONS
                     TAB     Tab
                     UP      Up
 
-            zero is returned on failure, non-zero for success.
+            zero is returned on failure, non-zero for success. For
+            configurations (Xvfb) that don't support Alt_Left, Meta_Left is
+            automatically used in its place.
 
     PressKey KEY
             Presses the specified key.
@@ -434,7 +461,7 @@ FUNCTIONS
 
               PressReleaseKey('n');
 
-            This function is effected by the key send delay.
+            This function is affected by the key send delay.
 
             zero is returned on failure, non-zero for success.
 
@@ -517,9 +544,12 @@ FUNCTIONS
 
     GetWindowPos WINDOWID
             Returns an array containing the position information for the
-            specified window.
+            specified window. It also returns size information (including
+            border width) and the number of the screen where the window
+            resides.
 
-              my ($x, $y, $width, $height) = GetWindowPos(GetRootWindow());
+              my ($x, $y, $width, $height, $borderWidth, $screen) =
+                    GetWindowPos(GetRootWindow());
 
     GetParentWindow WINDOWID
             Returns the parent of the specified window.
@@ -527,13 +557,17 @@ FUNCTIONS
             zero is returned if parent couldn't be determined (i.e., root
             window).
 
-    GetScreenRes
-            Returns the screen resolution.
+    GetScreenRes [SCREEN]
+            Returns the screen resolution. If no screen is specified, it is
+            taken from the value given when opening the X display. If the
+            screen (number) is invalid, the returned list will be empty.
 
               my ($x, $y) = GetScreenRes();
 
-    GetScreenDepth
-            Returns the color depth for the screen.
+    GetScreenDepth [SCREEN]
+            Returns the color depth for the screen. If no screen is
+            specified, it is taken from the value given when opening the X
+            display. If the screen (number) is invalid, -1 will be returned.
 
             Value is represented as bits, i.e. 16.
 
@@ -548,17 +582,19 @@ Available under the docs sub-directory.
       Copying (Copy of the GPL License)
 
 COPYRIGHT
-    Copyright(c) 2003-2004 Dennis K. Paulsen, All Rights Reserved. This
+    Copyright(c) 2003-2006 Dennis K. Paulsen, All Rights Reserved. This
     program is free software; you can redistribute it and/or modify it under
     the terms of the GNU General Public License.
 
 AUTHOR
-    Dennis K. Paulsen <ctrondlp@users.sourceforge.net> (Anthon, Iowa USA)
+    Dennis K. Paulsen <ctrondlp@cpan.org> (Des Moines, Iowa USA)
 
 CREDITS
     Thanks to everyone; including those specifically mentioned below for
     patches, suggestions, etc.:
 
+      Alexey Tourbin
       Richard Clamp
       Gustav Larsson
+      Nelson D. Caro
 

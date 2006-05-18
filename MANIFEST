@@ -1,9 +1,3 @@
-GUITest.h
-GUITest.pm
-GUITest.xs
-MANIFEST			This list of files
-Makefile.PL
-README
 docs/Changes
 docs/CodingStyle
 docs/Copying
@@ -11,8 +5,15 @@ docs/ToDo
 docs/X11-GUITest.html
 docs/X11-GUITest.txt
 eg/FindWindowLike.pl
+eg/templates/ScriptTemplate.pl
 eg/TextEditor_1.pl
 eg/WebBrowser_1.pl
-eg/templates/ScriptTemplate.pl
+GUITest.h
+GUITest.pm
+GUITest.xs
+Makefile.PL
+MANIFEST			This list of files
+README
 t/test.t
 typemap
+META.yml                                 Module meta-data (added by MakeMaker)

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #----------------------------------------------------------------------#
-# X11::GUITest ($Id: TextEditor_1.pl,v 1.4 2003/07/28 01:35:53 ctrondlp Exp $)
+# X11::GUITest ($Id: TextEditor_1.pl,v 1.5 2006/02/11 23:31:51 ctrondlp Exp $)
 # Notes: Example of interaction with gedit (Text Editor).  Tested with
 # 		 version 2.2.0 of the editor application using the English
 #		 language.
@@ -32,8 +32,8 @@ print "$0 : Script Start\n";
 
 # Start the text editor
 StartApp('gedit');
-# Wait for it to appear. RegEx: .* = zero or more of any character
-( ($GEMainWin) = WaitWindowViewable('Untitled.*gedit') ) or die('Unable to find editor window!');
+# Wait for it to appear within 120 seconds. RegEx: .* = zero or more of any character.
+( ($GEMainWin) = WaitWindowViewable('Un.*gedit', undef, 120) ) or die('Unable to find editor window!');
 
 # Send some text to the editor (TEXT x NUM TIMES)
 SendKeys("Hello, how are you today?\n" x 2) or die('Unable to send text to editor!');

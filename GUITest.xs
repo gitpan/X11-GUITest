@@ -1,7 +1,7 @@
-/* X11::GUITest ($Id: GUITest.xs,v 1.40 2004/01/16 23:41:42 ctrondlp Exp $)
+/* X11::GUITest ($Id: GUITest.xs,v 1.53 2006/04/28 17:50:33 ctrondlp Exp $)
  *  
- * Copyright (c) 2003-2004  Dennis K. Paulsen, All Rights Reserved.
- * Email: ctrondlp@users.sourceforge.net
+ * Copyright (c) 2003-2006  Dennis K. Paulsen, All Rights Reserved.
+ * Email: ctrondlp@cpan.org
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -50,7 +50,7 @@ static int TheScreen = 0;
 static WindowTable ChildWindows = {0};
 static ULONG EventSendDelay = DEF_EVENT_SEND_DELAY;
 static ULONG KeySendDelay = DEF_KEY_SEND_DELAY;
-
+static int (*OldErrorHandler)(Display *, XErrorEvent *) = NULL;
 
 /* Non Exported Utility Functions: */
 
@@ -60,8 +60,9 @@ static ULONG KeySendDelay = DEF_KEY_SEND_DELAY;
 static int IgnoreBadWindow(Display *display, XErrorEvent *error)
 {
 	/* Ignore bad window errors here, handle elsewhere */
-	if (error->request_code != BadWindow) {
-		XSetErrorHandler(NULL);
+	if (error->error_code != BadWindow) {
+		assert(NULL != OldErrorHandler);
+		(*OldErrorHandler)(display, error);
 	}
 	/* Note: Return is ignored */
 	return(0);
@@ -100,7 +101,7 @@ static void SetupXDisplay(void)
 static void CloseXDisplay(void)
 {
 	if (TheXDisplay) {
-		XFlush(TheXDisplay);
+		XSync(TheXDisplay, False);
 		XCloseDisplay(TheXDisplay);
 		TheXDisplay = NULL;
 	}
@@ -112,12 +113,13 @@ static void CloseXDisplay(void)
  */
 static BOOL IsNumber(const char *str)
 {
-	int i = 0;
+	size_t x = 0, len = 0;
 
 	assert(str != NULL);
 
-	for (i = 0; i < strlen(str); i++) {
-		if (!isdigit(str[i])) {
+	len = strlen(str);
+	for (x = 0; x < len; x++) {
+		if (!isdigit(str[x])) {
 			return(FALSE);
 		}
 	}
@@ -164,9 +166,10 @@ static BOOL GetKeySym(const char *name, KeySym *sym)
 		{"(", XK_parenleft},		{")", XK_parenright}, 		{" ", XK_space},
 		{"/", XK_slash},			{"\t", XK_Tab},				{"\n", XK_Return},
 		{"LSH", XK_Shift_L},		{"RSH", XK_Shift_R},		{"LCT", XK_Control_L},
-		{"RCT", XK_Control_R},		{"LAL", XK_Alt_L},			{"RAL", XK_Alt_R}, 
+		{"RCT", XK_Control_R},		{"LAL", XK_Alt_L},			{"RAL", XK_Alt_R},
+                {"LMA", XK_Meta_L},		{"RMA", XK_Meta_R}, 
 	};
-	int i = 0;
+	size_t x = 0;
 
 	assert(name != NULL);
 	assert(sym != NULL);
@@ -180,10 +183,10 @@ static BOOL GetKeySym(const char *name, KeySym *sym)
 		return(TRUE);
 	}
 	/* Do case insensitive search for specified name to obtain the KeySym from table */
-	for (i = 0; i < (sizeof(kns_table) / sizeof(KeyNameSymTable)); i++) {
-		if (strcasecmp(kns_table[i].Name, name) == 0) {
+	for (x = 0; x < (sizeof(kns_table) / sizeof(KeyNameSymTable)); x++) {
+		if (strcasecmp(kns_table[x].Name, name) == 0) {
 			/* Found It */
-			*sym = kns_table[i].Sym;
+			*sym = kns_table[x].Sym;
 			return(TRUE);
 		}
 	}
@@ -210,6 +213,22 @@ static BOOL GetRegKeySym(const char name, KeySym *sym)
 	return( GetKeySym(key, sym) );
 }
 
+/* Function: GetKeycodeFromKeysym
+ * Description: Wrapper around XKeysymToKeycode.  Supports compile-time
+ *              workarounds, etc.
+ */
+static KeyCode GetKeycodeFromKeysym(Display *display, KeySym keysym)
+{
+ 	KeyCode kc = XKeysymToKeycode(display, keysym);
+#ifdef X11_GUITEST_ALT_L_FALLBACK_META_L
+	/* Xvfb lacks XK_Alt_L; fall back to XK_Meta_L */
+ 	if (kc == 0 && keysym == XK_Alt_L) {
+ 		kc = XKeysymToKeycode(display, XK_Meta_L);
+	}
+#endif
+	return(kc);
+}
+
 /* Function: PressKeyImp
  * Description: Presses the key for the specified keysym.  Lower-level
  * 				implementation.
@@ -220,7 +239,7 @@ static BOOL PressKeyImp(KeySym sym)
 	KeyCode kc = 0;
 	BOOL retval = 0;
 
-	kc = XKeysymToKeycode(TheXDisplay, sym);
+	kc = GetKeycodeFromKeysym(TheXDisplay, sym);
 	if (kc == 0) {
 		return(FALSE);
 	}
@@ -241,7 +260,7 @@ static BOOL ReleaseKeyImp(KeySym sym)
 	KeyCode kc = 0;
 	BOOL retval = 0;
 	
-	kc = XKeysymToKeycode(TheXDisplay, sym);
+	kc = GetKeycodeFromKeysym(TheXDisplay, sym);
 	if (kc == 0) {
 		return(FALSE);
 	}
@@ -285,7 +304,7 @@ static BOOL IsShiftNeeded(KeySym sym)
 	int syms = 0;
 	BOOL needed = FALSE;
 	
-	kc = XKeysymToKeycode(TheXDisplay, sym);
+	kc = GetKeycodeFromKeysym(TheXDisplay, sym);
 	if (!kc) {
 		return(FALSE);
 	}
@@ -456,22 +475,23 @@ static BOOL ProcessBraceSet(const char *braceset, size_t *len)
 static BOOL SendKeysImp(const char *keys)
 {
 	KeySym sym = 0;
-	size_t bracelen = 0;
-	int i = 0;
+	size_t keyslen = 0, bracelen = 0;
+	size_t x = 0;
 	BOOL retval = FALSE, shift = FALSE, ctrl = FALSE, 
-		 alt = FALSE, modlock = FALSE, needshift = FALSE;
+		 alt = FALSE, meta = FALSE, modlock = FALSE, needshift = FALSE;
 
 	assert(keys != NULL);
 
-	for (i = 0; i < strlen(keys); i++) {
-		switch (keys[i]) {
+	keyslen = strlen(keys);
+	for (x = 0; x < keyslen; x++) {
+		switch (keys[x]) {
 		/* Brace Set? of quoted/special characters (i.e. {{}, {TAB}, {F1 F2}, {PAUSE 200}) */
 		case '{':
-			if (!ProcessBraceSet(&keys[i], &bracelen)) {
+			if (!ProcessBraceSet(&keys[x], &bracelen)) {
 				return(FALSE);
 			}
 			/* Skip past the brace set, Note: - 1 because we are at { already */
-			i += (bracelen - 1);
+			x += (bracelen - 1);
 			continue;
 		/* Modifiers? */
 		case '~': retval = PressReleaseKeyImp(XK_Return); break;
@@ -487,11 +507,15 @@ static BOOL SendKeysImp(const char *keys)
 			retval = PressKeyImp(XK_Alt_L);
 			alt = TRUE; 
 			break;
+		case '#': /* Meta */
+			retval = PressKeyImp(XK_Meta_L);
+			meta = TRUE; 
+			break;
 		case '(': modlock = TRUE; break;
 		case ')': modlock = FALSE; break;
 		/* Regular Key? (a, b, c, 1, 2, 3, _, *, %), etc. */
 		default:
-			if (!GetRegKeySym(keys[i], &sym)) {
+			if (!GetRegKeySym(keys[x], &sym)) {
 				return(FALSE);
 			}
 			/* Use shift if needed */
@@ -505,9 +529,9 @@ static BOOL SendKeysImp(const char *keys)
 				ReleaseKeyImp(XK_Shift_L);
 			} 
 			break;
-		}; /* switch (keys[i]) { */
+		}; /* switch (keys[x]) { */
 		/* If modlock coming up next, go on to process it */
-		if (keys[i + 1] == '(') {
+		if (keys[x + 1] == '(') {
 			continue;
 		}
 		/* Ensure modifiers are clear when needed */
@@ -523,10 +547,14 @@ static BOOL SendKeysImp(const char *keys)
 			ReleaseKeyImp(XK_Alt_L); 
 			alt = FALSE;
 		}
+		if (!modlock && meta) {
+			ReleaseKeyImp(XK_Meta_L); 
+			meta = FALSE;
+		}
 		if (!retval) {
 			return(FALSE);
 		}
-	} /* for (i = 0; i < strlen(keys); i++) { */
+	} /* for (x =  0; x < keyslen; x++) { */
 
 	return(TRUE);
 }
@@ -539,9 +567,12 @@ static BOOL SendKeysImp(const char *keys)
 static BOOL IsWindowImp(Window win)
 {
 	XWindowAttributes wattrs = {0};
-	
-	XSetErrorHandler(IgnoreBadWindow);
-	return( (BOOL)XGetWindowAttributes(TheXDisplay, win, &wattrs) );
+	BOOL retval;
+
+	OldErrorHandler = XSetErrorHandler(IgnoreBadWindow);
+	retval = (BOOL)(XGetWindowAttributes(TheXDisplay, win, &wattrs) != 0);
+	XSetErrorHandler(OldErrorHandler);
+	return(retval);
 }
 
 /* Function: AddChildWindow
@@ -614,38 +645,63 @@ static void FreeChildWindows(void)
 	ChildWindows.Max = 0;
 }
 
-/* Function: EnumChildWindows
+/* Function: EnumChildWindowsAux
  * Description: Obtains the list of window Ids
- * Note: No return value.
+ * Note: Returns value indicating success of obtaining
+ *       windows.
  */
-static void EnumChildWindows(Window win)
+static BOOL EnumChildWindowsAux(Window win)
 {
    	Window root = 0, parent = 0, *children = NULL;
    	UINT childcount = 0;
 	UINT i = 0;
 
-	/* Not a window? */
-	if (!IsWindowImp(win)) {
-		return;
-	}
-
 	/* get list of child windows */
 	if (XQueryTree(TheXDisplay, win, &root, &parent, &children, 
 				   &childcount)) {
 	   	for (i = 0; i < childcount; i++) {
-			if (IsWindowImp(children[i])) {
-				/* Add Child */
-				AddChildWindow(children[i]);
-				/* Look for its descendents */
-	       		EnumChildWindows(children[i]);
+			/* Add Child */
+			AddChildWindow(children[i]);
+			/* Look for its descendents */
+	   		if (!EnumChildWindowsAux(children[i])) {
+				XFree(children);
+				return FALSE;
 			}
    		}
    		if (children) {
        		XFree(children);
    		}
+		return TRUE;
+	} else {
+		return FALSE;
 	}
 }
 
+/* Function: EnumChildWindows
+ * Description: Calls utility function to obtain list of window
+ *              Ids.  Helps handle window transitions.
+ * Note: Returns nothing.
+ */
+static void EnumChildWindows(Window win)
+{
+	BOOL success = 0;
+	
+	for (;;) {
+		if (!IsWindowImp(win)) {
+			return;
+		}
+
+		OldErrorHandler = XSetErrorHandler(IgnoreBadWindow);
+		success = EnumChildWindowsAux(win);
+		XSetErrorHandler(OldErrorHandler);
+		if (success) {
+			return;
+		}
+		/* Failure: try again, in 1/2 second. */
+		ClearChildWindows();
+		usleep(500000); /* 500000 = 1/2 second */
+	}
+}
 
 MODULE = X11::GUITest			PACKAGE = X11::GUITest
 PROTOTYPES: DISABLE
@@ -656,13 +712,52 @@ PPCODE:
 	/* Things to do on initialization */
 	SetupXDisplay();
 	XTestGrabControl(TheXDisplay, True);
+	XSRETURN(0);
 
 void
 DeInitGUITest()
 PPCODE:
 	/* Things to do on deinitialization */
 	CloseXDisplay();
-	FreeChildWindows();	
+	FreeChildWindows();
+	XSRETURN(0);
+
+
+=over 8
+
+=item DefaultScreen
+
+Returns the screen number specified in the X display value used to open the
+display.
+
+=back
+
+=cut
+
+int
+DefaultScreen()
+CODE:
+	RETVAL = TheScreen;
+OUTPUT:
+	RETVAL
+
+
+=over 8
+
+=item ScreenCount
+
+Returns the number of screens in the X display specified when opening it.
+
+=back
+
+=cut
+
+int
+ScreenCount()
+CODE:
+	RETVAL = ScreenCount(TheXDisplay);
+OUTPUT:
+	RETVAL
 
 
 =over 8
@@ -832,19 +927,26 @@ OUTPUT:
 
 =over 8
 
-=item GetRootWindow
+=item GetRootWindow [SCREEN]
 
-Returns the root window Id.  This is the top/root level window that
-all other windows are under.
+Returns the Id of the root window of the screen.  This is the top/root level
+window that all other windows are under.  If no screen is given, it is taken
+from the value given when opening the X display.
 
 =back
 
 =cut
 
 Window
-GetRootWindow()
+GetRootWindow(scr_num = NO_INIT)
+	int scr_num
 CODE:
-	RETVAL = RootWindow(TheXDisplay, TheScreen);
+	if (0 == items)
+		scr_num = TheScreen;
+	if (scr_num >= 0 && scr_num < ScreenCount(TheXDisplay))
+		RETVAL = RootWindow(TheXDisplay, scr_num);
+	else
+		RETVAL = None;
 OUTPUT:
 	RETVAL 
 
@@ -854,7 +956,9 @@ OUTPUT:
 =item GetChildWindows WINDOWID
 
 Returns an array of the child windows for the specified
-window Id.
+window Id.  If it detects that the window hierarchy
+is in transition, it will wait half a second and try
+again.
 
 =back
 
@@ -867,32 +971,60 @@ PREINIT:
 	UINT i = 0;
 PPCODE:
 	EnumChildWindows(win);
+	EXTEND(SP, (int)ChildWindows.NVals);
 	for (i = 0; i < ChildWindows.NVals; i++) {
-		XPUSHs(sv_2mortal(newSVuv((UV)ChildWindows.Ids[i])));
+		PUSHs(sv_2mortal(newSVuv((UV)ChildWindows.Ids[i])));
 	}
 	ClearChildWindows();
-
+	XSRETURN(i);
 
 =over 8
 
-=item MoveMouseAbs X, Y
+=item MoveMouseAbs X, Y [, SCREEN]
 
-Moves the mouse cursor to the specified absolute position.
+Moves the mouse cursor to the specified absolute position in the optionally
+given screen.  If no screen is given, it is taken from the value given when
+opening the X display.
 
-zero is returned on failure, non-zero for success.
+Zero is returned on failure, non-zero for success.
 
 =back
 
 =cut
 
 BOOL
-MoveMouseAbs(x, y)
+MoveMouseAbs(x, y, scr_num = NO_INIT)
 	int x
 	int y
+	int scr_num
 CODE:
-	RETVAL = (BOOL)XTestFakeMotionEvent(TheXDisplay, TheScreen, x, y, 
-								  EventSendDelay);
-	XFlush(TheXDisplay);
+	if (items < 3)
+		scr_num = TheScreen;
+	if (scr_num >= 0 && scr_num < ScreenCount(TheXDisplay)) {
+#ifndef X11_GUITEST_USING_XINERAMA
+		RETVAL = (BOOL)XTestFakeMotionEvent(TheXDisplay, scr_num, x, y,
+						    EventSendDelay);
+		XFlush(TheXDisplay);
+#else
+		ULONG tmp;
+
+		    /* I decided not to set our error handler, since the
+		       window must exist. */
+		XWarpPointer(TheXDisplay, None,
+			     RootWindow(TheXDisplay, scr_num),
+			     0, 0, 0, 0,
+			     x, y);
+		XSync(TheXDisplay, False);
+		tmp = EventSendDelay / (ULONG) 1000;
+		while ((ULONG) 0 != tmp)
+			tmp = (ULONG) sleep((int) tmp);
+		tmp = EventSendDelay % (ULONG) 1000;
+		usleep(1000 * tmp);
+#endif
+		RETVAL = (BOOL) 1;
+	} else {
+		RETVAL = (BOOL) 0;
+	}
 OUTPUT:
 	RETVAL
 
@@ -901,9 +1033,10 @@ OUTPUT:
 
 =item GetMousePos
 
-Returns an array containing the position of the mouse cursor.
+Returns an array containing the position and the screen (number) of the mouse
+cursor.
 
-  my ($x, $y) = GetMousePos(); 
+  my ($x, $y, $scr_num) = GetMousePos(); 
 
 =back
 
@@ -914,15 +1047,27 @@ GetMousePos()
 PREINIT:
 	Window root = 0, child = 0;
 	int root_x = 0, root_y = 0;
-	int win_x = 0, win_y = 0;
+	int win_x = 0, win_y = 0, scr_num = 0;
 	UINT mask = 0;
 PPCODE:
-	if (XQueryPointer(TheXDisplay, RootWindow(TheXDisplay, TheScreen),
-					  &root, &child, &root_x, &root_y,
-					  &win_x, &win_y, &mask)) {
-		XPUSHs( sv_2mortal(newSViv((IV)root_x)) );
-		XPUSHs( sv_2mortal(newSViv((IV)root_y)) );
+		/* We do not bother to set our error handler because the
+		   window given has to exist. */
+	XQueryPointer(TheXDisplay, RootWindow(TheXDisplay, TheScreen),
+		      &root, &child, &root_x, &root_y, &win_x, &win_y, &mask);
+	EXTEND(SP, 3);
+	PUSHs( sv_2mortal(newSViv((IV)root_x)) );
+	PUSHs( sv_2mortal(newSViv((IV)root_y)) );
+	for (scr_num = ScreenCount(TheXDisplay) - 1; scr_num >= 0 ; --scr_num)
+	{
+		if (root == RootWindow(TheXDisplay, scr_num)) {
+			break;
+		}
+		assert(0 != scr_num);
+		/* There is something really wrong with the Xlib data
+		   structures, if this "assert" fails. */
 	}
+	PUSHs( sv_2mortal(newSViv((IV)scr_num)) );
+	XSRETURN(3);
 
 
 =over 8
@@ -981,20 +1126,21 @@ OUTPUT:
 
 Sends keystrokes to the window that has the input focus.
 
-The keystrokes to send are those specified in KEYS.  Some characters
+The keystrokes to send are those specified in KEYS parameter.  Some characters
 have special meaning, they are:
 
         Modifier Keys:
         ^    	CTRL
         %    	ALT
         +    	SHIFT
+        #       META
 
         Other Keys:
         ~    	ENTER
         \n   	ENTER
         \t  	TAB
-        ( and ) MODIFIER USAGE
-        { and } QUOTE CHARACTERS
+        ( and ) MODIFIER GROUPING
+        { and } QUOTE / ESCAPE CHARACTERS
 
 Simply, one can send a text string like so:
 
@@ -1017,6 +1163,7 @@ Quote Special Characters
 
         SendKeys('{{}'); # {
         SendKeys('{+}'); # +
+        SendKeys('{#}'); # #
 
         You can also use QuoteStringForSendKeys to perform quoting.
 
@@ -1066,6 +1213,7 @@ if you really wanted to.
         HOM     Home
         INS     Insert
         LAL     Alt_L
+        LMA     Meta_L
         LCT     Control_L
         LEF     Left
         LSH     Shift_L
@@ -1076,6 +1224,7 @@ if you really wanted to.
         PGU     Page_Up
         PRT     Print
         RAL     Alt_R
+        RMA     Meta_R
         RCT     Control_R
         RIG     Right
         RSH     Shift_R
@@ -1086,7 +1235,8 @@ if you really wanted to.
         TAB     Tab
         UP      Up
 
-zero is returned on failure, non-zero for success.
+zero is returned on failure, non-zero for success.  For configurations (Xvfb)
+that don't support Alt_Left, Meta_Left is automatically used in its place.
 
 =back
 
@@ -1187,7 +1337,7 @@ listed above.
 
   PressReleaseKey('n');
 
-This function is effected by the key send delay.
+This function is affected by the key send delay.
 
 zero is returned on failure, non-zero for success.
 
@@ -1240,8 +1390,8 @@ PREINIT:
 	char keys_return[KEYMAP_VECTOR_SIZE] = "";
 CODE:
 	if (key && GetKeySym(key, &sym)) {
-		kc = XKeysymToKeycode(TheXDisplay, sym);
-		skc = XKeysymToKeycode(TheXDisplay, XK_Shift_L); 
+		kc = GetKeycodeFromKeysym(TheXDisplay, sym);
+		skc = GetKeycodeFromKeysym(TheXDisplay, XK_Shift_L); 
 		XQueryKeymap(TheXDisplay, keys_return);
 		for (pos = 0; pos < (KEYMAP_VECTOR_SIZE * KEYMAP_BIT_COUNT); pos++) {
 			/* For the derived keycode, are we at the correct bit position for it? */
@@ -1372,12 +1522,13 @@ IsWindowViewable(win)
 PREINIT:
 	XWindowAttributes wattrs = {0};
 CODE:
-	XSetErrorHandler(IgnoreBadWindow);
+	OldErrorHandler = XSetErrorHandler(IgnoreBadWindow);
 	if (!XGetWindowAttributes(TheXDisplay, win, &wattrs)) {
 		RETVAL = FALSE;
 	} else { 
 		RETVAL = (wattrs.map_state == IsViewable);
 	}
+	XSetErrorHandler(OldErrorHandler);
 OUTPUT:
 	RETVAL
 
@@ -1400,9 +1551,10 @@ MoveWindow(win, x, y)
 	int x
 	int y
 CODE:
-	XSetErrorHandler(IgnoreBadWindow);
+	OldErrorHandler = XSetErrorHandler(IgnoreBadWindow);
 	RETVAL = XMoveWindow(TheXDisplay, win, x, y);
-	XFlush(TheXDisplay);
+	XSync(TheXDisplay, False);
+	XSetErrorHandler(OldErrorHandler);
 OUTPUT:
 	RETVAL
 
@@ -1425,9 +1577,10 @@ ResizeWindow(win, w, h)
 	int w
 	int h
 CODE:
-	XSetErrorHandler(IgnoreBadWindow);
+	OldErrorHandler = XSetErrorHandler(IgnoreBadWindow);
 	RETVAL = XResizeWindow(TheXDisplay, win, w, h);
-	XFlush(TheXDisplay);
+	XSync(TheXDisplay, False);
+	XSetErrorHandler(OldErrorHandler);
 OUTPUT:
 	RETVAL
 
@@ -1447,10 +1600,30 @@ zero is returned on failure, non-zero for success.
 BOOL
 IconifyWindow(win)
 	Window win
+PREINIT:
+	XWindowAttributes wattrs = {0};
+	int scr_num;
 CODE:
-	XSetErrorHandler(IgnoreBadWindow);
-	RETVAL = XIconifyWindow(TheXDisplay, win, TheScreen);
-	XFlush(TheXDisplay);
+	OldErrorHandler = XSetErrorHandler(IgnoreBadWindow);
+	if (XGetWindowAttributes(TheXDisplay, win, &wattrs)) {
+		for (scr_num = ScreenCount(TheXDisplay) - 1;
+		     scr_num >= 0 ; --scr_num)
+		{
+			if ( wattrs.screen
+			  == ScreenOfDisplay(TheXDisplay, scr_num))
+			{
+				break;
+			}
+			assert(0 != scr_num);
+			/* There is something really wrong with the Xlib data
+			   structures, if this "assert" fails. */
+		}
+		RETVAL = XIconifyWindow(TheXDisplay, win, scr_num);
+		XSync(TheXDisplay, False);
+	} else {
+		RETVAL = (BOOL) 0;
+	}
+	XSetErrorHandler(OldErrorHandler);
 OUTPUT:
 	RETVAL
 
@@ -1471,9 +1644,10 @@ BOOL
 UnIconifyWindow(win)
 	Window win
 CODE:
-	XSetErrorHandler(IgnoreBadWindow);
+	OldErrorHandler = XSetErrorHandler(IgnoreBadWindow);
 	RETVAL = XMapWindow(TheXDisplay, win);
-	XFlush(TheXDisplay);
+	XSync(TheXDisplay, False);
+	XSetErrorHandler(OldErrorHandler);
 OUTPUT:
 	RETVAL
 
@@ -1495,9 +1669,10 @@ BOOL
 RaiseWindow(win)
 	Window win
 CODE:
-	XSetErrorHandler(IgnoreBadWindow);
+	OldErrorHandler = XSetErrorHandler(IgnoreBadWindow);
 	RETVAL = XRaiseWindow(TheXDisplay, win);
-	XFlush(TheXDisplay);
+	XSync(TheXDisplay, False);
+	XSetErrorHandler(OldErrorHandler);
 OUTPUT:
 	RETVAL
 
@@ -1519,9 +1694,10 @@ BOOL
 LowerWindow(win)
 	Window win
 CODE:
-	XSetErrorHandler(IgnoreBadWindow);
+	OldErrorHandler = XSetErrorHandler(IgnoreBadWindow);
 	RETVAL = XLowerWindow(TheXDisplay, win);
-	XFlush(TheXDisplay);
+	XSync(TheXDisplay, False);
+	XSetErrorHandler(OldErrorHandler);
 OUTPUT:
 	RETVAL
 
@@ -1567,12 +1743,13 @@ PREINIT:
 	Window focus = 0;
 	int revert = 0;
 CODE:
-	XSetErrorHandler(IgnoreBadWindow);
+	OldErrorHandler = XSetErrorHandler(IgnoreBadWindow);
 	/* Note: Per function man page, there is no effect if the time parameter
 	 *  	 of this call isn't accurate.  Will use CurrentTime.  Also, it
 	 *		 appears that we can't trust its return value. */
 	XSetInputFocus(TheXDisplay, win, RevertToParent, CurrentTime);
-	XFlush(TheXDisplay);
+	XSync(TheXDisplay, False);
+	XSetErrorHandler(OldErrorHandler);
 	/* Verify that the window now has focus.  Used to determine return value */
 	XGetInputFocus(TheXDisplay, &focus, &revert);
 	RETVAL = (focus == win);
@@ -1585,9 +1762,11 @@ OUTPUT:
 =item GetWindowPos WINDOWID
 
 Returns an array containing the position information for the specified
-window.
+window.  It also returns size information (including border width) and the
+number of the screen where the window resides.
 
-  my ($x, $y, $width, $height) = GetWindowPos(GetRootWindow());
+  my ($x, $y, $width, $height, $borderWidth, $screen) =
+        GetWindowPos(GetRootWindow());
 
 =back
 
@@ -1598,21 +1777,37 @@ GetWindowPos(win)
 	Window win
 PREINIT:
 	XWindowAttributes wattrs = {0};
-	Window child = 0, parent = 0, *children = NULL, root = 0;
-	UINT childcount = 0; 
-	int x = 0, y = 0;
+	Window child = 0;
+	int num_ret = 0, x = 0, y = 0, scr_num;
 PPCODE:
-	XSetErrorHandler(IgnoreBadWindow);
-	XGetWindowAttributes(TheXDisplay, win, &wattrs);
-	if (XQueryTree(TheXDisplay, win, &root, &parent, &children, &childcount)) {
-		XFree(children);
-		XTranslateCoordinates(TheXDisplay, parent, wattrs.root, wattrs.x, wattrs.y,
-							  &x, &y, &child);
-		XPUSHs( sv_2mortal(newSViv((IV)x)) );
-		XPUSHs( sv_2mortal(newSViv((IV)y)) );
-		XPUSHs( sv_2mortal(newSViv((IV)wattrs.width)) );
-		XPUSHs( sv_2mortal(newSViv((IV)wattrs.height)) );
+	OldErrorHandler = XSetErrorHandler(IgnoreBadWindow);
+	if (XGetWindowAttributes(TheXDisplay, win, &wattrs)) {
+		XTranslateCoordinates(TheXDisplay, win, wattrs.root,
+			0 - wattrs.border_width, 0 - wattrs.border_width,
+			&x, &y, &child);
+		EXTEND(SP, 6);
+		PUSHs( sv_2mortal(newSViv((IV)x)) );
+		PUSHs( sv_2mortal(newSViv((IV)y)) );
+		PUSHs( sv_2mortal(newSViv((IV)wattrs.width)) );
+		PUSHs( sv_2mortal(newSViv((IV)wattrs.height)) );
+		PUSHs( sv_2mortal(newSViv((IV)wattrs.border_width)) );
+		for (scr_num = ScreenCount(TheXDisplay) - 1;
+		     scr_num >= 0 ; --scr_num)
+		{
+			if ( wattrs.screen
+			  == ScreenOfDisplay(TheXDisplay, scr_num))
+			{
+				break;
+			}
+			assert(0 != scr_num);
+			/* There is something really wrong with the Xlib data
+			   structures, if this "assert" fails. */
+		}
+		PUSHs( sv_2mortal(newSViv((IV)scr_num)) );
+		num_ret = 6;
 	}
+	XSetErrorHandler(OldErrorHandler);
+	XSRETURN(num_ret);
 
 
 =over 8
@@ -1645,9 +1840,11 @@ OUTPUT:
 
 =over 8
 
-=item GetScreenRes
+=item GetScreenRes [SCREEN]
 
-Returns the screen resolution.
+Returns the screen resolution.  If no screen is specified, it is taken from the
+value given when opening the X display.  If the screen (number) is invalid, the
+returned list will be empty.
 
   my ($x, $y) = GetScreenRes();
 
@@ -1656,21 +1853,32 @@ Returns the screen resolution.
 =cut
 
 void
-GetScreenRes()
+GetScreenRes(scr_num = NO_INIT)
+	int scr_num
 PREINIT:
-	int x = 0, y = 0;
+	int x = 0, y = 0, num_ret = 0;
 PPCODE:
-	x = DisplayWidth(TheXDisplay, TheScreen);
-	y = DisplayHeight(TheXDisplay, TheScreen);
-	XPUSHs( sv_2mortal(newSViv((IV)x)) );
-	XPUSHs( sv_2mortal(newSViv((IV)y)) );
+	if (0 == items)
+		scr_num = TheScreen;
+	if (scr_num >= 0 && scr_num < ScreenCount(TheXDisplay)) {
+		x = DisplayWidth(TheXDisplay, scr_num);
+		y = DisplayHeight(TheXDisplay, scr_num);
+		EXTEND(SP, 2);
+		PUSHs( sv_2mortal(newSViv((IV)x)) );
+		PUSHs( sv_2mortal(newSViv((IV)y)) );
+		num_ret = 2;
+	}
+	XSRETURN(num_ret);
+
 
 
 =over 8
 
-=item GetScreenDepth
+=item GetScreenDepth [SCREEN]
 
-Returns the color depth for the screen.  
+Returns the color depth for the screen.  If no screen is specified, it is taken
+from the value given when opening the X display.  If the screen (number) is
+invalid, -1 will be returned.
 
 Value is represented as bits, i.e. 16.
 
@@ -1681,9 +1889,16 @@ Value is represented as bits, i.e. 16.
 =cut
 
 int
-GetScreenDepth()
+GetScreenDepth(scr_num = NO_INIT)
+	int scr_num
 CODE:
-	RETVAL = DefaultDepth(TheXDisplay, TheScreen);
+	if (0 == items)
+		scr_num = TheScreen;
+	if (scr_num >= 0 && scr_num < ScreenCount(TheXDisplay)) {
+		RETVAL = DefaultDepth(TheXDisplay, scr_num);
+	} else {
+		RETVAL = -1;
+	}
 OUTPUT:
 	RETVAL
 
@@ -1718,20 +1933,22 @@ Not installed.
 
 =head1 COPYRIGHT
 
-Copyright(c) 2003-2004 Dennis K. Paulsen, All Rights Reserved.  This
+Copyright(c) 2003-2006 Dennis K. Paulsen, All Rights Reserved.  This
 program is free software; you can redistribute it and/or modify it 
 under the terms of the GNU General Public License.
 
 =head1 AUTHOR
 
-Dennis K. Paulsen <ctrondlp@users.sourceforge.net> (Anthon, Iowa USA)
+Dennis K. Paulsen <ctrondlp@cpan.org> (Des Moines, Iowa USA)
 
 =head1 CREDITS
 
 Thanks to everyone; including those specifically mentioned below for patches,
 suggestions, etc.:
 
+  Alexey Tourbin
   Richard Clamp
   Gustav Larsson
+  Nelson D. Caro
 
 =cut

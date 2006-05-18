@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# X11::GUITest ($Id: Makefile.PL,v 1.15 2004/01/16 23:41:42 ctrondlp Exp $)
+# X11::GUITest ($Id: Makefile.PL,v 1.20 2006/04/28 17:34:08 ctrondlp Exp $)
 
 use strict;
 use warnings;
@@ -14,13 +14,19 @@ WriteDocumentation();
 WriteMakefile(
 	'NAME' => 'X11::GUITest',
 	($] ge '5.005') ? (
-		'AUTHOR' => 'Dennis K. Paulsen <ctrondlp@users.sourceforge.net>',
+		'AUTHOR' => 'Dennis K. Paulsen <ctrondlp@cpan.org>',
 		'ABSTRACT' => 'Collection of functions for X11 GUI testing/interaction.',
 	) : (),
 	'VERSION_FROM' => 'GUITest.pm', # Finds $VERSION
+	($] lt '5.008') ? (
+		'INST_MAN3DIR' => './blib/man3',
+		'MAN3EXT' => '3pm'
+	) : (),
 	'MAN3PODS' => (-r 'X11-GUITest.POD~') ? {'X11-GUITest.POD~' => '$(INST_MAN3DIR)/X11::GUITest.$(MAN3EXT)'} : {},
-	'LIBS'  => ['-L/usr/X11R6/lib -L/usr/X/lib -lX11 -lXtst -lXext'], # e.g., '-lm'
-	'DEFINE' => '-DNDEBUG', # e.g., '-DHAVE_SOMETHING'
+	'LIBS'  => ['-L/usr/X11R6/lib -L/usr/X/lib -lXtst -lXext -lX11'], # e.g., '-lm'
+	# To work around an incompatibility between the XTest and the Xinerama
+	# (X server) extensions, use "-DX11_GUITEST_USING_XINERAMA".
+	'DEFINE' => '-DNDEBUG -DX11_GUITEST_ALT_L_FALLBACK_META_L', # e.g., '-DHAVE_SOMETHING'
 	'INC'   => '-I/usr/X11R6/include -I/usr/X/include', # e.g., '-I/usr/include/other'
 	'clean' => {FILES => 'X11-GUITest.POD~'},
 	'CCFLAGS' => '-Wall',
@@ -60,6 +66,7 @@ sub WriteDocumentation {
 	# Clean up misc. files.  Leaving X11-GUITest.POD~ around for
 	# Makefile use
 	unlink <pod*.x??>;
+	unlink <pod*.tmp>;
 	
 	return(1);	
 }

@@ -1,7 +1,39 @@
-X11::GUITest ($Id: Changes,v 1.51 2004/02/14 15:43:00 ctrondlp Exp $)
+X11::GUITest ($Id: Changes,v 1.62 2006/05/06 15:26:17 ctrondlp Exp $)
 
 This is the list of module changes between revisions.
 --------------------------------------------------------------------
+
+0.21 Sat May 06 2006 10:24
+
+  - Implemented Nelson Caro's patch 1.1 dealing mostly
+    with Makefile.PL enhancements concerning older versions
+    of Perl.
+
+  - Implemented Nelson Caro's patch 1.2 dealing
+    with efficiency improvements, and fault handling.  Also,
+    GetWindowPos() now returns the border width of a window.
+
+  - Implemented Nelson Caro's patch 1.3; which improves
+    GetWindowFromPoint() in dealing with correct window border
+    width.  Also, FindWindowLike now handles invalid windows better.
+
+  - Applied patches cpan #13682(XK_Meta_L fallback) and
+    cpan #13684 (StartApp) from Alexey Tourbin. Compiler define
+    X11_GUITEST_ALT_L_FALLBACK_META_L enabled by default.
+
+  - Added special # modifier for Meta_Left.  This modifier can be
+    used like the existing ones (Alt=%, Control=^, etc.).
+
+  - Applied Nelson's updates to test.t.  Helps to eleviate X server
+    jams when using Exceed, for MS Windows.  Also testing GetMousePos()
+    in list context.
+
+  - Applied Nelson's patch to support multi-screen operation in various
+    functions.  Certain functions now include an additional parameter to specify
+    the screen number.
+
+  - Corrected incompatibility between Xinerama and the XTest extension.  Compile
+    with X11_GUITEST_USING_XINERAMA defined.  See Makefile.PL for details.
 
 0.20 Sat Feb 14 2004 09:43
   
