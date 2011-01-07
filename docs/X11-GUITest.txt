@@ -4,7 +4,7 @@ NAME
     Developed by Dennis K. Paulsen
 
 VERSION
-    0.21
+    0.22
 
     Updates are made available at the following sites:
 
@@ -281,7 +281,7 @@ FUNCTIONS
             Returns an array containing the position and the screen (number)
             of the mouse cursor.
 
-              my ($x, $y, $scr_num) = GetMousePos(); 
+              my ($x, $y, $scr_num) = GetMousePos();
 
     PressMouseButton BUTTON
             Presses the specified mouse button. Available mouse buttons are:
@@ -575,14 +575,12 @@ FUNCTIONS
 
 OTHER DOCUMENTATION
 Available under the docs sub-directory.
-
-      Changes (Module Changes)
-      CodingStyle (Coding-Style Guidelines)
-      ToDo (ToDo List)
-      Copying (Copy of the GPL License)
-
+  Changes (Module Changes)
+  CodingStyle (Coding-Style Guidelines)
+  ToDo (ToDo List)
+  Copying (Copy of the GPL License)
 COPYRIGHT
-    Copyright(c) 2003-2006 Dennis K. Paulsen, All Rights Reserved. This
+    Copyright(c) 2003-2011 Dennis K. Paulsen, All Rights Reserved. This
     program is free software; you can redistribute it and/or modify it under
     the terms of the GNU General Public License.
 

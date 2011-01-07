@@ -1,10 +1,16 @@
 #!/usr/bin/perl
-# X11::GUITest ($Id: Makefile.PL,v 1.20 2006/04/28 17:34:08 ctrondlp Exp $)
+# X11::GUITest ($Id: Makefile.PL,v 1.21 2008/09/06 19:52:35 ctrondlp Exp $)
 
 use strict;
 use warnings;
 use ExtUtils::MakeMaker;
 
+# Disable Automated Testing in certain cases
+if (defined $ENV{'AUTOMATED_TESTING'} && $ENV{'AUTOMATED_TESTING'}) {
+	if (!defined($ENV{'DISPLAY'}) || not length($ENV{'DISPLAY'})) {
+		exit(0);
+	}
+}
 
 # Write core documentation and the POD that Makefile uses.
 WriteDocumentation();

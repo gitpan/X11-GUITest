@@ -4,6 +4,7 @@ docs/Copying
 docs/ToDo
 docs/X11-GUITest.html
 docs/X11-GUITest.txt
+eg/FindControlVisually.pl
 eg/FindWindowLike.pl
 eg/templates/ScriptTemplate.pl
 eg/TextEditor_1.pl
@@ -16,4 +17,3 @@ MANIFEST			This list of files
 README
 t/test.t
 typemap
-META.yml                                 Module meta-data (added by MakeMaker)

@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #----------------------------------------------------------------------#
-# X11::GUITest ($Id: TextEditor_1.pl,v 1.5 2006/02/11 23:31:51 ctrondlp Exp $)
+# X11::GUITest ($Id: TextEditor_1.pl,v 1.6 2008/09/06 20:45:38 ctrondlp Exp $)
 # Notes: Example of interaction with gedit (Text Editor).  Tested with
 # 		 version 2.2.0 of the editor application using the English
 #		 language.
@@ -40,14 +40,14 @@ SendKeys("Hello, how are you today?\n" x 2) or die('Unable to send text to edito
 
 # Ensure the window changes its name to include the
 # 'modified' word since we sent it text above.
-(GetWindowName($GEMainWin) =~ /modified/i) or die('Editor did not switch its title as expected!');
+(GetWindowName($GEMainWin) =~ /(modified|\*Unsaved)/i) or die('Editor did not switch its title as expected!');
 
 # Using shortcuts (Alt-h, a), open about box and wait for it
 SendKeys('%(h)a');
 ( ($GEAboutWin) = WaitWindowViewable('About gedit') ) or die('Unable to find about box!');
 
-# Close about box (Alt-o) using shortcut for OK button. 
-SendKeys('%(o)');
+# Close about box (Alt-o (old) and Alt-c (new)) using shortcut for OK button. 
+SendKeys('%(o)%(c)');
 
 # To be safe, ensure about box is closed before we continue
 WaitWindowClose($GEAboutWin);
@@ -56,10 +56,11 @@ WaitWindowClose($GEAboutWin);
 SendKeys('%(f)q');
 
 # Wait for confirmation window to appear
-WaitWindowViewable('Question') or die('Unable to find confirmation (Question) window!');
+# New gedit may not have this text.  May need to implement screen capture sooner then later.
+WaitWindowViewable('Question'); # or die('Unable to find confirmation (Question) window!');
 
-# Select DoN't Save
-SendKeys('%(n)') or die('Unable to select Don\'t Save button!');
+# Select DoN't Save or Close without Saving (new)
+SendKeys('%(n)%(w)') or die('Unable to select Don\'t Save button!');
 
 # Ensure main window gets closed
 WaitWindowClose($GEMainWin) or die('The editor window did not close!');

@@ -1,7 +1,20 @@
-X11::GUITest ($Id: Changes,v 1.62 2006/05/06 15:26:17 ctrondlp Exp $)
+X11::GUITest ($Id: Changes,v 1.67 2011/01/07 02:24:54 ctrondlp Exp $)
 
 This is the list of module changes between revisions.
 --------------------------------------------------------------------
+
+0.22 Thu Jan 06 2011 20:00
+
+  - Example script eg/FindControlVisually.pl added to help demonstrate
+    finding controls/widgets on screen using a baseline image.
+
+  - Applied Thorsten H's AltGr keyboard modifier support.  This
+    applies to international (German, etc.) languages.
+
+  - Minor compiler warning fix.
+
+  - Skip building/testing if we're in AUTOMATED_TESTING (smoke testing)
+	and DISPLAY isn't setup.  Alleviate bogus test reports in this case.
 
 0.21 Sat May 06 2006 10:24
 

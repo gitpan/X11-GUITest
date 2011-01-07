@@ -1,6 +1,6 @@
-/* X11::GUITest ($Id: GUITest.xs,v 1.53 2006/04/28 17:50:33 ctrondlp Exp $)
+/* X11::GUITest ($Id: GUITest.xs,v 1.58 2011/01/06 18:43:58 ctrondlp Exp $)
  *  
- * Copyright (c) 2003-2006  Dennis K. Paulsen, All Rights Reserved.
+ * Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@cpan.org
  *
  * This program is free software; you can redistribute it and/or
@@ -477,7 +477,7 @@ static BOOL SendKeysImp(const char *keys)
 	KeySym sym = 0;
 	size_t keyslen = 0, bracelen = 0;
 	size_t x = 0;
-	BOOL retval = FALSE, shift = FALSE, ctrl = FALSE, 
+	BOOL retval = FALSE, shift = FALSE, ctrl = FALSE, altgr = FALSE, 
 		 alt = FALSE, meta = FALSE, modlock = FALSE, needshift = FALSE;
 
 	assert(keys != NULL);
@@ -511,6 +511,10 @@ static BOOL SendKeysImp(const char *keys)
 			retval = PressKeyImp(XK_Meta_L);
 			meta = TRUE; 
 			break;
+		case (char)167: /* AltGr */
+			retval = PressKeyImp(XK_ISO_Level3_Shift);
+			altgr = TRUE;
+			break;
 		case '(': modlock = TRUE; break;
 		case ')': modlock = FALSE; break;
 		/* Regular Key? (a, b, c, 1, 2, 3, _, *, %), etc. */
@@ -535,21 +539,27 @@ static BOOL SendKeysImp(const char *keys)
 			continue;
 		}
 		/* Ensure modifiers are clear when needed */
-		if (!modlock && shift) {
-			ReleaseKeyImp(XK_Shift_L); 
-			shift = FALSE; 		
-		}
-		if (!modlock && ctrl) { 
-			ReleaseKeyImp(XK_Control_L); 
-			ctrl = FALSE;
-		}	
-		if (!modlock && alt) {
-			ReleaseKeyImp(XK_Alt_L); 
-			alt = FALSE;
-		}
-		if (!modlock && meta) {
-			ReleaseKeyImp(XK_Meta_L); 
-			meta = FALSE;
+		if (!modlock) {
+			if (shift) {
+				ReleaseKeyImp(XK_Shift_L); 
+				shift = FALSE; 		
+			}
+			if (ctrl) { 
+				ReleaseKeyImp(XK_Control_L); 
+				ctrl = FALSE;
+			}	
+			if (alt) {
+				ReleaseKeyImp(XK_Alt_L); 
+				alt = FALSE;
+			}
+			if (meta) {
+				ReleaseKeyImp(XK_Meta_L); 
+				meta = FALSE;
+			}
+			if (altgr) {
+				ReleaseKeyImp(XK_ISO_Level3_Shift);
+				altgr = FALSE;
+			}
 		}
 		if (!retval) {
 			return(FALSE);
@@ -599,6 +609,7 @@ static BOOL AddChildWindow(Window win)
 		ChildWindows.NVals = 0;
 	} else if (ChildWindows.NVals >= ChildWindows.Max) {
 		/* Grow */
+		/* Note: Did not use [insert fancy algorythm name here] algorythm here on purpose */
 		Window *TempIds = NULL;
 		TempIds = (Window *)saferealloc(ChildWindows.Ids, 
 						(GROW * ChildWindows.Max) * sizeof(Window));
@@ -1933,7 +1944,7 @@ Not installed.
 
 =head1 COPYRIGHT
 
-Copyright(c) 2003-2006 Dennis K. Paulsen, All Rights Reserved.  This
+Copyright(c) 2003-2011 Dennis K. Paulsen, All Rights Reserved.  This
 program is free software; you can redistribute it and/or modify it 
 under the terms of the GNU General Public License.
 

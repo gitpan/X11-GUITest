@@ -9,8 +9,10 @@
 
 <body style="background-color: white">
 
-<p><a name="__index__"></a></p>
+
 <!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
 
 <ul>
 
@@ -26,9 +28,11 @@
 	<li><a href="#author">AUTHOR</a></li>
 	<li><a href="#credits">CREDITS</a></li>
 </ul>
+
+<hr name="index" />
+</div>
 <!-- INDEX END -->
 
-<hr />
 <p>
 </p>
 <h1><a name="name">NAME</a></h1>
@@ -38,7 +42,7 @@
 </p>
 <hr />
 <h1><a name="version">VERSION</a></h1>
-<p>0.21</p>
+<p>0.22</p>
 <p>Updates are made available at the following sites:</p>
 <pre>
   <a href="http://sourceforge.net/projects/x11guitest">http://sourceforge.net/projects/x11guitest</a> (Primary) 
@@ -53,7 +57,7 @@ module revisions.</p>
 <p>This Perl package is intended to facilitate the testing of GUI applications
 by means of user emulation.  It can be used to test/interact with GUI
 applications; which have been built upon the X library or toolkits
-(i.e., GTK+, Xt, Qt, Motif, etc.) that ``wrap'' the X library's functionality.</p>
+(i.e., GTK+, Xt, Qt, Motif, etc.) that &quot;wrap&quot; the X library's functionality.</p>
 <p>
 </p>
 <hr />
@@ -63,7 +67,7 @@ norm.  If it is not enabled, it usually can be by modifying the X
 server configuration (i.e., XF86Config).</p>
 <p>The standard DISPLAY environment variable is utilized to determine
 the host, display, and screen to work with.  By default it is usually set
-to ``:0.0'' for the localhost.  However, by altering this variable one can
+to &quot;:0.0&quot; for the localhost.  However, by altering this variable one can
 interact with applications under a remote host's X server.  To change this 
 from a terminal window, one can utilize the following basic syntax: 
 export DISPLAY=&lt;hostname-or-ipaddress&gt;:&lt;display&gt;.&lt;screen&gt;  Please note that
@@ -126,143 +130,106 @@ sub-directory from the installation folder.</p>
 and you would like to specify the last one, for example, you can
 utilize undef for those parameters you don't specify.</p>
 <p>REGEX in the documentation below denotes an item that is treated as 
-a regular expression.  For example, the regex ``^OK$'' would look for
+a regular expression.  For example, the regex &quot;^OK$&quot; would look for
 an exact match for the word OK.</p>
 <dl>
-<dt><strong><a name="item_findwindowlike_titleregex__5b_2c_windowidstartunde">FindWindowLike TITLEREGEX [, WINDOWIDSTARTUNDER]</a></strong>
+<dt><strong><a name="findwindowlike_titleregex_windowidstartunder" class="item">FindWindowLike TITLEREGEX [, WINDOWIDSTARTUNDER]</a></strong></dt>
 
 <dd>
 <p>Finds the window Ids of the windows matching the specified title regex.  
 Optionally one can specify the window to start under; which would allow
 one to constrain the search to child windows of that window.</p>
-</dd>
-<dd>
 <p>An array of window Ids is returned for the matches found.  An empty
 array is returned if no matches were found.</p>
-</dd>
-<dd>
 <pre>
   my @WindowIds = FindWindowLike('gedit');
   # Only worry about first window found
   my ($WindowId) = FindWindowLike('gedit');</pre>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_waitwindowlike_titleregex__5b_2c_windowidstartunde">WaitWindowLike TITLEREGEX [, WINDOWIDSTARTUNDER] [, MAXWAITINSECONDS]</a></strong>
+<dt><strong><a name="waitwindowlike_titleregex_windowidstartunder_maxwaitinseconds" class="item">WaitWindowLike TITLEREGEX [, WINDOWIDSTARTUNDER] [, MAXWAITINSECONDS]</a></strong></dt>
 
 <dd>
 <p>Waits for a window to come up that matches the specified title regex.  
 Optionally one can specify the window to start under; which would allow
 one to constrain the search to child windows of that window.</p>
-</dd>
-<dd>
 <p>One can optionally specify an alternative wait amount in seconds.  A
 window will keep being looked for that matches the specified title regex
 until this amount of time has been reached.  The default amount is defined
 in the DEF_WAIT constant available through the :CONST export tag.</p>
-</dd>
-<dd>
 <p>If a window is going to be manipulated by input, WaitWindowViewable is the
 more robust solution to utilize.</p>
-</dd>
-<dd>
 <p>An array of window Ids is returned for the matches found.  An empty
 array is returned if no matches were found.</p>
-</dd>
-<dd>
 <pre>
   my @WindowIds = WaitWindowLike('gedit');
   # Only worry about first window found
   my ($WindowId) = WaitWindowLike('gedit');</pre>
-</dd>
-<dd>
 <pre>
   WaitWindowLike('gedit') or die(&quot;gedit window not found!&quot;);</pre>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_waitwindowviewable_titleregex__5b_2c_windowidstart">WaitWindowViewable TITLEREGEX [, WINDOWIDSTARTUNDER] [, MAXWAITINSECONDS]</a></strong>
+<dt><strong><a name="waitwindowviewable_titleregex_windowidstartunder_maxwaitinseconds" class="item">WaitWindowViewable TITLEREGEX [, WINDOWIDSTARTUNDER] [, MAXWAITINSECONDS]</a></strong></dt>
 
 <dd>
 <p>Similar to WaitWindow, but only recognizes windows that are viewable.  When GUI
 applications are started, their window isn't necessarily viewable yet, let alone
 available for input, so this function is very useful.</p>
-</dd>
-<dd>
 <p>Likewise, this function will only return an array of the matching window Ids for
 those windows that are viewable.  An empty array is returned if no matches were
 found.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_waitwindowclose_windowid__5b_2c_maxwaitinseconds_5">WaitWindowClose WINDOWID [, MAXWAITINSECONDS]</a></strong>
+<dt><strong><a name="waitwindowclose_windowid_maxwaitinseconds" class="item">WaitWindowClose WINDOWID [, MAXWAITINSECONDS]</a></strong></dt>
 
 <dd>
 <p>Waits for the specified window to close.</p>
-</dd>
-<dd>
 <p>One can optionally specify an alternative wait amount in seconds. The
 window will keep being checked to see if it has closed until this amount
 of time has been reached.  The default amount is defined in the DEF_WAIT
 constant available through the :CONST export tag.</p>
-</dd>
-<dd>
 <p>zero is returned if window is not gone, non-zero if it is gone.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_clickwindow_windowid__5b_2c_x_offset_5d__5b_2c_y_o">ClickWindow WINDOWID [, X Offset] [, Y Offset] [, Button]</a></strong>
+<dt><strong><a name="clickwindow_windowid_x_offset_y_offset_button" class="item">ClickWindow WINDOWID [, X Offset] [, Y Offset] [, Button]</a></strong></dt>
 
 <dd>
 <p>Clicks on the specified window with the mouse.</p>
-</dd>
-<dd>
 <p>Optionally one can specify the X offset and Y offset.  By default,
 the top left corner of the window is clicked on, with these two
 parameters one can specify a different position to be clicked on.</p>
-</dd>
-<dd>
 <p>One can also specify an alternative button.  The default button is
 M_LEFT, but M_MIDDLE and M_RIGHT may be specified too.  Also,
 you could use the logical Id for the button: M_BTN1, M_BTN2, M_BTN3,
 M_BTN4, M_BTN5.  These are all available through the :CONST export
 tag.</p>
-</dd>
-<dd>
 <p>zero is returned on failure, non-zero for success</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_getwindowfrompoint_x_2c_y__5b_2c_screen_5d">GetWindowFromPoint X, Y [, SCREEN]</a></strong>
+<dt><strong><a name="getwindowfrompoint_x_y_screen" class="item">GetWindowFromPoint X, Y [, SCREEN]</a></strong></dt>
 
 <dd>
 <p>Returns the window that is at the specified point.  If no screen is given, it
 is taken from the value given when opening the X display.</p>
-</dd>
-<dd>
 <p>zero is returned if there are no matches (i.e., off screen).</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_ischild_parentwindowid_2c_windowid">IsChild PARENTWINDOWID, WINDOWID</a></strong>
+<dt><strong><a name="ischild_parentwindowid_windowid" class="item">IsChild PARENTWINDOWID, WINDOWID</a></strong></dt>
 
 <dd>
 <p>Determines if the specified window is a child of the
 specified parent.</p>
-</dd>
-<dd>
 <p>zero is returned for false, non-zero for true.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_quotestringforsendkeys_string">QuoteStringForSendKeys STRING</a></strong>
+<dt><strong><a name="quotestringforsendkeys_string" class="item">QuoteStringForSendKeys STRING</a></strong></dt>
 
 <dd>
 <p>Quotes {} characters in the specified string that would be interpreted
@@ -270,164 +237,127 @@ as having special meaning if sent to SendKeys directly.  This function
 would be useful if you had a text file in which you wanted to use each
 line of the file as input to the SendKeys function, but didn't want
 any special interpretation of the characters in the file.</p>
-</dd>
-<dd>
 <p>Returns the quoted string, undef is returned on error.</p>
-</dd>
-<dd>
 <pre>
   # Quote  ~, %, etc.  as  {~}, {%}, etc for literal use in SendKeys. 
   SendKeys( QuoteStringForSendKeys('Hello: ~%^(){}+#') );</pre>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_startapp_commandline">StartApp COMMANDLINE</a></strong>
+<dt><strong><a name="startapp_commandline" class="item">StartApp COMMANDLINE</a></strong></dt>
 
 <dd>
 <p>Uses the shell to execute a program.  This function returns as
 soon as the program is called.  Useful for starting GUI
 applications and then going on to work with them.</p>
-</dd>
-<dd>
 <p>zero is returned on failure, non-zero for success</p>
-</dd>
-<dd>
 <pre>
   StartApp('gedit');</pre>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_runapp_commandline">RunApp COMMANDLINE</a></strong>
+<dt><strong><a name="runapp_commandline" class="item">RunApp COMMANDLINE</a></strong></dt>
 
 <dd>
 <p>Uses the shell to execute a program until its completion.</p>
-</dd>
-<dd>
 <p>Return value will be application specific, however -1 is returned
 to indicate a failure in starting the program.</p>
-</dd>
-<dd>
 <pre>
   RunApp('/work/myapp');</pre>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_clickmousebutton_button">ClickMouseButton BUTTON</a></strong>
+<dt><strong><a name="clickmousebutton_button" class="item">ClickMouseButton BUTTON</a></strong></dt>
 
 <dd>
 <p>Clicks the specified mouse button.  Available mouse buttons
 are: M_LEFT, M_MIDDLE, M_RIGHT.  Also, you could use the logical
 Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5.  These
 are all available through the :CONST export tag.</p>
-</dd>
-<dd>
 <p>zero is returned on failure, non-zero for success.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item__3cdocumentation_continued_2e_2e_2e_3e">&lt;Documentation Continued...&gt;</a></strong>
+<dt><strong><a name="documentation_continued" class="item">&lt;Documentation Continued...&gt;</a></strong></dt>
 
 </dl>
 <dl>
-<dt><strong><a name="item_defaultscreen">DefaultScreen</a></strong>
+<dt><strong><a name="defaultscreen" class="item">DefaultScreen</a></strong></dt>
 
 <dd>
 <p>Returns the screen number specified in the X display value used to open the
 display.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_screencount">ScreenCount</a></strong>
+<dt><strong><a name="screencount" class="item">ScreenCount</a></strong></dt>
 
 <dd>
 <p>Returns the number of screens in the X display specified when opening it.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_seteventsenddelay_delayinmilliseconds">SetEventSendDelay DELAYINMILLISECONDS</a></strong>
+<dt><strong><a name="seteventsenddelay_delayinmilliseconds" class="item">SetEventSendDelay DELAYINMILLISECONDS</a></strong></dt>
 
 <dd>
 <p>Sets the milliseconds of delay between events being sent to the
 X display.  It is usually not a good idea to set this to 0.</p>
-</dd>
-<dd>
 <p>Please note that this delay will also affect SendKeys.</p>
-</dd>
-<dd>
 <p>Returns the old delay amount in milliseconds.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_geteventsenddelay">GetEventSendDelay</a></strong>
+<dt><strong><a name="geteventsenddelay" class="item">GetEventSendDelay</a></strong></dt>
 
 <dd>
 <p>Returns the current event sending delay amount in milliseconds.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_setkeysenddelay_delayinmilliseconds">SetKeySendDelay DELAYINMILLISECONDS</a></strong>
+<dt><strong><a name="setkeysenddelay_delayinmilliseconds" class="item">SetKeySendDelay DELAYINMILLISECONDS</a></strong></dt>
 
 <dd>
 <p>Sets the milliseconds of delay between keystrokes.</p>
-</dd>
-<dd>
 <p>Returns the old delay amount in milliseconds.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_getkeysenddelay">GetKeySendDelay</a></strong>
+<dt><strong><a name="getkeysenddelay" class="item">GetKeySendDelay</a></strong></dt>
 
 <dd>
 <p>Returns the current keystroke sending delay amount in milliseconds.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_getwindowname_windowid">GetWindowName WINDOWID</a></strong>
+<dt><strong><a name="getwindowname_windowid" class="item">GetWindowName WINDOWID</a></strong></dt>
 
 <dd>
 <p>Returns the window name for the specified window Id.  undef
 is returned if name could not be obtained.</p>
-</dd>
-<dd>
 <pre>
   # Return the name of the window that has the input focus.
   my $WinName = GetWindowName(GetInputFocus());</pre>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_setwindowname_windowid_2c_name">SetWindowName WINDOWID, NAME</a></strong>
+<dt><strong><a name="setwindowname_windowid_name" class="item">SetWindowName WINDOWID, NAME</a></strong></dt>
 
 <dd>
 <p>Sets the window name for the specified window Id.</p>
-</dd>
-<dd>
 <p>zero is returned on failure, non-zero for success.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_getrootwindow__5bscreen_5d">GetRootWindow [SCREEN]</a></strong>
+<dt><strong><a name="getrootwindow_screen" class="item">GetRootWindow [SCREEN]</a></strong></dt>
 
 <dd>
 <p>Returns the Id of the root window of the screen.  This is the top/root level
 window that all other windows are under.  If no screen is given, it is taken
 from the value given when opening the X display.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_getchildwindows_windowid">GetChildWindows WINDOWID</a></strong>
+<dt><strong><a name="getchildwindows_windowid" class="item">GetChildWindows WINDOWID</a></strong></dt>
 
 <dd>
 <p>Returns an array of the child windows for the specified
@@ -435,81 +365,62 @@ window Id.  If it detects that the window hierarchy
 is in transition, it will wait half a second and try
 again.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_movemouseabs_x_2c_y__5b_2c_screen_5d">MoveMouseAbs X, Y [, SCREEN]</a></strong>
+<dt><strong><a name="movemouseabs_x_y_screen" class="item">MoveMouseAbs X, Y [, SCREEN]</a></strong></dt>
 
 <dd>
 <p>Moves the mouse cursor to the specified absolute position in the optionally
 given screen.  If no screen is given, it is taken from the value given when
 opening the X display.</p>
-</dd>
-<dd>
 <p>Zero is returned on failure, non-zero for success.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_getmousepos">GetMousePos</a></strong>
+<dt><strong><a name="getmousepos" class="item">GetMousePos</a></strong></dt>
 
 <dd>
 <p>Returns an array containing the position and the screen (number) of the mouse
 cursor.</p>
-</dd>
-<dd>
 <pre>
   my ($x, $y, $scr_num) = GetMousePos();</pre>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_pressmousebutton_button">PressMouseButton BUTTON</a></strong>
+<dt><strong><a name="pressmousebutton_button" class="item">PressMouseButton BUTTON</a></strong></dt>
 
 <dd>
 <p>Presses the specified mouse button.  Available mouse buttons
 are: M_LEFT, M_MIDDLE, M_RIGHT.  Also, you could use the logical
 Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5.  These
 are all available through the :CONST export tag.</p>
-</dd>
-<dd>
 <p>zero is returned on failure, non-zero for success.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_releasemousebutton_button">ReleaseMouseButton BUTTON</a></strong>
+<dt><strong><a name="releasemousebutton_button" class="item">ReleaseMouseButton BUTTON</a></strong></dt>
 
 <dd>
 <p>Releases the specified mouse button.  Available mouse buttons
 are: M_LEFT, M_MIDDLE, M_RIGHT.  Also, you could use the logical
 Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5.  These
 are all available through the :CONST export tag.</p>
-</dd>
-<dd>
 <p>zero is returned on failure, non-zero for success.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_sendkeys_keys">SendKeys KEYS</a></strong>
+<dt><strong><a name="sendkeys_keys" class="item">SendKeys KEYS</a></strong></dt>
 
 <dd>
 <p>Sends keystrokes to the window that has the input focus.</p>
-</dd>
-<dd>
 <p>The keystrokes to send are those specified in KEYS parameter.  Some characters
 have special meaning, they are:</p>
-</dd>
-<dd>
 <pre>
         Modifier Keys:
         ^       CTRL
         %       ALT
         +       SHIFT
         #       META</pre>
-</dd>
-<dd>
 <pre>
         Other Keys:
         ~       ENTER
@@ -517,71 +428,41 @@ have special meaning, they are:</p>
         \t      TAB
         ( and ) MODIFIER GROUPING
         { and } QUOTE / ESCAPE CHARACTERS</pre>
-</dd>
-<dd>
 <p>Simply, one can send a text string like so:</p>
-</dd>
-<dd>
 <pre>
         SendKeys('Hello, how are you today?');</pre>
-</dd>
-<dd>
 <p>Parenthesis allow a modifier to work on one or more characters.  For example:</p>
-</dd>
-<dd>
 <pre>
         SendKeys('%(f)q'); # Alt-f, then press q
         SendKeys('%(fa)^(m)'); # Alt-f, Alt-a, Ctrl-m
         SendKeys('+(abc)'); # Uppercase ABC using shift modifier
         SendKeys('^(+(l))'); # Ctrl-Shift-l
         SendKeys('+'); # Press shift</pre>
-</dd>
-<dd>
 <p>Braces are used to quote special characters, for utilizing aliased key
 names, or for special functionality. Multiple characters can be specified
 in a brace by space delimiting the entries.  Characters can be repeated using
 a number that is space delimited after the preceeding key.</p>
-</dd>
-<dd>
 <p>Quote Special Characters</p>
-</dd>
-<dd>
 <pre>
         SendKeys('{{}'); # {
         SendKeys('{+}'); # +
         SendKeys('{#}'); # #</pre>
-</dd>
-<dd>
 <pre>
         You can also use QuoteStringForSendKeys to perform quoting.</pre>
-</dd>
-<dd>
 <p>Aliased Key Names</p>
-</dd>
-<dd>
 <pre>
         SendKeys('{BAC}'); # Backspace
         SendKeys('{F1 F2 F3}'); # F1, F2, F3
         SendKeys('{TAB 3}'); # Press TAB 3 times
         SendKeys('{SPC 3 a b c}'); # Space 3 times, a, b, c</pre>
-</dd>
-<dd>
 <p>Special Functionality</p>
-</dd>
-<dd>
 <pre>
         # Pause execution for 500 milliseconds
         SendKeys('{PAUSE 500}');</pre>
-</dd>
-<dd>
 <p>Combinations</p>
-</dd>
-<dd>
 <pre>
         SendKeys('abc+(abc){TAB PAUSE 500}'); # a, b, c, A, B, C, Tab, Pause 500
         SendKeys('+({a b c})'); # A, B, C</pre>
-</dd>
-<dd>
 <p>The following abbreviated key names are currently recognized within a brace set.  If you
 don't see the desired key, you can still use the unabbreviated name for the key.  If you
 are unsure of this name, utilize the xev (X event view) tool, press the key you
@@ -590,8 +471,6 @@ below can be utilized regardless of case.  Ones that aren't in this list are goi
 case sensitive and also not abbreviated.  For example, using 'xev' you will find that the
 name of the backspace key is BackSpace, so you could use {BackSpace} in place of {bac}
 if you really wanted to.</p>
-</dd>
-<dd>
 <pre>
         Name    Action
         -------------------
@@ -634,294 +513,212 @@ if you really wanted to.</p>
         SPC     Space
         TAB     Tab
         UP      Up</pre>
-</dd>
-<dd>
 <p>zero is returned on failure, non-zero for success.  For configurations (Xvfb)
 that don't support Alt_Left, Meta_Left is automatically used in its place.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_presskey_key">PressKey KEY</a></strong>
+<dt><strong><a name="presskey_key" class="item">PressKey KEY</a></strong></dt>
 
 <dd>
 <p>Presses the specified key.</p>
-</dd>
-<dd>
 <p>One can utilize the abbreviated key names from the table
 listed above as outlined in the following example:</p>
-</dd>
-<dd>
 <pre>
   # Alt-n
   PressKey('LAL'); # Left Alt
   PressKey('n');
   ReleaseKey('n');
   ReleaseKey('LAL');</pre>
-</dd>
-<dd>
 <pre>
   # Uppercase a
   PressKey('LSH'); # Left Shift
   PressKey('a'); 
   ReleaseKey('a');
   ReleaseKey('LSH');</pre>
-</dd>
-<dd>
 <p>The ReleaseKey calls in the above example are there to set
 both key states back.</p>
-</dd>
-<dd>
 <p>zero is returned on failure, non-zero for success.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_releasekey_key">ReleaseKey KEY</a></strong>
+<dt><strong><a name="releasekey_key" class="item">ReleaseKey KEY</a></strong></dt>
 
 <dd>
 <p>Releases the specified key.  Normally follows a PressKey call.</p>
-</dd>
-<dd>
 <p>One can utilize the abbreviated key names from the table
 listed above.</p>
-</dd>
-<dd>
 <pre>
   ReleaseKey('n');</pre>
-</dd>
-<dd>
 <p>zero is returned on failure, non-zero for success.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_pressreleasekey_key">PressReleaseKey KEY</a></strong>
+<dt><strong><a name="pressreleasekey_key" class="item">PressReleaseKey KEY</a></strong></dt>
 
 <dd>
 <p>Presses and releases the specified key.</p>
-</dd>
-<dd>
 <p>One can utilize the abbreviated key names from the table
 listed above.</p>
-</dd>
-<dd>
 <pre>
   PressReleaseKey('n');</pre>
-</dd>
-<dd>
 <p>This function is affected by the key send delay.</p>
-</dd>
-<dd>
 <p>zero is returned on failure, non-zero for success.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_iskeypressed_key">IsKeyPressed KEY</a></strong>
+<dt><strong><a name="iskeypressed_key" class="item">IsKeyPressed KEY</a></strong></dt>
 
 <dd>
 <p>Determines if the specified key is currently being pressed.</p>
-</dd>
-<dd>
 <p>You can specify such things as 'bac' or the unabbreviated form 'BackSpace' as
 covered in the SendKeys information.  Brace forms such as '{bac}' are
 unsupported.  A '{' is taken literally and letters are case sensitive.</p>
-</dd>
-<dd>
 <pre>
   if (IsKeyPressed('esc')) {  # Is Escape pressed?
   if (IsKeyPressed('a')) { # Is a pressed?
   if (IsKeyPressed('A')) { # Is A pressed?</pre>
-</dd>
-<dd>
 <p>Returns non-zero for true, zero for false.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_ismousebuttonpressed_button">IsMouseButtonPressed BUTTON</a></strong>
+<dt><strong><a name="ismousebuttonpressed_button" class="item">IsMouseButtonPressed BUTTON</a></strong></dt>
 
 <dd>
 <p>Determines if the specified mouse button is currently being pressed.</p>
-</dd>
-<dd>
 <p>Available mouse buttons are: M_LEFT, M_MIDDLE, M_RIGHT.  Also, you
 could use the logical Id for the button: M_BTN1, M_BTN2, M_BTN3,
 M_BTN4, M_BTN5.  These are all available through the :CONST export
 tag.</p>
-</dd>
-<dd>
 <pre>
   if (IsMouseButtonPressed(M_LEFT)) { # Is left button pressed?</pre>
-</dd>
-<dd>
 <p>Returns non-zero for true, zero for false.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_iswindow_windowid">IsWindow WINDOWID</a></strong>
+<dt><strong><a name="iswindow_windowid" class="item">IsWindow WINDOWID</a></strong></dt>
 
 <dd>
 <p>zero is returned if the specified window Id is not for something
 that can be recognized as a window.  non-zero is returned if it
 looks like a window.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_iswindowviewable_windowid">IsWindowViewable WINDOWID</a></strong>
+<dt><strong><a name="iswindowviewable_windowid" class="item">IsWindowViewable WINDOWID</a></strong></dt>
 
 <dd>
 <p>zero is returned if the specified window Id is for a window that
 isn't viewable.  non-zero is returned if the window is viewable.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_movewindow_windowid_2c_x_2c_y">MoveWindow WINDOWID, X, Y</a></strong>
+<dt><strong><a name="movewindow_windowid_x_y" class="item">MoveWindow WINDOWID, X, Y</a></strong></dt>
 
 <dd>
 <p>Moves the window to the specified location.</p>
-</dd>
-<dd>
 <p>zero is returned on failure, non-zero for success.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_resizewindow_windowid_2c_width_2c_height">ResizeWindow WINDOWID, WIDTH, HEIGHT</a></strong>
+<dt><strong><a name="resizewindow_windowid_width_height" class="item">ResizeWindow WINDOWID, WIDTH, HEIGHT</a></strong></dt>
 
 <dd>
 <p>Resizes the window to the specified size.</p>
-</dd>
-<dd>
 <p>zero is returned on failure, non-zero for success.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_iconifywindow_windowid">IconifyWindow WINDOWID</a></strong>
+<dt><strong><a name="iconifywindow_windowid" class="item">IconifyWindow WINDOWID</a></strong></dt>
 
 <dd>
 <p>Minimizes (Iconifies) the specified window.</p>
-</dd>
-<dd>
 <p>zero is returned on failure, non-zero for success.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_uniconifywindow_windowid">UnIconifyWindow WINDOWID</a></strong>
+<dt><strong><a name="uniconifywindow_windowid" class="item">UnIconifyWindow WINDOWID</a></strong></dt>
 
 <dd>
 <p>Unminimizes (UnIconifies) the specified window.</p>
-</dd>
-<dd>
 <p>zero is returned on failure, non-zero for success.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_raisewindow_windowid">RaiseWindow WINDOWID</a></strong>
+<dt><strong><a name="raisewindow_windowid" class="item">RaiseWindow WINDOWID</a></strong></dt>
 
 <dd>
 <p>Raises the specified window to the top of the stack, so
 that no other windows cover it.</p>
-</dd>
-<dd>
 <p>zero is returned on failure, non-zero for success.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_lowerwindow_windowid">LowerWindow WINDOWID</a></strong>
+<dt><strong><a name="lowerwindow_windowid" class="item">LowerWindow WINDOWID</a></strong></dt>
 
 <dd>
 <p>Lowers the specified window to the bottom of the stack, so
 other existing windows will cover it.</p>
-</dd>
-<dd>
 <p>zero is returned on failure, non-zero for success.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_getinputfocus">GetInputFocus</a></strong>
+<dt><strong><a name="getinputfocus" class="item">GetInputFocus</a></strong></dt>
 
 <dd>
 <p>Returns the window that currently has the input focus.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_setinputfocus_windowid">SetInputFocus WINDOWID</a></strong>
+<dt><strong><a name="setinputfocus_windowid" class="item">SetInputFocus WINDOWID</a></strong></dt>
 
 <dd>
 <p>Sets the specified window to be the one that has the input focus.</p>
-</dd>
-<dd>
 <p>zero is returned on failure, non-zero for success.</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_getwindowpos_windowid">GetWindowPos WINDOWID</a></strong>
+<dt><strong><a name="getwindowpos_windowid" class="item">GetWindowPos WINDOWID</a></strong></dt>
 
 <dd>
 <p>Returns an array containing the position information for the specified
 window.  It also returns size information (including border width) and the
 number of the screen where the window resides.</p>
-</dd>
-<dd>
 <pre>
   my ($x, $y, $width, $height, $borderWidth, $screen) =
         GetWindowPos(GetRootWindow());</pre>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_getparentwindow_windowid">GetParentWindow WINDOWID</a></strong>
+<dt><strong><a name="getparentwindow_windowid" class="item">GetParentWindow WINDOWID</a></strong></dt>
 
 <dd>
 <p>Returns the parent of the specified window.</p>
-</dd>
-<dd>
 <p>zero is returned if parent couldn't be determined (i.e., root window).</p>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_getscreenres__5bscreen_5d">GetScreenRes [SCREEN]</a></strong>
+<dt><strong><a name="getscreenres_screen" class="item">GetScreenRes [SCREEN]</a></strong></dt>
 
 <dd>
 <p>Returns the screen resolution.  If no screen is specified, it is taken from the
 value given when opening the X display.  If the screen (number) is invalid, the
 returned list will be empty.</p>
-</dd>
-<dd>
 <pre>
   my ($x, $y) = GetScreenRes();</pre>
 </dd>
-</li>
 </dl>
 <dl>
-<dt><strong><a name="item_getscreendepth__5bscreen_5d">GetScreenDepth [SCREEN]</a></strong>
+<dt><strong><a name="getscreendepth_screen" class="item">GetScreenDepth [SCREEN]</a></strong></dt>
 
 <dd>
 <p>Returns the color depth for the screen.  If no screen is specified, it is taken
 from the value given when opening the X display.  If the screen (number) is
 invalid, -1 will be returned.</p>
-</dd>
-<dd>
 <p>Value is represented as bits, i.e. 16.</p>
-</dd>
-<dd>
 <pre>
   my $depth = GetScreenDepth();</pre>
 </dd>
-</li>
 </dl>
 <p>
 </p>
@@ -934,26 +731,20 @@ invalid, -1 will be returned.</p>
 </p>
 <hr />
 <h1><a name="copyright">COPYRIGHT</a></h1>
-<p><code>Copyright(c)</code> 2003-2006 Dennis K. Paulsen, All Rights Reserved.  This
+<p>Copyright(c) 2003-2011 Dennis K. Paulsen, All Rights Reserved.  This
 program is free software; you can redistribute it and/or modify it 
-under the terms of the GNU General Public License.
-
-</p>
+under the terms of the GNU General Public License.</p>
 <p>
 </p>
 <hr />
 <h1><a name="author">AUTHOR</a></h1>
-<p>Dennis K. Paulsen &lt;<a href="mailto:ctrondlp@cpan.org">ctrondlp@cpan.org</a>&gt; (Des Moines, Iowa USA)
-
-</p>
+<p>Dennis K. Paulsen &lt;<a href="mailto:ctrondlp@cpan.org">ctrondlp@cpan.org</a>&gt; (Des Moines, Iowa USA)</p>
 <p>
 </p>
 <hr />
 <h1><a name="credits">CREDITS</a></h1>
 <p>Thanks to everyone; including those specifically mentioned below for patches,
-suggestions, etc.:
-
-</p>
+suggestions, etc.:</p>
 <pre>
   Alexey Tourbin
   Richard Clamp

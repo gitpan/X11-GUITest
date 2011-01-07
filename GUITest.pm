@@ -1,6 +1,6 @@
-# X11::GUITest ($Id: GUITest.pm,v 1.50 2006/05/06 15:26:17 ctrondlp Exp $) 
+# X11::GUITest ($Id: GUITest.pm,v 1.54 2011/01/07 02:24:53 ctrondlp Exp $) 
 #  
-# Copyright (c) 2003-2006  Dennis K. Paulsen, All Rights Reserved.
+# Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
 # Email: ctrondlp@cpan.org
 #
 # This program is free software; you can redistribute it and/or
@@ -27,7 +27,7 @@ Developed by Dennis K. Paulsen
 
 =head1 VERSION
 
-0.21
+0.22
 
 Updates are made available at the following sites:
 
@@ -182,7 +182,7 @@ require DynaLoader;
 
 Exporter::export_ok_tags(keys %EXPORT_TAGS);
 
-$VERSION = '0.21';
+$VERSION = '0.22';
 
 # Module Constants 
 sub DEF_WAIT() { 10; }
