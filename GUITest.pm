@@ -1,4 +1,4 @@
-# X11::GUITest ($Id: GUITest.pm,v 1.54 2011/01/07 02:24:53 ctrondlp Exp $) 
+# X11::GUITest ($Id: GUITest.pm,v 1.56 2011/04/25 03:27:25 ctrondlp Exp $) 
 #  
 # Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
 # Email: ctrondlp@cpan.org
@@ -14,20 +14,19 @@
 # GNU General Public License for more details.
 # 
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+# along with this program; if not, see <http://www.gnu.org/licenses>.
 #
 #
 
 =head1 NAME
 
-B<X11::GUITest> - Provides GUI testing/interaction facilities.
+B<X11::GUITest> - Provides GUI testing/interaction routines.
 
 Developed by Dennis K. Paulsen
 
 =head1 VERSION
 
-0.22
+0.23
 
 Updates are made available at the following sites:
 
@@ -44,6 +43,9 @@ This Perl package is intended to facilitate the testing of GUI applications
 by means of user emulation.  It can be used to test/interact with GUI
 applications; which have been built upon the X library or toolkits
 (i.e., GTK+, Xt, Qt, Motif, etc.) that "wrap" the X library's functionality.
+
+A basic recorder (x11guirecord) is also available, and can be found in
+the source code respository.
 
 =head1 DEPENDENCIES
 
@@ -155,6 +157,7 @@ require DynaLoader;
 	PressKey
 	PressMouseButton
 	PressReleaseKey
+	QSfSK
 	QuoteStringForSendKeys
 	RaiseWindow
 	ReleaseKey
@@ -182,7 +185,7 @@ require DynaLoader;
 
 Exporter::export_ok_tags(keys %EXPORT_TAGS);
 
-$VERSION = '0.22';
+$VERSION = '0.23';
 
 # Module Constants 
 sub DEF_WAIT() { 10; }
@@ -527,13 +530,17 @@ Returns the quoted string, undef is returned on error.
 
   # Quote  ~, %, etc.  as  {~}, {%}, etc for literal use in SendKeys. 
   SendKeys( QuoteStringForSendKeys('Hello: ~%^(){}+#') );
+  SendKeys( QSfSK('#+#') );
 
 =back
 
 =cut
 
 sub QuoteStringForSendKeys {
-	my $str = shift or return(undef);
+	my $str = shift;
+	if (!defined($str)) {
+		return(undef);
+	}
 
 	# Quote {} special characters (^, %, (, {, etc.)
 	$str =~ s/(\^|\%|\+|\~|\(|\)|\{|\})/\{$1\}/gm;
@@ -541,6 +548,9 @@ sub QuoteStringForSendKeys {
 	return($str);
 }
 
+sub QSfSK { 
+	return QuoteStringForSendKeys(shift); 
+}
 
 =over 8
 

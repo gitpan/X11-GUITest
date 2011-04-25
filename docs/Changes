@@ -1,8 +1,17 @@
-X11::GUITest ($Id: Changes,v 1.67 2011/01/07 02:24:54 ctrondlp Exp $)
+X11::GUITest ($Id: Changes,v 1.70 2011/04/25 03:27:25 ctrondlp Exp $)
 
 This is the list of module changes between revisions.
 --------------------------------------------------------------------
 
+0.23 Sun Apr 24 2011 22:30
+
+  - Added support for recording using x11guirecord utility.
+
+  - Updated behavior of QuoteStringForSendKeys function in handling
+    zeros.
+
+  - Added alias QSfSK() to QuoteStringForSendKeys() function.
+ 
 0.22 Thu Jan 06 2011 20:00
 
   - Example script eg/FindControlVisually.pl added to help demonstrate

@@ -1,6 +1,6 @@
-/* X11::GUITest ($Id: GUITest.h,v 1.17 2011/04/25 03:27:25 ctrondlp Exp $)
+/* X11::GUITest ($Id: record_event.h,v 1.3 2011/04/25 03:27:25 ctrondlp Exp $)
  *  
- * Copyright (c) 2003-2011 Dennis K. Paulsen, All Rights Reserved.
+ * Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@cpan.org
  *
  * This program is free software; you can redistribute it and/or
@@ -17,22 +17,20 @@
  * along with this program; if not, see <http://www.gnu.org/licenses>.
  *
  */
-#ifndef GUITest_h
-#define GUITest_h
+#ifndef RECORD_EVENT_H
+#define RECORD_EVENT_H
 
+typedef enum {NOTYPE, MOUSEBUTTON, KEY, MOUSEMOVE} EventType;
+typedef enum {NOSTATE, UP, DOWN } EventState;
 
-#define DEF_EVENT_SEND_DELAY 10 /* Value < 10 not recommended */
-#define DEF_KEY_SEND_DELAY 0 
-#define KEYMAP_VECTOR_SIZE 32
-#define KEYMAP_BIT_COUNT 8
+struct record_event {
+	EventType type;
+	EventState state;
+	unsigned long delay;
+	const char *dataname;
+	int data;
+	int posX;
+	int posY;
+};
 
-
-typedef struct WindowTable {
-	Window *Ids;
-	UINT NVals;
-	UINT Max;
-} WindowTable;
-
-
-#endif /* #ifndef GUITest_h */
-
+#endif /* #ifndef RECORD_EVENT_H */ 

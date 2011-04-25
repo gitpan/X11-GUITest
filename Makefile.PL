@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# X11::GUITest ($Id: Makefile.PL,v 1.21 2008/09/06 19:52:35 ctrondlp Exp $)
+# X11::GUITest ($Id: Makefile.PL,v 1.22 2011/01/09 19:50:14 ctrondlp Exp $)
 
 use strict;
 use warnings;
@@ -36,6 +36,7 @@ WriteMakefile(
 	'INC'   => '-I/usr/X11R6/include -I/usr/X/include', # e.g., '-I/usr/include/other'
 	'clean' => {FILES => 'X11-GUITest.POD~'},
 	'CCFLAGS' => '-Wall',
+	'OBJECT' => 'GUITest$(OBJ_EXT) KeyUtil$(OBJ_EXT)',
 	'OPTIMIZE' => '-O2'
 );
 

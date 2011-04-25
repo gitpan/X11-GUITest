@@ -1,6 +1,6 @@
-/* X11::GUITest ($Id: GUITest.h,v 1.17 2011/04/25 03:27:25 ctrondlp Exp $)
+/* X11::GUITest ($Id: Common.h,v 1.2 2011/04/25 03:27:25 ctrondlp Exp $)
  *  
- * Copyright (c) 2003-2011 Dennis K. Paulsen, All Rights Reserved.
+ * Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@cpan.org
  *
  * This program is free software; you can redistribute it and/or
@@ -17,22 +17,30 @@
  * along with this program; if not, see <http://www.gnu.org/licenses>.
  *
  */
-#ifndef GUITest_h
-#define GUITest_h
+#ifndef COMMON_H 
+#define COMMON_H
 
 
-#define DEF_EVENT_SEND_DELAY 10 /* Value < 10 not recommended */
-#define DEF_KEY_SEND_DELAY 0 
-#define KEYMAP_VECTOR_SIZE 32
-#define KEYMAP_BIT_COUNT 8
+#define APP_VERSION "0.23"
 
+#ifndef TRUE
+#define TRUE (1)
+#endif
+#ifndef FALSE
+#define FALSE (0)
+#endif
 
-typedef struct WindowTable {
-	Window *Ids;
-	UINT NVals;
-	UINT Max;
-} WindowTable;
+#ifndef BOOL
+#define BOOL int
+#endif
+#ifndef UINT
+#define UINT unsigned int
+#endif
+#ifndef ULONG
+#define ULONG unsigned long
+#endif
 
+#define NUL '\0'
+#define MAX_PATH 255
 
-#endif /* #ifndef GUITest_h */
-
+#endif /* #ifndef COMMON_H */

@@ -1,4 +1,4 @@
-/* X11::GUITest ($Id: GUITest.h,v 1.17 2011/04/25 03:27:25 ctrondlp Exp $)
+/* X11::GUITest ($Id: script_file.h,v 1.2 2011/04/25 03:27:25 ctrondlp Exp $)
  *  
  * Copyright (c) 2003-2011 Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@cpan.org
@@ -17,22 +17,16 @@
  * along with this program; if not, see <http://www.gnu.org/licenses>.
  *
  */
-#ifndef GUITest_h
-#define GUITest_h
+#ifndef SCRIPT_FILE_H
+#define SCRIPT_FILE_H
 
 
-#define DEF_EVENT_SEND_DELAY 10 /* Value < 10 not recommended */
-#define DEF_KEY_SEND_DELAY 0 
-#define KEYMAP_VECTOR_SIZE 32
-#define KEYMAP_BIT_COUNT 8
+#define MAX_SCRIPT_BUFFER 2048
+
+BOOL OpenScript(char *scriptFile);
+void WriteScript(char *format, ...);
+void CloseScript(void);
 
 
-typedef struct WindowTable {
-	Window *Ids;
-	UINT NVals;
-	UINT Max;
-} WindowTable;
-
-
-#endif /* #ifndef GUITest_h */
+#endif /* #ifndef SCRIPT_FILE_H */
 

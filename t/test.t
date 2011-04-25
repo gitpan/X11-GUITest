@@ -1,11 +1,11 @@
 #!/usr/bin/perl
-# X11::GUITest ($Id: test.t,v 1.25 2009/04/27 19:49:33 ctrondlp Exp $)
+# X11::GUITest ($Id: test.t,v 1.27 2011/01/11 13:47:37 ctrondlp Exp $)
 # Note: Functions that might be intrusive are not checked
 
 BEGIN {
 	# Is X running? 
 	$| = 1;
-	if (defined($ENV{'DISPLAY'}) && length $ENV{'DISPLAY'}) {
+	if (defined($ENV{'DISPLAY'}) && length $ENV{'DISPLAY'} > 0) {
 		# It should be, so plan on running the tests.
 		print "1..23\n";
 	} else {
@@ -103,6 +103,9 @@ print "ok 10\n";
 
 # IsWindowViewable
 @Windows = WaitWindowViewable(".*");
+if (not IsWindow($Windows[0])) { # First window not viewable
+	$Windows[0] = GetRootWindow(); # Fall-back to root
+}
 print "not " unless IsWindowViewable($Windows[0]);
 print "not " unless not IsWindowViewable($BadWinId);
 print "ok 11\n";

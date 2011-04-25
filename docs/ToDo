@@ -3,9 +3,6 @@ X11::GUITest ($Id: ToDo,v 1.13 2006/05/06 15:22:35 ctrondlp Exp $)
 This is a list of Todo items. 
 --------------------------------------------------------------------
 
-- Script recording mechanism.  Shouldn't be too time consuming to
-  implement.
-
 - Be able to obtain a widget's text.  For example, if we could
   obtain the label text of a button, we could then locate its
   position and use ClickWindow to click on it rather then using

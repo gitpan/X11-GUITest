@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #-----------------------------------------------------------------------------#
-# X11::GUITest ($Id: FindControlVisually.pl,v 1.2 2011/01/07 02:24:54 ctrondlp Exp $)
+# X11::GUITest ($Id: FindControlVisually.pl,v 1.3 2011/03/04 07:08:58 ctrondlp Exp $)
 # Notes: Example of script to locate a widget/control visually using an
 #        image baseline. 
 #-----------------------------------------------------------------------------#
@@ -40,8 +40,8 @@ print "$0 : Script End (Success)\n";
 
 ## Subroutines ##
 sub FindScreenObject {
-	my $baseline = shift;
-	my $maxwait = shift || 30;
+	my $baseline = shift; # baseline sub-image/clip to find on screen
+	my $maxwait = shift || 30; # seconds to wait for discovery
 
 	if (!-e $baseline) {
 		die("Baseline $baseline image does not exist");
@@ -50,6 +50,7 @@ sub FindScreenObject {
     my $scrfile = GetScreenshot();
 	for (my $i = 1; $i <= $maxwait; $i++) {
 		# Results may vary, depending on baseline quality and detail, etc.
+		# In general, a larger (50x50 pixels) baseline with good detail will fair good.
 	    my ($x, $y) = FindSubImage($scrfile, $baseline);
 	    if ($x > 0 || $y > 0) {
 	    	unlink $scrfile;
