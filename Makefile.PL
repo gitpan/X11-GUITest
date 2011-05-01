@@ -1,19 +1,15 @@
 #!/usr/bin/perl
-# X11::GUITest ($Id: Makefile.PL,v 1.22 2011/01/09 19:50:14 ctrondlp Exp $)
+# X11::GUITest ($Id: Makefile.PL,v 1.25 2011/04/29 02:08:27 ctrondlp Exp $)
 
 use strict;
 use warnings;
 use ExtUtils::MakeMaker;
 
-# Disable Automated Testing in certain cases
-if (defined $ENV{'AUTOMATED_TESTING'} && $ENV{'AUTOMATED_TESTING'}) {
-	if (!defined($ENV{'DISPLAY'}) || not length($ENV{'DISPLAY'})) {
-		exit(0);
-	}
-}
 
-# Write core documentation and the POD that Makefile uses.
-WriteDocumentation();
+# Optional building of additional doc formats.
+if (defined($ARGV[0]) && $ARGV[0] eq 'docs') {
+	BuildDocumentation();
+}
 
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
@@ -28,31 +24,23 @@ WriteMakefile(
 		'INST_MAN3DIR' => './blib/man3',
 		'MAN3EXT' => '3pm'
 	) : (),
-	'MAN3PODS' => (-r 'X11-GUITest.POD~') ? {'X11-GUITest.POD~' => '$(INST_MAN3DIR)/X11::GUITest.$(MAN3EXT)'} : {},
+	'MAN3PODS' => {'GUITest.pm' => '$(INST_MAN3DIR)/X11::GUITest.$(MAN3EXT)'},
 	'LIBS'  => ['-L/usr/X11R6/lib -L/usr/X/lib -lXtst -lXext -lX11'], # e.g., '-lm'
 	# To work around an incompatibility between the XTest and the Xinerama
 	# (X server) extensions, use "-DX11_GUITEST_USING_XINERAMA".
 	'DEFINE' => '-DNDEBUG -DX11_GUITEST_ALT_L_FALLBACK_META_L', # e.g., '-DHAVE_SOMETHING'
 	'INC'   => '-I/usr/X11R6/include -I/usr/X/include', # e.g., '-I/usr/include/other'
-	'clean' => {FILES => 'X11-GUITest.POD~'},
 	'CCFLAGS' => '-Wall',
 	'OBJECT' => 'GUITest$(OBJ_EXT) KeyUtil$(OBJ_EXT)',
 	'OPTIMIZE' => '-O2'
 );
 
 
-# Subroutine: WriteDocumentation 
-# Description: This function is implemented to combine the
-#			   files containing POD, generate the documentation
-#			   in HTML/plain-text formats, and support the
-#			   Makefile's MAN3 transformation/installation.
-sub WriteDocumentation {
-	my $podfile = 'X11-GUITest.POD~';
-	
-	# Combine POD containing files into one.  Don't love
-	# the system() calls, but acceptable as short-term.
-	system("cat GUITest.pm >$podfile");
-	system("cat GUITest.xs >>$podfile");
+# Subroutine: BuildDocumentation 
+# Description: This function is implemented to generate the
+#			   documentation in HTML/plain-text formats. 
+sub BuildDocumentation {
+	my $podfile = 'GUITest.pm';
 
 	# Check POD
 	if ( system("podchecker $podfile &>/dev/null") != 0 ) {
@@ -64,11 +52,7 @@ sub WriteDocumentation {
 	print "Writing documentation for X11::GUITest\n";
 	system("pod2text $podfile docs/X11-GUITest.txt");
 	system("pod2html --infile=$podfile --outfile=docs/X11-GUITest.html");
-
-	# If symlink subroutine is supported, create the README link
-	if ( eval {symlink('', ''); 1} ) {
-		symlink('docs/X11-GUITest.txt', 'README');
-	}
+	system("cp -f docs/X11-GUITest.txt README");
 
 	# Clean up misc. files.  Leaving X11-GUITest.POD~ around for
 	# Makefile use

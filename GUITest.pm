@@ -1,4 +1,4 @@
-# X11::GUITest ($Id: GUITest.pm,v 1.56 2011/04/25 03:27:25 ctrondlp Exp $) 
+# X11::GUITest ($Id: GUITest.pm,v 1.60 2011/04/30 13:57:30 ctrondlp Exp $) 
 #  
 # Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
 # Email: ctrondlp@cpan.org
@@ -26,13 +26,12 @@ Developed by Dennis K. Paulsen
 
 =head1 VERSION
 
-0.23
+0.24
 
 Updates are made available at the following sites:
 
-  http://sourceforge.net/projects/x11guitest (Primary) 
-  http://www.freshmeat.net (Linked)
-  http://www.cpan.org (Secondary)
+  http://sourceforge.net/projects/x11guitest 
+  http://www.cpan.org
 
 Please consult 'docs/Changes' for the list of changes between
 module revisions.
@@ -185,7 +184,7 @@ require DynaLoader;
 
 Exporter::export_ok_tags(keys %EXPORT_TAGS);
 
-$VERSION = '0.23';
+$VERSION = '0.24';
 
 # Module Constants 
 sub DEF_WAIT() { 10; }
@@ -636,7 +635,9 @@ sub ClickMouseButton {
 #			   that this package utilizes. 
 # Note: Perl idiom not to return values for this subroutine.
 sub INIT {
-	InitGUITest();
+	if (!defined($ENV{'AUTOMATED_TESTING'}) || $ENV{'AUTOMATED_TESTING'} ne 1) {
+		InitGUITest();
+	}
 }
 
 # Subroutine: END
@@ -649,11 +650,635 @@ sub END {
 
 =over 8
 
-=item <Documentation Continued...>
+=item DefaultScreen
+
+Returns the screen number specified in the X display value used to open the
+display.
 
 =back
 
 =cut
+
+=over 8
+
+=item ScreenCount
+
+Returns the number of screens in the X display specified when opening it.
+
+=back
+
+=cut
+
+=over 8
+
+=item SetEventSendDelay DELAYINMILLISECONDS
+
+Sets the milliseconds of delay between events being sent to the
+X display.  It is usually not a good idea to set this to 0.
+
+Please note that this delay will also affect SendKeys.
+
+Returns the old delay amount in milliseconds.
+
+=back
+
+=cut
+
+=over 8
+
+=item GetEventSendDelay
+
+Returns the current event sending delay amount in milliseconds.
+
+=back
+
+=cut
+
+=over 8
+
+=item SetKeySendDelay DELAYINMILLISECONDS
+
+Sets the milliseconds of delay between keystrokes.
+
+Returns the old delay amount in milliseconds.
+
+=back
+
+=cut
+
+=over 8
+
+=item GetKeySendDelay
+
+Returns the current keystroke sending delay amount in milliseconds.
+
+=back
+
+=cut
+
+=over 8
+
+=item GetWindowName WINDOWID
+
+Returns the window name for the specified window Id.  undef
+is returned if name could not be obtained.
+
+  # Return the name of the window that has the input focus.
+  my $WinName = GetWindowName(GetInputFocus());
+
+=back
+
+=cut
+
+=over 8
+
+=item SetWindowName WINDOWID, NAME
+
+Sets the window name for the specified window Id.
+
+zero is returned on failure, non-zero for success.
+
+=back
+
+=cut
+
+=over 8
+
+=item GetRootWindow [SCREEN]
+
+Returns the Id of the root window of the screen.  This is the top/root level
+window that all other windows are under.  If no screen is given, it is taken
+from the value given when opening the X display.
+
+=back
+
+=cut
+
+=over 8
+
+=item GetChildWindows WINDOWID
+
+Returns an array of the child windows for the specified
+window Id.  If it detects that the window hierarchy
+is in transition, it will wait half a second and try
+again.
+
+=back
+
+=cut
+
+=over 8
+
+=item MoveMouseAbs X, Y [, SCREEN]
+
+Moves the mouse cursor to the specified absolute position in the optionally
+given screen.  If no screen is given, it is taken from the value given when
+opening the X display.
+
+Zero is returned on failure, non-zero for success.
+
+=back
+
+=cut
+
+=over 8
+
+=item GetMousePos
+
+Returns an array containing the position and the screen (number) of the mouse
+cursor.
+
+  my ($x, $y, $scr_num) = GetMousePos(); 
+
+=back
+
+=cut
+
+=over 8
+
+=item PressMouseButton BUTTON
+
+Presses the specified mouse button.  Available mouse buttons
+are: M_LEFT, M_MIDDLE, M_RIGHT.  Also, you could use the logical
+Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5.  These
+are all available through the :CONST export tag.
+
+zero is returned on failure, non-zero for success.
+
+=back
+
+=cut
+
+=over 8
+
+=item ReleaseMouseButton BUTTON
+
+Releases the specified mouse button.  Available mouse buttons
+are: M_LEFT, M_MIDDLE, M_RIGHT.  Also, you could use the logical
+Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5.  These
+are all available through the :CONST export tag.
+
+zero is returned on failure, non-zero for success.
+
+=back
+
+=cut
+
+=over 8
+
+=item SendKeys KEYS
+
+Sends keystrokes to the window that has the input focus.
+
+The keystrokes to send are those specified in KEYS parameter.  Some characters
+have special meaning, they are:
+
+        Modifier Keys:
+        ^    	CTRL
+        %    	ALT
+        +    	SHIFT
+        #       META
+                ALTGR
+
+        Other Keys:
+        ~    	ENTER
+        \n   	ENTER
+        \t  	TAB
+        ( and ) MODIFIER GROUPING
+        { and } QUOTE / ESCAPE CHARACTERS
+
+Simply, one can send a text string like so:
+
+        SendKeys('Hello, how are you today?');
+
+Parenthesis allow a modifier to work on one or more characters.  For example:
+
+        SendKeys('%(f)q'); # Alt-f, then press q
+        SendKeys('%(fa)^(m)'); # Alt-f, Alt-a, Ctrl-m
+        SendKeys('+(abc)'); # Uppercase ABC using shift modifier
+        SendKeys('^(+(l))'); # Ctrl-Shift-l
+        SendKeys('+'); # Press shift
+
+Braces are used to quote special characters, for utilizing aliased key
+names, or for special functionality. Multiple characters can be specified
+in a brace by space delimiting the entries.  Characters can be repeated using
+a number that is space delimited after the preceeding key.
+
+Quote Special Characters
+
+        SendKeys('{{}'); # {
+        SendKeys('{+}'); # +
+        SendKeys('{#}'); # #
+
+        You can also use QuoteStringForSendKeys to perform quoting.
+
+Aliased Key Names
+
+        SendKeys('{BAC}'); # Backspace
+        SendKeys('{F1 F2 F3}'); # F1, F2, F3
+        SendKeys('{TAB 3}'); # Press TAB 3 times
+        SendKeys('{SPC 3 a b c}'); # Space 3 times, a, b, c
+
+Special Functionality
+
+        # Pause execution for 500 milliseconds
+        SendKeys('{PAUSE 500}');
+
+Combinations
+
+        SendKeys('abc+(abc){TAB PAUSE 500}'); # a, b, c, A, B, C, Tab, Pause 500
+        SendKeys('+({a b c})'); # A, B, C
+
+The following abbreviated key names are currently recognized within a brace set.  If you
+don't see the desired key, you can still use the unabbreviated name for the key.  If you
+are unsure of this name, utilize the xev (X event view) tool, press the key you
+want and look at the tools output for the name of that key.  Names that are in the list
+below can be utilized regardless of case.  Ones that aren't in this list are going to be
+case sensitive and also not abbreviated.  For example, using 'xev' you will find that the
+name of the backspace key is BackSpace, so you could use {BackSpace} in place of {bac}
+if you really wanted to.
+
+        Name    Action
+        -------------------
+        BAC     BackSpace
+        BS      BackSpace
+        BKS     BackSpace
+        BRE     Break
+        CAN     Cancel
+        CAP     Caps_Lock
+        DEL     Delete
+        DOW     Down
+        END     End
+        ENT     Return
+        ESC     Escape
+        F1      F1
+        ...     ...
+        F12     F12
+        HEL     Help
+        HOM     Home
+        INS     Insert
+        LAL     Alt_L
+        LMA     Meta_L
+        LCT     Control_L
+        LEF     Left
+        LSH     Shift_L
+        LSK     Super_L
+        MNU     Menu
+        NUM     Num_Lock
+        PGD     Page_Down
+        PGU     Page_Up
+        PRT     Print
+        RAL     Alt_R
+        RMA     Meta_R
+        RCT     Control_R
+        RIG     Right
+        RSH     Shift_R
+        RSK     Super_R
+        SCR     Scroll_Lock
+        SPA     Space
+        SPC     Space
+        TAB     Tab
+        UP      Up
+
+zero is returned on failure, non-zero for success.  For configurations (Xvfb)
+that don't support Alt_Left, Meta_Left is automatically used in its place.
+
+=back
+
+=cut
+
+=over 8
+
+=item PressKey KEY 
+
+Presses the specified key. 
+
+One can utilize the abbreviated key names from the table
+listed above as outlined in the following example:
+
+  # Alt-n
+  PressKey('LAL'); # Left Alt
+  PressKey('n');
+  ReleaseKey('n');
+  ReleaseKey('LAL');
+
+  # Uppercase a
+  PressKey('LSH'); # Left Shift
+  PressKey('a'); 
+  ReleaseKey('a');
+  ReleaseKey('LSH');
+
+The ReleaseKey calls in the above example are there to set
+both key states back.
+
+zero is returned on failure, non-zero for success.
+
+=back
+
+=cut
+
+=over 8
+
+=item ReleaseKey KEY 
+
+Releases the specified key.  Normally follows a PressKey call.
+
+One can utilize the abbreviated key names from the table
+listed above.
+
+  ReleaseKey('n');
+
+zero is returned on failure, non-zero for success.
+
+=back
+
+=cut
+
+=over 8
+
+=item PressReleaseKey KEY 
+
+Presses and releases the specified key.
+
+One can utilize the abbreviated key names from the table
+listed above.
+
+  PressReleaseKey('n');
+
+This function is affected by the key send delay.
+
+zero is returned on failure, non-zero for success.
+
+=back
+
+=cut
+
+=over 8
+
+=item IsKeyPressed KEY
+
+Determines if the specified key is currently being pressed.  
+
+You can specify such things as 'bac' or the unabbreviated form 'BackSpace' as
+covered in the SendKeys information.  Brace forms such as '{bac}' are
+unsupported.  A '{' is taken literally and letters are case sensitive.
+
+  if (IsKeyPressed('esc')) {  # Is Escape pressed?
+  if (IsKeyPressed('a')) { # Is a pressed?
+  if (IsKeyPressed('A')) { # Is A pressed?
+
+Returns non-zero for true, zero for false.
+
+=back
+
+=cut
+
+=over 8
+
+=item IsMouseButtonPressed BUTTON
+
+Determines if the specified mouse button is currently being pressed.  
+
+Available mouse buttons are: M_LEFT, M_MIDDLE, M_RIGHT.  Also, you
+could use the logical Id for the button: M_BTN1, M_BTN2, M_BTN3,
+M_BTN4, M_BTN5.  These are all available through the :CONST export
+tag.
+
+  if (IsMouseButtonPressed(M_LEFT)) { # Is left button pressed?
+
+Returns non-zero for true, zero for false.
+
+=back
+
+=cut
+
+=over 8
+
+=item IsWindow WINDOWID
+
+zero is returned if the specified window Id is not for something
+that can be recognized as a window.  non-zero is returned if it
+looks like a window.
+
+=back
+
+=cut
+
+=over 8
+
+=item IsWindowViewable WINDOWID
+
+zero is returned if the specified window Id is for a window that
+isn't viewable.  non-zero is returned if the window is viewable.
+
+=back
+
+=cut
+
+=over 8
+
+=item MoveWindow WINDOWID, X, Y
+
+Moves the window to the specified location.
+
+zero is returned on failure, non-zero for success.
+
+=back
+
+=cut
+
+=over 8
+
+=item ResizeWindow WINDOWID, WIDTH, HEIGHT
+
+Resizes the window to the specified size.
+
+zero is returned on failure, non-zero for success.
+
+=back
+
+=cut
+
+=over 8
+
+=item IconifyWindow WINDOWID
+
+Minimizes (Iconifies) the specified window.
+
+zero is returned on failure, non-zero for success.
+
+=back
+
+=cut
+
+=over 8
+
+=item UnIconifyWindow WINDOWID
+
+Unminimizes (UnIconifies) the specified window.
+
+zero is returned on failure, non-zero for success.
+
+=back
+
+=cut
+
+=over 8
+
+=item RaiseWindow WINDOWID
+
+Raises the specified window to the top of the stack, so
+that no other windows cover it.
+
+zero is returned on failure, non-zero for success.
+
+=back
+
+=cut
+
+=over 8
+
+=item LowerWindow WINDOWID
+
+Lowers the specified window to the bottom of the stack, so
+other existing windows will cover it.
+
+zero is returned on failure, non-zero for success.
+
+=back
+
+=cut
+
+=over 8
+
+=item GetInputFocus
+
+Returns the window that currently has the input focus.
+
+=back
+
+=cut
+
+=over 8
+
+=item SetInputFocus WINDOWID
+
+Sets the specified window to be the one that has the input focus.
+
+zero is returned on failure, non-zero for success.
+
+=back
+
+=cut
+
+=over 8
+
+=item GetWindowPos WINDOWID
+
+Returns an array containing the position information for the specified
+window.  It also returns size information (including border width) and the
+number of the screen where the window resides.
+
+  my ($x, $y, $width, $height, $borderWidth, $screen) =
+        GetWindowPos(GetRootWindow());
+
+=back
+
+=cut
+
+=over 8
+
+=item GetParentWindow WINDOWID
+
+Returns the parent of the specified window.
+
+zero is returned if parent couldn't be determined (i.e., root window).
+
+=back
+
+=cut
+
+=over 8
+
+=item GetScreenDepth [SCREEN]
+
+Returns the color depth for the screen.  If no screen is specified, it is taken
+from the value given when opening the X display.  If the screen (number) is
+invalid, -1 will be returned.
+
+Value is represented as bits, i.e. 16.
+
+  my $depth = GetScreenDepth();
+
+=back
+
+=cut
+
+=over 8
+
+=item GetScreenRes [SCREEN]
+
+Returns the screen resolution.  If no screen is specified, it is taken from the
+value given when opening the X display.  If the screen (number) is invalid, the
+returned list will be empty.
+
+  my ($x, $y) = GetScreenRes();
+
+=back
+
+=cut
+
+=head1 OTHER DOCUMENTATION
+
+
+=begin html
+
+<a href='Changes'>Module Changes</a><br>
+<a href='CodingStyle'>Coding-Style Guidelines</a><br>
+<a href='ToDo'>ToDo List</a><br>
+<a href='Copying'>Copy of the GPL License</a><br>
+
+=end html
+
+
+=begin text
+
+  Available under the docs sub-directory.
+    Changes (Module Changes)
+    CodingStyle (Coding-Style Guidelines)
+    ToDo (ToDo List)
+    Copying (Copy of the GPL License)
+
+=end text
+
+=begin man
+
+Not installed.
+
+=end man
+
+=head1 COPYRIGHT
+
+Copyright(c) 2003-2011 Dennis K. Paulsen, All Rights Reserved.  This
+program is free software; you can redistribute it and/or modify it 
+under the terms of the GNU General Public License.
+
+=head1 AUTHOR
+
+Dennis K. Paulsen <ctrondlp@cpan.org> (Des Moines, Iowa USA)
+
+=head1 CREDITS
+
+Thanks to everyone; including those specifically mentioned below for patches,
+suggestions, etc.:
+
+  Alexey Tourbin
+  Richard Clamp
+  Gustav Larsson
+  Nelson D. Caro
+
+=cut
+
 
 # Autoload methods go after __END__, and are processed by the autosplit program.
 

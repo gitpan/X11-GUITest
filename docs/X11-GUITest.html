@@ -42,12 +42,11 @@
 </p>
 <hr />
 <h1><a name="version">VERSION</a></h1>
-<p>0.23</p>
+<p>0.24</p>
 <p>Updates are made available at the following sites:</p>
 <pre>
-  <a href="http://sourceforge.net/projects/x11guitest">http://sourceforge.net/projects/x11guitest</a> (Primary) 
-  <a href="http://www.freshmeat.net">http://www.freshmeat.net</a> (Linked)
-  <a href="http://www.cpan.org">http://www.cpan.org</a> (Secondary)</pre>
+  <a href="http://sourceforge.net/projects/x11guitest">http://sourceforge.net/projects/x11guitest</a> 
+  <a href="http://www.cpan.org">http://www.cpan.org</a></pre>
 <p>Please consult 'docs/Changes' for the list of changes between
 module revisions.</p>
 <p>
@@ -279,10 +278,6 @@ Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5.  These
 are all available through the :CONST export tag.</p>
 <p>zero is returned on failure, non-zero for success.</p>
 </dd>
-</dl>
-<dl>
-<dt><strong><a name="documentation_continued" class="item">&lt;Documentation Continued...&gt;</a></strong></dt>
-
 </dl>
 <dl>
 <dt><strong><a name="defaultscreen" class="item">DefaultScreen</a></strong></dt>
@@ -702,17 +697,6 @@ number of the screen where the window resides.</p>
 </dd>
 </dl>
 <dl>
-<dt><strong><a name="getscreenres_screen" class="item">GetScreenRes [SCREEN]</a></strong></dt>
-
-<dd>
-<p>Returns the screen resolution.  If no screen is specified, it is taken from the
-value given when opening the X display.  If the screen (number) is invalid, the
-returned list will be empty.</p>
-<pre>
-  my ($x, $y) = GetScreenRes();</pre>
-</dd>
-</dl>
-<dl>
 <dt><strong><a name="getscreendepth_screen" class="item">GetScreenDepth [SCREEN]</a></strong></dt>
 
 <dd>
@@ -722,6 +706,17 @@ invalid, -1 will be returned.</p>
 <p>Value is represented as bits, i.e. 16.</p>
 <pre>
   my $depth = GetScreenDepth();</pre>
+</dd>
+</dl>
+<dl>
+<dt><strong><a name="getscreenres_screen" class="item">GetScreenRes [SCREEN]</a></strong></dt>
+
+<dd>
+<p>Returns the screen resolution.  If no screen is specified, it is taken from the
+value given when opening the X display.  If the screen (number) is invalid, the
+returned list will be empty.</p>
+<pre>
+  my ($x, $y) = GetScreenRes();</pre>
 </dd>
 </dl>
 <p>
@@ -753,9 +748,7 @@ suggestions, etc.:</p>
   Alexey Tourbin
   Richard Clamp
   Gustav Larsson
-  Nelson D. Caro
-
-</pre>
+  Nelson D. Caro</pre>
 
 </body>
 

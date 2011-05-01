@@ -1,4 +1,4 @@
-/* X11::GUITest ($Id: main.c,v 1.17 2011/04/25 03:27:25 ctrondlp Exp $)
+/* X11::GUITest ($Id: main.c,v 1.3 2011/05/01 17:47:49 ctrondlp Exp $)
  *  
  * Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@cpan.org
@@ -22,6 +22,7 @@
 #include <string.h>
 #include <popt.h>
 #include <unistd.h>
+#include <libintl.h>
 #include <X11/Xutil.h>
 #include "record.h"
 #include "record_event.h"
@@ -46,15 +47,18 @@ int main (int argc, char *argv[])
 {
 	poptContext	optCon;
 
-	
+	// International support
+	setlocale(LC_MESSAGES, "");
+	bindtextdomain(APP_NAME, APP_TEXTDOMAIN);
+	textdomain(APP_NAME);
 	
 	// Handle Args
 	struct poptOption optTbl[] = {
-		{"script", 's', POPT_ARG_STRING, &scriptFile, 0, "Script file", NULL},
-		{"wait", 'w', POPT_ARG_INT, &waitSeconds, 0, "Seconds to wait before recording", NULL},
-		{"exitkey", 'e', POPT_ARG_STRING, &exitKey, 0, "Exit key to stop recording (default: ESC)", NULL},
-		{"nodelay", 'n', POPT_ARG_NONE, &excludeDelays, 0, "Don't include user delays", NULL},
-		{"granularity", 'g', POPT_ARG_NONE, &granularity, 0, "Level of granularity (mouse move frequency, default: 10 out of 1-10)", NULL},
+		{"script", 's', POPT_ARG_STRING, &scriptFile, 0, _("Script file"), NULL},
+		{"wait", 'w', POPT_ARG_INT, &waitSeconds, 0, _("Seconds to wait before recording"), NULL},
+		{"exitkey", 'e', POPT_ARG_STRING, &exitKey, 0, _("Exit key to stop recording (default: ESC)"), NULL},
+		{"nodelay", 'n', POPT_ARG_NONE, &excludeDelays, 0, _("Don't include user delays"), NULL},
+		{"granularity", 'g', POPT_ARG_NONE, &granularity, 0, _("Level of granularity (mouse move frequency, default: 10 out of 1-10)"), NULL},
 		POPT_AUTOHELP
 		{NULL, 0, 0, NULL, 0}
 	};
@@ -63,44 +67,44 @@ int main (int argc, char *argv[])
 	poptFreeContext(optCon);
 
 	if (scriptFile == NULL || !*scriptFile) {
-		fprintf(stderr, "No script file specified.\n");
+		fprintf(stderr, _("No script file specified.\n"));
 		exit(1);
 	}
 	if (!GetKeySym(exitKey, &exitKeySym)) {
-		fprintf(stderr, "Invalid exit key defined.\n");
+		fprintf(stderr, _("Invalid exit key defined.\n"));
 		exit(1);
 	}
 	if (waitSeconds <= 0 || waitSeconds > MAX_WAIT_SECONDS) {
-		fprintf(stderr, "Invalid wait defined (supplied %d, but needs 1-%d).\n", 
+		fprintf(stderr, _("Invalid wait defined (supplied %d, but needs 1-%d).\n"), 
 				waitSeconds, MAX_WAIT_SECONDS);
 		exit(1);
 	}
 	if (granularity < MIN_GRANULARITY || granularity > MAX_GRANULARITY) {
-		fprintf(stderr, "Invalid granularity defined (supplied %d, but needs %d-%d).\n", 
+		fprintf(stderr, _("Invalid granularity defined (supplied %d, but needs %d-%d).\n"), 
 				granularity, MIN_GRANULARITY, MAX_GRANULARITY);
 		exit(1);
 	}
 	if (!OpenScript(scriptFile)) {
-		fprintf(stderr, "Unable to open script file '%s'!\n", scriptFile);	
+		fprintf(stderr, _("Unable to open script file '%s'!\n"), scriptFile);	
 		exit(1);
 	}
 
 	usleep(waitSeconds * 1000000);
-	printf("Recording Started, press %s to exit.\n", exitKey);
+	printf(_("Recording Started, press %s to exit.\n"), exitKey);
 
 	WriteScript("#!/usr/bin/perl\n\n");
 	WriteScript("use X11::GUITest qw/:ALL/;\n\n");
 	
-	WriteScript("\n# Begin (Recorder Version %s).\n", APP_VERSION);
+	WriteScript(_("\n# Begin (Recorder Version %s).\n"), APP_VERSION);
 
 	////
 	RecordEvents(ProcessEvent);
 	////
 
-	WriteScript("\n\n# End.\n");
+	WriteScript(_("\n\n# End.\n"));
 	CloseScript();
 
-	printf("\nRecording Finished.\n");
+	printf(_("\nRecording Finished.\n"));
 	exit(0);
 }
 
@@ -190,7 +194,7 @@ void ProcessEvent(struct record_event ev)
 				}
 			}
 		} else {
-			WriteScript("# [Unhandled Key %d/%d]\n", ev.data, ev.state);
+			WriteScript(_("# [Unhandled Key %d/%d]\n"), ev.data, ev.state);
 		}	
 	} else { // Mouse, etc.
 		HandleKeyBuffer(TRUE);
@@ -203,7 +207,7 @@ void ProcessEvent(struct record_event ev)
 		} else if (ev.type == MOUSEBUTTON) {
 			GetMouseButtonFromIndex(ev.data, buttonName);
 			if (!*buttonName) {
-				WriteScript("# [Unhandled Mouse Button %d/%d]\n", ev.data, ev.state);
+				WriteScript(_("# [Unhandled Mouse Button %d/%d]\n"), ev.data, ev.state);
 			} else {
 				// TODO: Simplify to 'ClickMouseButton' where possible...
 				if (ev.state == UP) {
@@ -224,6 +228,7 @@ BOOL IsMouseMoveTooGranular(struct record_event ev)
 	if (lastEvent.type != MOUSEMOVE) {
 		return(FALSE); // must be mousemove -> mousemove to count
 	} else {
+		// TODO: Adjust
 		int threshold = (int)MAX_GRANULARITY / granularity - 1;
 		if (ev.delay < threshold) {
 			return(TRUE);

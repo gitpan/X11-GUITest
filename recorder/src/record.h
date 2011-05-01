@@ -1,6 +1,6 @@
-/* X11::GUITest ($Id: script_file.h,v 1.2 2011/04/25 03:27:25 ctrondlp Exp $)
+/* X11::GUITest ($Id: record.h,v 1.1 2011/04/30 22:06:08 ctrondlp Exp $)
  *  
- * Copyright (c) 2003-2011 Dennis K. Paulsen, All Rights Reserved.
+ * Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@cpan.org
  *
  * This program is free software; you can redistribute it and/or
@@ -17,16 +17,18 @@
  * along with this program; if not, see <http://www.gnu.org/licenses>.
  *
  */
-#ifndef SCRIPT_FILE_H
-#define SCRIPT_FILE_H
+#ifndef RECORD_H
+#define RECORD_H
+#include <X11/extensions/record.h>
+#include "record_event.h"
 
+int RecordEvents(void (*handleEvent)(struct record_event));
+void StopRecording(void);
 
-#define MAX_SCRIPT_BUFFER 2048
-
-BOOL OpenScript(char *scriptFile);
-void WriteScript(char *format, ...);
-void CloseScript(void);
-
-
-#endif /* #ifndef SCRIPT_FILE_H */
-
+void sigint_handler(int sig);
+void SetLastTime(void);
+void SetCurrentTime(void);
+void EventCallback(XPointer p, XRecordInterceptData *idata);
+long GetDelay(void); 
+ 
+#endif /* #ifndef RECORD_H */

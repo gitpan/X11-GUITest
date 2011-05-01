@@ -4,13 +4,12 @@ NAME
     Developed by Dennis K. Paulsen
 
 VERSION
-    0.23
+    0.24
 
     Updates are made available at the following sites:
 
-      http://sourceforge.net/projects/x11guitest (Primary) 
-      http://www.freshmeat.net (Linked)
-      http://www.cpan.org (Secondary)
+      http://sourceforge.net/projects/x11guitest 
+      http://www.cpan.org
 
     Please consult 'docs/Changes' for the list of changes between module
     revisions.
@@ -220,8 +219,6 @@ FUNCTIONS
             are all available through the :CONST export tag.
 
             zero is returned on failure, non-zero for success.
-
-    <Documentation Continued...>
 
     DefaultScreen
             Returns the screen number specified in the X display value used
@@ -562,13 +559,6 @@ FUNCTIONS
             zero is returned if parent couldn't be determined (i.e., root
             window).
 
-    GetScreenRes [SCREEN]
-            Returns the screen resolution. If no screen is specified, it is
-            taken from the value given when opening the X display. If the
-            screen (number) is invalid, the returned list will be empty.
-
-              my ($x, $y) = GetScreenRes();
-
     GetScreenDepth [SCREEN]
             Returns the color depth for the screen. If no screen is
             specified, it is taken from the value given when opening the X
@@ -578,12 +568,19 @@ FUNCTIONS
 
               my $depth = GetScreenDepth();
 
+    GetScreenRes [SCREEN]
+            Returns the screen resolution. If no screen is specified, it is
+            taken from the value given when opening the X display. If the
+            screen (number) is invalid, the returned list will be empty.
+
+              my ($x, $y) = GetScreenRes();
+
 OTHER DOCUMENTATION
-Available under the docs sub-directory.
-  Changes (Module Changes)
-  CodingStyle (Coding-Style Guidelines)
-  ToDo (ToDo List)
-  Copying (Copy of the GPL License)
+  Available under the docs sub-directory.
+    Changes (Module Changes)
+    CodingStyle (Coding-Style Guidelines)
+    ToDo (ToDo List)
+    Copying (Copy of the GPL License)
 COPYRIGHT
     Copyright(c) 2003-2011 Dennis K. Paulsen, All Rights Reserved. This
     program is free software; you can redistribute it and/or modify it under

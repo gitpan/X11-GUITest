@@ -1,7 +1,18 @@
-X11::GUITest ($Id: Changes,v 1.70 2011/04/25 03:27:25 ctrondlp Exp $)
+X11::GUITest ($Id: Changes,v 1.72 2011/05/01 21:01:40 ctrondlp Exp $)
 
 This is the list of module changes between revisions.
 --------------------------------------------------------------------
+
+0.24 Sun May 01 2011 16:50
+
+  - Reorganized source code and POD.
+
+  - Updated x11guirecord build to use autotools.
+
+  - Backend support added for internationalization.
+
+  - Alternate document formats is now an optional build step for
+    maintainer.
 
 0.23 Sun Apr 24 2011 22:30
 

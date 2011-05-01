@@ -1,4 +1,4 @@
-/* X11::GUITest ($Id: record.c,v 1.6 2011/04/25 03:27:25 ctrondlp Exp $)
+/* X11::GUITest ($Id: record.c,v 1.2 2011/05/01 10:50:59 ctrondlp Exp $)
  *  
  * Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@cpan.org
@@ -22,6 +22,7 @@
 #include <string.h>
 #include <signal.h>
 #include <unistd.h>
+#include <libintl.h>
 #include <sys/time.h>
 #include <X11/X.h>
 #include <X11/Xlib.h>
@@ -33,6 +34,7 @@
 #include <X11/StringDefs.h>
 #include "record_event.h"
 #include "record.h"
+#include "Common.h"
 
 static int shouldExit = 0;
 static struct timeval lastTime = {0};
@@ -57,20 +59,20 @@ int RecordEvents(void (*handleEvent)(struct record_event ev))
 
 	disp = XOpenDisplay(NULL);
  	if (disp == NULL) {
-		fprintf(stderr, "Unable to open display connection.\n");
+		fprintf(stderr, _("Unable to open display connection.\n"));
 		return 1;
 	}
 	XSynchronize(disp, False);
 
 	// Ensure extension available 
 	if (!XRecordQueryVersion(disp, &major, &minor)) {
-		fprintf(stderr, "The record extension is unavailable.\n");
+		fprintf(stderr, _("The record extension is unavailable.\n"));
 		return 1;
 	}
 
 	xrr = XRecordAllocRange();
 	if (xrr == NULL) {
-		fprintf(stderr, "Range allocation failed.\n");
+		fprintf(stderr, _("Range allocation failed.\n"));
 		return 1;
 	}
 
@@ -80,13 +82,13 @@ int RecordEvents(void (*handleEvent)(struct record_event ev))
 
 	rcon = XRecordCreateContext(disp, 0, &rcspec, 1, &xrr, 1);
 	if (!rcon) {
-		fprintf(stderr, "Unable to create context.\n");
+		fprintf(stderr, _("Unable to create context.\n"));
 		return 1;
 	}
 		
 	otherDisp = XOpenDisplay(NULL);
 	if (otherDisp == NULL) {
-		fprintf(stderr, "Unable to open other display connection.\n");
+		fprintf(stderr, _("Unable to open other display connection.\n"));
 		return 1;
 	}
 
@@ -96,7 +98,7 @@ int RecordEvents(void (*handleEvent)(struct record_event ev))
 
 	// Record...
 	if (!XRecordEnableContext(otherDisp, rcon, EventCallback, (XPointer)disp)) {
-		fprintf(stderr, "enable context failed\n");
+		fprintf(stderr, _("Enable context failed\n"));
 		return 1;
 	}
 	// ...until StopRecording() is called.
@@ -117,14 +119,14 @@ void StopRecording(void)
 void SetLastTime(void) 
 {
 	if (gettimeofday(&lastTime, NULL) != 0) {
-		fprintf(stderr, "unable to get time\n");
+		fprintf(stderr, _("unable to get time\n"));
 	}
 }
 
 void SetCurrentTime(void) 
 {
 	if (gettimeofday(&currentTime, NULL) != 0) {
-  		fprintf(stderr, "unable to get time\n");
+  		fprintf(stderr, _("unable to get time\n"));
 	}
 }
 

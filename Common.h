@@ -1,4 +1,4 @@
-/* X11::GUITest ($Id: Common.h,v 1.2 2011/04/25 03:27:25 ctrondlp Exp $)
+/* X11::GUITest ($Id: Common.h,v 1.4 2011/05/01 10:52:17 ctrondlp Exp $)
  *  
  * Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@cpan.org
@@ -20,8 +20,12 @@
 #ifndef COMMON_H 
 #define COMMON_H
 
+#define APP_VERSION "0.24"
+#define APP_TEXTDOMAIN "/usr/share/locale"
 
-#define APP_VERSION "0.23"
+#ifndef _
+#define _(str) gettext(str)
+#endif
 
 #ifndef TRUE
 #define TRUE (1)
@@ -39,8 +43,11 @@
 #ifndef ULONG
 #define ULONG unsigned long
 #endif
-
+#ifndef NUL
 #define NUL '\0'
+#endif
+#ifndef MAX_PATH
 #define MAX_PATH 255
+#endif
 
 #endif /* #ifndef COMMON_H */

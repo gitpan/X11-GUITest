@@ -1,4 +1,4 @@
-/* X11::GUITest ($Id: record.h,v 1.4 2011/04/25 03:27:25 ctrondlp Exp $)
+/* X11::GUITest ($Id: record_event.h,v 1.1 2011/04/30 22:06:08 ctrondlp Exp $)
  *  
  * Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@cpan.org
@@ -17,18 +17,20 @@
  * along with this program; if not, see <http://www.gnu.org/licenses>.
  *
  */
-#ifndef RECORD_H
-#define RECORD_H
-#include <X11/extensions/record.h>
-#include "record_event.h"
+#ifndef RECORD_EVENT_H
+#define RECORD_EVENT_H
 
-int RecordEvents(void (*handleEvent)(struct record_event));
-void StopRecording(void);
+typedef enum {NOTYPE, MOUSEBUTTON, KEY, MOUSEMOVE} EventType;
+typedef enum {NOSTATE, UP, DOWN } EventState;
 
-void sigint_handler(int sig);
-void SetLastTime(void);
-void SetCurrentTime(void);
-void EventCallback(XPointer p, XRecordInterceptData *idata);
-long GetDelay(void); 
- 
-#endif /* #ifndef RECORD_H */
+struct record_event {
+	EventType type;
+	EventState state;
+	unsigned long delay;
+	const char *dataname;
+	int data;
+	int posX;
+	int posY;
+};
+
+#endif /* #ifndef RECORD_EVENT_H */ 

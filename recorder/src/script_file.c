@@ -1,4 +1,4 @@
-/* X11::GUITest ($Id: script_file.c,v 1.4 2011/04/25 03:27:25 ctrondlp Exp $)
+/* X11::GUITest ($Id: script_file.c,v 1.2 2011/05/01 10:50:59 ctrondlp Exp $)
  *  
  * Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@cpan.org
@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <libintl.h>
 #include <sys/time.h>
 #include "Common.h"
 #include "script_file.h"
@@ -32,7 +33,7 @@ BOOL OpenScript(char *scriptFile)
 { 
 	sfp = fopen(scriptFile, "wt");
 	if (sfp == NULL) {
-		fprintf(stderr, "Unable to open script file '%s'!\n", scriptFile);	
+		fprintf(stderr, _("Unable to open script file '%s'!\n"), scriptFile);	
 		return FALSE;	
 	}
 	return TRUE;
@@ -41,7 +42,7 @@ BOOL OpenScript(char *scriptFile)
 void WriteScript(char *format, ...)
 {
 	if (sfp == NULL) {
-		fprintf(stderr, "Unable to write to script file!\n");	
+		fprintf(stderr, _("Unable to write to script file!\n"));	
 		return;
 	} 
 
