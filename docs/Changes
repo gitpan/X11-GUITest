@@ -1,7 +1,22 @@
-X11::GUITest ($Id: Changes,v 1.72 2011/05/01 21:01:40 ctrondlp Exp $)
+X11::GUITest ($Id: Changes 211 2011-05-21 14:06:02Z ctrondlp $)
 
 This is the list of module changes between revisions.
 --------------------------------------------------------------------
+
+0.25 Sat May 21 2011 09:00
+
+  - Added IsWindowCursor() function to determine if a window
+    has the specified cursor.
+
+  - Various recorder enhancements.
+
+  - Added -d (delaythreshold) option to recorder.   Allows for inclusion
+    of more/less granular event delays.
+     
+  - Added WaitSeconds() function, perhaps a little more intuitive then select.
+
+  - Support for mouse wheel scrolling, using M_DOWN and M_UP
+    constants.
 
 0.24 Sun May 01 2011 16:50
 
@@ -218,3 +233,4 @@ This is the list of module changes between revisions.
 0.10 Tue Mar 05 2003 18:00
 
   - Initial Release.
+

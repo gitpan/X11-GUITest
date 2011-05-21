@@ -1,4 +1,4 @@
-# X11::GUITest ($Id: GUITest.pm,v 1.60 2011/04/30 13:57:30 ctrondlp Exp $) 
+# X11::GUITest ($Id: GUITest.pm 211 2011-05-21 14:06:02Z ctrondlp $) 
 #  
 # Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
 # Email: ctrondlp@cpan.org
@@ -26,11 +26,11 @@ Developed by Dennis K. Paulsen
 
 =head1 VERSION
 
-0.24
+0.25
 
 Updates are made available at the following sites:
 
-  http://sourceforge.net/projects/x11guitest 
+  ttp://sourceforge.net/projects/x11guitest 
   http://www.cpan.org
 
 Please consult 'docs/Changes' for the list of changes between
@@ -73,6 +73,14 @@ details.
   make
   make test
   make install
+
+  # If you'd like to install the recorder, use these steps:
+  cd recorder
+  ./autogen.sh
+  ./configure
+  make
+  make install
+  x11guirecord --help
 
 =head1 SYNOPSIS
 
@@ -149,6 +157,7 @@ require DynaLoader;
 	IsKeyPressed
 	IsMouseButtonPressed
 	IsWindow
+	IsWindowCursor
 	IsWindowViewable
 	LowerWindow
 	MoveMouseAbs
@@ -171,6 +180,7 @@ require DynaLoader;
 	SetWindowName
 	StartApp
 	UnIconifyWindow
+	WaitSeconds
 	WaitWindowClose
 	WaitWindowLike
 	WaitWindowViewable
@@ -179,12 +189,12 @@ require DynaLoader;
 # Tags (:ALL, etc.)
 %EXPORT_TAGS = (
 	'ALL' => \@EXPORT_OK,
-	'CONST' => [qw(DEF_WAIT M_LEFT M_MIDDLE M_RIGHT M_BTN1 M_BTN2 M_BTN3 M_BTN4 M_BTN5)],
+	'CONST' => [qw(DEF_WAIT M_LEFT M_MIDDLE M_RIGHT M_UP M_DOWN M_BTN1 M_BTN2 M_BTN3 M_BTN4 M_BTN5 XC_X_CURSOR XC_ARROW XC_BASED_ARROW_DOWN XC_BASED_ARROW_UP XC_BOAT XC_BOGOSITY XC_BOTTOM_LEFT_CORNER XC_BOTTOM_RIGHT_CORNER XC_BOTTOM_SIDE XC_BOTTOM_TEE XC_BOX_SPIRAL XC_CENTER_PTR XC_CIRCLE XC_CLOCK XC_COFFEE_MUG XC_CROSS XC_CROSS_REVERSE XC_CROSSHAIR XC_DIAMOND_CROSS XC_DOT XC_DOTBOX XC_DOUBLE_ARROW XC_DRAFT_LARGE XC_DRAFT_SMALL XC_DRAPED_BOX XC_EXCHANGE XC_FLEUR XC_GOBBLER XC_GUMBY XC_HAND1 XC_HAND2 XC_HEART XC_ICON XC_IRON_CROSS XC_LEFT_PTR XC_LEFT_SIDE XC_LEFT_TEE XC_LEFTBUTTON XC_LL_ANGLE XC_LR_ANGLE XC_MAN XC_MIDDLEBUTTON XC_MOUSE XC_PENCIL XC_PIRATE XC_PLUS XC_QUESTION_ARROW XC_RIGHT_PTR XC_RIGHT_SIDE XC_RIGHT_TEE XC_RIGHTBUTTON XC_RTL_LOGO XC_SAILBOAT XC_SB_DOWN_ARROW XC_SB_H_DOUBLE_ARROW XC_SB_LEFT_ARROW XC_SB_RIGHT_ARROW XC_SB_UP_ARROW XC_SB_V_DOUBLE_ARROW XC_SHUTTLE XC_SIZING XC_SPIDER XC_SPRAYCAN XC_STAR XC_TARGET XC_TCROSS XC_TOP_LEFT_ARROW XC_TOP_LEFT_CORNER XC_TOP_RIGHT_CORNER XC_TOP_SIDE XC_TOP_TEE XC_TREK XC_UL_ANGLE XC_UMBRELLA XC_UR_ANGLE XC_WATCH XC_XTERM)],
 );
 
 Exporter::export_ok_tags(keys %EXPORT_TAGS);
 
-$VERSION = '0.24';
+$VERSION = '0.25';
 
 # Module Constants 
 sub DEF_WAIT() { 10; }
@@ -197,6 +207,86 @@ sub M_BTN5() { 5; }
 sub M_LEFT() { M_BTN1; }
 sub M_MIDDLE() { M_BTN2; }
 sub M_RIGHT() { M_BTN3; }
+sub M_UP() { M_BTN4; }
+sub M_DOWN() { M_BTN5; }
+# Cursors
+sub XC_X_CURSOR() { 0 };
+sub XC_ARROW() { 2 };
+sub XC_BASED_ARROW_DOWN() { 4 };
+sub XC_BASED_ARROW_UP() { 6 };
+sub XC_BOAT() { 8 };
+sub XC_BOGOSITY() { 10 };
+sub XC_BOTTOM_LEFT_CORNER() { 12 };
+sub XC_BOTTOM_RIGHT_CORNER() { 14 };
+sub XC_BOTTOM_SIDE() { 16 };
+sub XC_BOTTOM_TEE() { 18 };
+sub XC_BOX_SPIRAL() { 20 };
+sub XC_CENTER_PTR() { 22 };
+sub XC_CIRCLE() { 24 };
+sub XC_CLOCK() { 26 };
+sub XC_COFFEE_MUG() { 28 };
+sub XC_CROSS() { 30 };
+sub XC_CROSS_REVERSE() { 32 };
+sub XC_CROSSHAIR() { 34 };
+sub XC_DIAMOND_CROSS() { 36 };
+sub XC_DOT() { 38 };
+sub XC_DOTBOX() { 40 };
+sub XC_DOUBLE_ARROW() { 42 };
+sub XC_DRAFT_LARGE() { 44 };
+sub XC_DRAFT_SMALL() { 46 };
+sub XC_DRAPED_BOX() { 48 };
+sub XC_EXCHANGE() { 50 };
+sub XC_FLEUR() { 52 };
+sub XC_GOBBLER() { 54 };
+sub XC_GUMBY() { 56 };
+sub XC_HAND1() { 58 };
+sub XC_HAND2() { 60 };
+sub XC_HEART() { 62 };
+sub XC_ICON() { 64 };
+sub XC_IRON_CROSS() { 66 };
+sub XC_LEFT_PTR() { 68 };
+sub XC_LEFT_SIDE() { 70 };
+sub XC_LEFT_TEE() { 72 };
+sub XC_LEFTBUTTON() { 74 };
+sub XC_LL_ANGLE() { 76 };
+sub XC_LR_ANGLE() { 78 };
+sub XC_MAN() { 80 };
+sub XC_MIDDLEBUTTON() { 82 };
+sub XC_MOUSE() { 84 };
+sub XC_PENCIL() { 86 };
+sub XC_PIRATE() { 88 };
+sub XC_PLUS() { 90 };
+sub XC_QUESTION_ARROW() { 92 };
+sub XC_RIGHT_PTR() { 94 };
+sub XC_RIGHT_SIDE() { 96 };
+sub XC_RIGHT_TEE() { 98 };
+sub XC_RIGHTBUTTON() { 100 };
+sub XC_RTL_LOGO() { 102 };
+sub XC_SAILBOAT() { 104 };
+sub XC_SB_DOWN_ARROW() { 106 };
+sub XC_SB_H_DOUBLE_ARROW() { 108 };
+sub XC_SB_LEFT_ARROW() { 110 };
+sub XC_SB_RIGHT_ARROW() { 112 };
+sub XC_SB_UP_ARROW() { 114 };
+sub XC_SB_V_DOUBLE_ARROW() { 116 };
+sub XC_SHUTTLE() { 118 };
+sub XC_SIZING() { 120 };
+sub XC_SPIDER() { 122 };
+sub XC_SPRAYCAN() { 124 };
+sub XC_STAR() { 126 };
+sub XC_TARGET() { 128 };
+sub XC_TCROSS() { 130 };
+sub XC_TOP_LEFT_ARROW() { 132 };
+sub XC_TOP_LEFT_CORNER() { 134 };
+sub XC_TOP_RIGHT_CORNER() { 136 };
+sub XC_TOP_SIDE() { 138 };
+sub XC_TOP_TEE() { 140 };
+sub XC_TREK() { 142 };
+sub XC_UL_ANGLE() { 144 };
+sub XC_UMBRELLA() { 146 };
+sub XC_UR_ANGLE() { 148 };
+sub XC_WATCH() { 150 };
+sub XC_XTERM() { 152 };
 
 # Module Variables
 
@@ -403,6 +493,22 @@ sub WaitWindowClose {
 	return(0);
 }
 
+=over 8
+
+=item WaitSeconds SECONDS
+
+Pauses execution for the specified amount of seconds.
+
+  WaitSeconds(0.5); # Wait 1/2 second
+  WaitSeconds(3); # Wait 3 seconds
+
+=back
+
+=cut
+
+sub WaitSeconds {
+	select(undef, undef, undef, shift);
+}
 
 =over 8
 
@@ -610,9 +716,10 @@ sub RunApp {
 =item ClickMouseButton BUTTON
 
 Clicks the specified mouse button.  Available mouse buttons
-are: M_LEFT, M_MIDDLE, M_RIGHT.  Also, you could use the logical
-Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5.  These
-are all available through the :CONST export tag.
+are: M_LEFT, M_MIDDLE, M_RIGHT, M_DOWN, M_UP.  Also, you could
+use the logical Id for the button: M_BTN1, M_BTN2, M_BTN3,
+M_BTN4, M_BTN5.  These are all available through the :CONST
+export tag.
 
 zero is returned on failure, non-zero for success.
 
@@ -655,6 +762,8 @@ sub END {
 Returns the screen number specified in the X display value used to open the
 display.
 
+Leverages the Xlib macro of the same name. 
+
 =back
 
 =cut
@@ -664,6 +773,8 @@ display.
 =item ScreenCount
 
 Returns the number of screens in the X display specified when opening it.
+
+Leverages the Xlib macro of the same name. 
 
 =back
 
@@ -799,9 +910,9 @@ cursor.
 =item PressMouseButton BUTTON
 
 Presses the specified mouse button.  Available mouse buttons
-are: M_LEFT, M_MIDDLE, M_RIGHT.  Also, you could use the logical
-Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5.  These
-are all available through the :CONST export tag.
+are: M_LEFT, M_MIDDLE, M_RIGHT, M_DOWN, M_UP.  Also, you could
+use the logical Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, 
+M_BTN5.  These are all available through the :CONST export tag.
 
 zero is returned on failure, non-zero for success.
 
@@ -814,9 +925,9 @@ zero is returned on failure, non-zero for success.
 =item ReleaseMouseButton BUTTON
 
 Releases the specified mouse button.  Available mouse buttons
-are: M_LEFT, M_MIDDLE, M_RIGHT.  Also, you could use the logical
-Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5.  These
-are all available through the :CONST export tag.
+are: M_LEFT, M_MIDDLE, M_RIGHT, M_DOWN, M_UP.  Also, you could
+use the logical Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4,
+M_BTN5.  These are all available through the :CONST export tag.
 
 zero is returned on failure, non-zero for success.
 
@@ -870,7 +981,7 @@ Quote Special Characters
         SendKeys('{+}'); # +
         SendKeys('{#}'); # #
 
-        You can also use QuoteStringForSendKeys to perform quoting.
+        You can also use QuoteStringForSendKeys (QSfSK) to perform quoting.
 
 Aliased Key Names
 
@@ -1070,6 +1181,101 @@ looks like a window.
 
 zero is returned if the specified window Id is for a window that
 isn't viewable.  non-zero is returned if the window is viewable.
+
+=back
+
+=cut
+
+=over 8
+
+=item IsWindowCursor WINDOWID CURSOR
+
+Determines if the specified window has the specified cursor.
+
+zero is returned for false, non-zero for true.
+
+The following cursors are available through the :CONST export tag.
+
+    Name
+    -------------------
+	XC_NUM_GLYPHS
+	XC_X_CURSOR
+	XC_ARROW
+	XC_BASED_ARROW_DOWN
+	XC_BASED_ARROW_UP
+	XC_BOAT
+	XC_BOGOSITY
+	XC_BOTTOM_LEFT_CORNER
+	XC_BOTTOM_RIGHT_CORNER
+	XC_BOTTOM_SIDE
+	XC_BOTTOM_TEE
+	XC_BOX_SPIRAL
+	XC_CENTER_PTR
+	XC_CIRCLE
+	XC_CLOCK
+	XC_COFFEE_MUG
+	XC_CROSS
+	XC_CROSS_REVERSE
+	XC_CROSSHAIR
+	XC_DIAMOND_CROSS
+	XC_DOT
+	XC_DOTBOX
+	XC_DOUBLE_ARROW
+	XC_DRAFT_LARGE
+	XC_DRAFT_SMALL
+	XC_DRAPED_BOX
+	XC_EXCHANGE
+	XC_FLEUR
+	XC_GOBBLER
+	XC_GUMBY
+	XC_HAND1
+	XC_HAND2
+	XC_HEART
+	XC_ICON
+	XC_IRON_CROSS
+	XC_LEFT_PTR
+	XC_LEFT_SIDE
+	XC_LEFT_TEE
+	XC_LEFTBUTTON
+	XC_LL_ANGLE
+	XC_LR_ANGLE
+	XC_MAN
+	XC_MIDDLEBUTTON
+	XC_MOUSE
+	XC_PENCIL
+	XC_PIRATE
+	XC_PLUS
+	XC_QUESTION_ARROW
+	XC_RIGHT_PTR
+	XC_RIGHT_SIDE
+	XC_RIGHT_TEE
+	XC_RIGHTBUTTON
+	XC_RTL_LOGO
+	XC_SAILBOAT
+	XC_SB_DOWN_ARROW
+	XC_SB_H_DOUBLE_ARROW
+	XC_SB_LEFT_ARROW
+	XC_SB_RIGHT_ARROW
+	XC_SB_UP_ARROW
+	XC_SB_V_DOUBLE_ARROW
+	XC_SHUTTLE
+	XC_SIZING
+	XC_SPIDER
+	XC_SPRAYCAN
+	XC_STAR
+	XC_TARGET
+	XC_TCROSS
+	XC_TOP_LEFT_ARROW
+	XC_TOP_LEFT_CORNER
+	XC_TOP_RIGHT_CORNER
+	XC_TOP_SIDE
+	XC_TOP_TEE
+	XC_TREK
+	XC_UL_ANGLE
+	XC_UMBRELLA
+	XC_UR_ANGLE
+	XC_WATCH
+	XC_XTERM
 
 =back
 

@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# X11::GUITest ($Id: Makefile.PL,v 1.25 2011/04/29 02:08:27 ctrondlp Exp $)
+# X11::GUITest ($Id: Makefile.PL 203 2011-05-15 02:03:11Z ctrondlp $)
 
 use strict;
 use warnings;
@@ -25,7 +25,7 @@ WriteMakefile(
 		'MAN3EXT' => '3pm'
 	) : (),
 	'MAN3PODS' => {'GUITest.pm' => '$(INST_MAN3DIR)/X11::GUITest.$(MAN3EXT)'},
-	'LIBS'  => ['-L/usr/X11R6/lib -L/usr/X/lib -lXtst -lXext -lX11'], # e.g., '-lm'
+	'LIBS'  => GetLibs(), # e.g., '-lm'
 	# To work around an incompatibility between the XTest and the Xinerama
 	# (X server) extensions, use "-DX11_GUITEST_USING_XINERAMA".
 	'DEFINE' => '-DNDEBUG -DX11_GUITEST_ALT_L_FALLBACK_META_L', # e.g., '-DHAVE_SOMETHING'
@@ -35,6 +35,16 @@ WriteMakefile(
 	'OPTIMIZE' => '-O2'
 );
 
+
+sub GetLibs {
+	my $un = `uname -a 2>&1` || "";
+	if ($un =~ /x86_64|amd64/i) {
+		# In case of x64, lets make sure we use x64 libs, system might have both.
+		return ['-L/usr/X11R6/lib64 -L/usr/X/lib64 -lXtst -lXext -lX11'];
+	} else {
+		return ['-L/usr/X11R6/lib -L/usr/X/lib -lXtst -lXext -lX11'];
+	}
+}
 
 # Subroutine: BuildDocumentation 
 # Description: This function is implemented to generate the
@@ -54,8 +64,7 @@ sub BuildDocumentation {
 	system("pod2html --infile=$podfile --outfile=docs/X11-GUITest.html");
 	system("cp -f docs/X11-GUITest.txt README");
 
-	# Clean up misc. files.  Leaving X11-GUITest.POD~ around for
-	# Makefile use
+	# Cleanup
 	unlink <pod*.x??>;
 	unlink <pod*.tmp>;
 	

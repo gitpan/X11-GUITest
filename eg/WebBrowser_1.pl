@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #----------------------------------------------------------------------#
-# X11::GUITest ($Id: WebBrowser_1.pl,v 1.2 2003/08/17 22:44:15 ctrondlp Exp $)
+# X11::GUITest ($Id: WebBrowser_1.pl 206 2011-05-15 13:24:11Z ctrondlp $)
 # Notes: Basic interaction with Mozilla (Web Browser).  Tested using
 #        v1.2.1 of the application under the English language.
 #----------------------------------------------------------------------#
@@ -36,14 +36,14 @@ SetEventSendDelay(20);
 # Make sure Mozilla isn't already running
 # even though we could find a way around
 # other instances of it.
-if (FindWindowLike('Mozilla')) {
-	die('Mozilla window is already open!');
+if (FindWindowLike('Mozilla Firefox')) {
+	die('Mozilla Firefox window is already open!');
 }
 
 # Start the application
-StartApp('mozilla');
+StartApp('firefox');
 # Wait at most 20 seconds for it to come up
-($MainWin) = WaitWindowViewable('Mozilla', undef, 20) or die('Could not find Mozilla window!');
+($MainWin) = WaitWindowViewable('Mozilla Firefox', undef, 20) or die('Could not find browser window!');
 
 # If an alert window presents itself within 5 seconds, close it
 if ( (($AlertWin) = WaitWindowViewable('Alert', undef, 5)) ) {
@@ -64,7 +64,7 @@ sleep(15);
 SendKeys('%(h)a'); # Alt-h, a
 ($AboutWin) = WaitWindowViewable('About.*Mozilla') or die('Could not find About window!');
 # Now close it
-SendKeys('^(w)');
+SendKeys('%(c)');
 WaitWindowClose($AboutWin) or die('Could not close About window!');
 
 # Close main Mozilla window

@@ -1,4 +1,4 @@
-/* X11::GUITest ($Id: record.c,v 1.2 2011/05/01 10:50:59 ctrondlp Exp $)
+/* X11::GUITest ($Id: record.c 203 2011-05-15 02:03:11Z ctrondlp $)
  *  
  * Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@cpan.org
@@ -36,7 +36,7 @@
 #include "record.h"
 #include "Common.h"
 
-static int shouldExit = 0;
+static BOOL shouldExit = FALSE;
 static struct timeval lastTime = {0};
 static struct timeval currentTime = {0};
 static void (*HandleEvent)(struct record_event ev);
@@ -109,10 +109,10 @@ int RecordEvents(void (*handleEvent)(struct record_event ev))
 
 void StopRecording(void)
 {
-	shouldExit = 1;
+	shouldExit = TRUE;
 	XRecordDisableContext(disp, rcon);
 	XRecordFreeContext(disp, rcon);
-	//XCloseDisplay(otherDisp); // Note: Blocks 
+	//XCloseDisplay(otherDisp); // Note: N/A, blocks indefinitely 
 	XCloseDisplay(disp);
 }
 

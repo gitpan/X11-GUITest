@@ -4,11 +4,11 @@ NAME
     Developed by Dennis K. Paulsen
 
 VERSION
-    0.24
+    0.25
 
     Updates are made available at the following sites:
 
-      http://sourceforge.net/projects/x11guitest 
+      ttp://sourceforge.net/projects/x11guitest 
       http://www.cpan.org
 
     Please consult 'docs/Changes' for the list of changes between module
@@ -49,6 +49,14 @@ INSTALLATION
       make
       make test
       make install
+
+      # If you'd like to install the recorder, use these steps:
+      cd recorder
+      ./autogen.sh
+      ./configure
+      make
+      make install
+      x11guirecord --help
 
 SYNOPSIS
     For additional examples, please look under the 'eg/' sub-directory from
@@ -152,6 +160,12 @@ FUNCTIONS
 
             zero is returned if window is not gone, non-zero if it is gone.
 
+    WaitSeconds SECONDS
+            Pauses execution for the specified amount of seconds.
+
+              WaitSeconds(0.5); # Wait 1/2 second
+              WaitSeconds(3); # Wait 3 seconds
+
     ClickWindow WINDOWID [, X Offset] [, Y Offset] [, Button]
             Clicks on the specified window with the mouse.
 
@@ -214,9 +228,9 @@ FUNCTIONS
 
     ClickMouseButton BUTTON
             Clicks the specified mouse button. Available mouse buttons are:
-            M_LEFT, M_MIDDLE, M_RIGHT. Also, you could use the logical Id
-            for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5. These
-            are all available through the :CONST export tag.
+            M_LEFT, M_MIDDLE, M_RIGHT, M_DOWN, M_UP. Also, you could use the
+            logical Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4,
+            M_BTN5. These are all available through the :CONST export tag.
 
             zero is returned on failure, non-zero for success.
 
@@ -224,9 +238,13 @@ FUNCTIONS
             Returns the screen number specified in the X display value used
             to open the display.
 
+            Leverages the Xlib macro of the same name.
+
     ScreenCount
             Returns the number of screens in the X display specified when
             opening it.
+
+            Leverages the Xlib macro of the same name.
 
     SetEventSendDelay DELAYINMILLISECONDS
             Sets the milliseconds of delay between events being sent to the
@@ -286,17 +304,18 @@ FUNCTIONS
 
     PressMouseButton BUTTON
             Presses the specified mouse button. Available mouse buttons are:
-            M_LEFT, M_MIDDLE, M_RIGHT. Also, you could use the logical Id
-            for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5. These
-            are all available through the :CONST export tag.
+            M_LEFT, M_MIDDLE, M_RIGHT, M_DOWN, M_UP. Also, you could use the
+            logical Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4,
+            M_BTN5. These are all available through the :CONST export tag.
 
             zero is returned on failure, non-zero for success.
 
     ReleaseMouseButton BUTTON
             Releases the specified mouse button. Available mouse buttons
-            are: M_LEFT, M_MIDDLE, M_RIGHT. Also, you could use the logical
-            Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, M_BTN5. These
-            are all available through the :CONST export tag.
+            are: M_LEFT, M_MIDDLE, M_RIGHT, M_DOWN, M_UP. Also, you could
+            use the logical Id for the button: M_BTN1, M_BTN2, M_BTN3,
+            M_BTN4, M_BTN5. These are all available through the :CONST
+            export tag.
 
             zero is returned on failure, non-zero for success.
 
@@ -345,7 +364,7 @@ FUNCTIONS
                     SendKeys('{+}'); # +
                     SendKeys('{#}'); # #
 
-                    You can also use QuoteStringForSendKeys to perform quoting.
+                    You can also use QuoteStringForSendKeys (QSfSK) to perform quoting.
 
             Aliased Key Names
 
@@ -502,6 +521,95 @@ FUNCTIONS
     IsWindowViewable WINDOWID
             zero is returned if the specified window Id is for a window that
             isn't viewable. non-zero is returned if the window is viewable.
+
+    IsWindowCursor WINDOWID CURSOR
+            Determines if the specified window has the specified cursor.
+
+            zero is returned for false, non-zero for true.
+
+            The following cursors are available through the :CONST export
+            tag.
+
+                Name
+                -------------------
+                    XC_NUM_GLYPHS
+                    XC_X_CURSOR
+                    XC_ARROW
+                    XC_BASED_ARROW_DOWN
+                    XC_BASED_ARROW_UP
+                    XC_BOAT
+                    XC_BOGOSITY
+                    XC_BOTTOM_LEFT_CORNER
+                    XC_BOTTOM_RIGHT_CORNER
+                    XC_BOTTOM_SIDE
+                    XC_BOTTOM_TEE
+                    XC_BOX_SPIRAL
+                    XC_CENTER_PTR
+                    XC_CIRCLE
+                    XC_CLOCK
+                    XC_COFFEE_MUG
+                    XC_CROSS
+                    XC_CROSS_REVERSE
+                    XC_CROSSHAIR
+                    XC_DIAMOND_CROSS
+                    XC_DOT
+                    XC_DOTBOX
+                    XC_DOUBLE_ARROW
+                    XC_DRAFT_LARGE
+                    XC_DRAFT_SMALL
+                    XC_DRAPED_BOX
+                    XC_EXCHANGE
+                    XC_FLEUR
+                    XC_GOBBLER
+                    XC_GUMBY
+                    XC_HAND1
+                    XC_HAND2
+                    XC_HEART
+                    XC_ICON
+                    XC_IRON_CROSS
+                    XC_LEFT_PTR
+                    XC_LEFT_SIDE
+                    XC_LEFT_TEE
+                    XC_LEFTBUTTON
+                    XC_LL_ANGLE
+                    XC_LR_ANGLE
+                    XC_MAN
+                    XC_MIDDLEBUTTON
+                    XC_MOUSE
+                    XC_PENCIL
+                    XC_PIRATE
+                    XC_PLUS
+                    XC_QUESTION_ARROW
+                    XC_RIGHT_PTR
+                    XC_RIGHT_SIDE
+                    XC_RIGHT_TEE
+                    XC_RIGHTBUTTON
+                    XC_RTL_LOGO
+                    XC_SAILBOAT
+                    XC_SB_DOWN_ARROW
+                    XC_SB_H_DOUBLE_ARROW
+                    XC_SB_LEFT_ARROW
+                    XC_SB_RIGHT_ARROW
+                    XC_SB_UP_ARROW
+                    XC_SB_V_DOUBLE_ARROW
+                    XC_SHUTTLE
+                    XC_SIZING
+                    XC_SPIDER
+                    XC_SPRAYCAN
+                    XC_STAR
+                    XC_TARGET
+                    XC_TCROSS
+                    XC_TOP_LEFT_ARROW
+                    XC_TOP_LEFT_CORNER
+                    XC_TOP_RIGHT_CORNER
+                    XC_TOP_SIDE
+                    XC_TOP_TEE
+                    XC_TREK
+                    XC_UL_ANGLE
+                    XC_UMBRELLA
+                    XC_UR_ANGLE
+                    XC_WATCH
+                    XC_XTERM
 
     MoveWindow WINDOWID, X, Y
             Moves the window to the specified location.

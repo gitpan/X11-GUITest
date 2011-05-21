@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #----------------------------------------------------------------------#
-# X11::GUITest ($Id: TextEditor_1.pl,v 1.6 2008/09/06 20:45:38 ctrondlp Exp $)
+# X11::GUITest ($Id: TextEditor_1.pl 203 2011-05-15 02:03:11Z ctrondlp $)
 # Notes: Example of interaction with gedit (Text Editor).  Tested with
 # 		 version 2.2.0 of the editor application using the English
 #		 language.

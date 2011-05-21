@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #-----------------------------------------------------------------------------#
-# X11::GUITest ($Id: FindWindowLike.pl,v 1.2 2003/11/30 16:59:37 ctrondlp Exp $)
+# X11::GUITest ($Id: FindWindowLike.pl 203 2011-05-15 02:03:11Z ctrondlp $)
 # Notes: Example usage of FindWindowLike
 #-----------------------------------------------------------------------------#
 

@@ -1,4 +1,4 @@
-.\" $Id: x11guirecord.1,v 1.3 2011/05/01 17:47:49 ctrondlp Exp $
+.\" $Id: x11guirecord.1 207 2011-05-15 13:32:40Z ctrondlp $
 .\" 
 .TH "x11guirecord" "1" "x11guirecord 0.24" "Dennis K. Paulsen" ""
 .SH "NAME"
@@ -24,6 +24,9 @@ Specifies the script file to record to
 .TP 
 .B [\-w \fIwait\fP]
 Seconds to wait before recording
+.TP 
+.B [\-d \fIdelaythreshold\fP]
+Event delay (ms) threshold to account for / record (default: 50)
 .TP 
 .B [\-e \fIexitkey\fP]
 Exit key to stop recording (default: ESC)

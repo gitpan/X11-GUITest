@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# X11::GUITest ($Id: test.t,v 1.28 2011/04/29 02:08:27 ctrondlp Exp $)
+# X11::GUITest ($Id: test.t 203 2011-05-15 02:03:11Z ctrondlp $)
 # Note: Functions that might be too intrusive are not checked
 
 BEGIN {

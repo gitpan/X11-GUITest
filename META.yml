@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               X11-GUITest
-version:            0.24
+version:            0.25
 abstract:           Collection of functions for X11 GUI testing/interaction.
 author:
     - Dennis K. Paulsen <ctrondlp@cpan.org>

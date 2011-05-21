@@ -1,4 +1,4 @@
-/* X11::GUITest ($Id: main.c,v 1.3 2011/05/01 17:47:49 ctrondlp Exp $)
+/* X11::GUITest ($Id: main.c 208 2011-05-15 13:37:15Z ctrondlp $)
  *  
  * Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@cpan.org
@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <popt.h>
+#include <math.h>
 #include <unistd.h>
 #include <libintl.h>
 #include <X11/Xutil.h>
@@ -35,9 +36,10 @@
 static char *scriptFile = NULL;
 static char *exitKey = "ESC";
 static KeySym exitKeySym = 0;
-static int excludeDelays = 0;
-static int waitSeconds = 1;
-static int granularity = MAX_GRANULARITY; // TODO: use
+static BOOL excludeDelays = FALSE;
+static int waitSeconds = DEFAULT_WAIT_SECS;
+static int delayThresholdMs = DEFAULT_DELAY_MS;
+static int granularity = MAX_GRANULARITY;
 static struct record_event lastEvent = {0};
 static char buttonName[MAX_MBUTTON_NAME] = "\0";
 static char keyBuffer[MAX_KEY_BUFFER] = "\0";
@@ -45,7 +47,7 @@ static char keyBuffer[MAX_KEY_BUFFER] = "\0";
 
 int main (int argc, char *argv[]) 
 {
-	poptContext	optCon;
+	poptContext	optCon = {0};
 
 	// International support
 	setlocale(LC_MESSAGES, "");
@@ -54,11 +56,12 @@ int main (int argc, char *argv[])
 	
 	// Handle Args
 	struct poptOption optTbl[] = {
-		{"script", 's', POPT_ARG_STRING, &scriptFile, 0, _("Script file"), NULL},
+		{"script", 's', POPT_ARG_STRING, &scriptFile, 0, _("Script file to create"), NULL},
 		{"wait", 'w', POPT_ARG_INT, &waitSeconds, 0, _("Seconds to wait before recording"), NULL},
+		{"delaythreshold", 'd', POPT_ARG_INT, &delayThresholdMs, 0, _("Event delay (ms) threshold to account for / record (default: 50)"), NULL},
 		{"exitkey", 'e', POPT_ARG_STRING, &exitKey, 0, _("Exit key to stop recording (default: ESC)"), NULL},
 		{"nodelay", 'n', POPT_ARG_NONE, &excludeDelays, 0, _("Don't include user delays"), NULL},
-		{"granularity", 'g', POPT_ARG_NONE, &granularity, 0, _("Level of granularity (mouse move frequency, default: 10 out of 1-10)"), NULL},
+		{"granularity", 'g', POPT_ARG_INT, &granularity, 0, _("Level of granularity (mouse move frequency, default: 10 out of 1-10)"), NULL},
 		POPT_AUTOHELP
 		{NULL, 0, 0, NULL, 0}
 	};
@@ -66,6 +69,7 @@ int main (int argc, char *argv[])
 	while (poptGetNextOpt(optCon) >= 0) {}
 	poptFreeContext(optCon);
 
+	// Check arguments
 	if (scriptFile == NULL || !*scriptFile) {
 		fprintf(stderr, _("No script file specified.\n"));
 		exit(1);
@@ -74,7 +78,7 @@ int main (int argc, char *argv[])
 		fprintf(stderr, _("Invalid exit key defined.\n"));
 		exit(1);
 	}
-	if (waitSeconds <= 0 || waitSeconds > MAX_WAIT_SECONDS) {
+	if (waitSeconds < MIN_WAIT_SECONDS || waitSeconds > MAX_WAIT_SECONDS) {
 		fprintf(stderr, _("Invalid wait defined (supplied %d, but needs 1-%d).\n"), 
 				waitSeconds, MAX_WAIT_SECONDS);
 		exit(1);
@@ -84,17 +88,22 @@ int main (int argc, char *argv[])
 				granularity, MIN_GRANULARITY, MAX_GRANULARITY);
 		exit(1);
 	}
-	if (!OpenScript(scriptFile)) {
-		fprintf(stderr, _("Unable to open script file '%s'!\n"), scriptFile);	
+	if (delayThresholdMs < MIN_DELAY_MS || delayThresholdMs > MAX_DELAY_MS) {
+		fprintf(stderr, _("Invalid delay theshold defined (supplied %d, but needs %d-%d).\n"), 
+				delayThresholdMs, MIN_DELAY_MS, MAX_DELAY_MS);
 		exit(1);
 	}
 
+	if (!OpenScript(scriptFile)) {
+		exit(1);
+	}
+
+	// Starting up...
 	usleep(waitSeconds * 1000000);
 	printf(_("Recording Started, press %s to exit.\n"), exitKey);
 
 	WriteScript("#!/usr/bin/perl\n\n");
 	WriteScript("use X11::GUITest qw/:ALL/;\n\n");
-	
 	WriteScript(_("\n# Begin (Recorder Version %s).\n"), APP_VERSION);
 
 	////
@@ -108,7 +117,7 @@ int main (int argc, char *argv[])
 	exit(0);
 }
 
-BOOL GetMouseButtonFromIndex(int index, char *button)
+static BOOL GetMouseButtonFromIndex(int index, char *button)
 {
 	if (button == NULL) {
 		return FALSE;
@@ -121,6 +130,10 @@ BOOL GetMouseButtonFromIndex(int index, char *button)
 		strcpy(button, "M_MIDDLE");
 	} else if (index == 3) {
 		strcpy(button, "M_RIGHT");
+	} else if (index == 4) {
+		strcpy(button, "M_UP");
+	} else if (index == 5) {
+		strcpy(button, "M_DOWN");
 	} else {
 		return FALSE;
 	}
@@ -128,20 +141,20 @@ BOOL GetMouseButtonFromIndex(int index, char *button)
 	return TRUE;
 }
 
-void HandleDelay(unsigned long delay)
+static void HandleDelay(unsigned long delay)
 {
-	if (excludeDelays == 0) {
-		if (delay > MIN_DELAY_MS) {	
-			float secs = ((float)delay / 1000);
-			WriteScript("select(undef, undef, undef, %0.3f);\n", secs);
+	if (excludeDelays == FALSE) {
+		if (delay > delayThresholdMs) {	
+			float secs = ((float)delay / 1000); // ms to secs
+			WriteScript("WaitSeconds(%0.3f);\n", secs);
 		}
 	}
 }
 
-void HandleKeyBuffer(BOOL force)
+static void HandleKeyBuffer(BOOL forceKeyFlush)
 {
 	int len = strlen(keyBuffer);
-	if (force || len >= KEY_BUFFER_THRESHOLD) {
+	if (forceKeyFlush || len >= KEY_BUFFER_THRESHOLD) {
 		if (len > 0) {
 			WriteScript("SendKeys('%s');\n", keyBuffer);
 			*keyBuffer = '\0'; // clear
@@ -149,14 +162,13 @@ void HandleKeyBuffer(BOOL force)
 	}	
 }
 
-void ProcessEvent(struct record_event ev) 
+static void ProcessEvent(struct record_event ev) 
 {
 	if (ev.type == KEY) {
-		BOOL flushKeys = (ev.delay > MIN_KEYDELAY_MS);
-		HandleKeyBuffer(flushKeys);
-		if (flushKeys) {
-			HandleDelay(ev.delay);
-		}
+		// TODO: Granular delay between buffered key events
+		BOOL forceKeyFlush = (ev.delay > MAX_KEYDELAY_BEFOREFLUSH_MS);
+		HandleKeyBuffer(forceKeyFlush);
+		HandleDelay(ev.delay);
 		
 		// Are we exiting?
 		if (ev.data == exitKeySym) {
@@ -169,7 +181,7 @@ void ProcessEvent(struct record_event ev)
 		if (nam != NULL) {
 			const char *mod = GetModifierCode(ev.data);
 			if (mod != NULL) {
-				// handle modifiers
+				//// handle modifiers
 				if (ev.state == DOWN) {
 					strcat(keyBuffer, mod);
 					strcat(keyBuffer, "(");
@@ -177,7 +189,7 @@ void ProcessEvent(struct record_event ev)
 					strcat(keyBuffer, ")");
 				}
 			} else {
-				// handle other keys
+				//// handle other keys
 				if (ev.state == UP) {
 					//printf("Key: %s (%s)\n", nam, mod);
 					if (strlen(nam) > 1) {
@@ -186,7 +198,7 @@ void ProcessEvent(struct record_event ev)
 						strcat(keyBuffer, nam);
 						strcat(keyBuffer, "}");
 					} else {
-						if (strcmp(nam, "'") ==  0) { // escape this
+						if (nam[0] == '\'') { // escape this
 							strcat(keyBuffer, "\\");
 						}
 						strcat(keyBuffer, nam);
@@ -197,7 +209,7 @@ void ProcessEvent(struct record_event ev)
 			WriteScript(_("# [Unhandled Key %d/%d]\n"), ev.data, ev.state);
 		}	
 	} else { // Mouse, etc.
-		HandleKeyBuffer(TRUE);
+		HandleKeyBuffer(TRUE); // Flush out others events...
 		HandleDelay(ev.delay);
 
 		if (ev.type == MOUSEMOVE) {
@@ -223,7 +235,7 @@ void ProcessEvent(struct record_event ev)
 	memcpy(&lastEvent, &ev, sizeof(struct record_event));
 }
 
-BOOL IsMouseMoveTooGranular(struct record_event ev)
+static BOOL IsMouseMoveTooGranular(struct record_event ev)
 {
 	if (lastEvent.type != MOUSEMOVE) {
 		return(FALSE); // must be mousemove -> mousemove to count

@@ -1,4 +1,4 @@
-/* X11::GUITest ($Id: GUITest.xs,v 1.63 2011/04/28 02:10:11 ctrondlp Exp $)
+/* X11::GUITest ($Id: GUITest.xs 209 2011-05-16 01:09:04Z ctrondlp $)
  *  
  * Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@cpan.org
@@ -1024,6 +1024,16 @@ CODE:
 OUTPUT:
 	RETVAL
 
+BOOL
+IsWindowCursor(win, cursor)
+	Window win
+	Cursor cursor
+CODE:
+	OldErrorHandler = XSetErrorHandler(IgnoreBadWindow);
+	RETVAL = XTestCompareCursorWithWindow(TheXDisplay, win, cursor);
+	XSetErrorHandler(OldErrorHandler);
+OUTPUT:
+	RETVAL
 
 BOOL 
 IsWindow(win)
@@ -1265,4 +1275,5 @@ CODE:
 	}
 OUTPUT:
 	RETVAL
+
 

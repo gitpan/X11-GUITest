@@ -102,7 +102,7 @@ ident ( ) {
     fi
 
     # extract version from CVS Id string
-    __id="$Id: autogen.sh,v 1.1 2011/05/01 01:25:29 ctrondlp Exp $"
+    __id="$Id: autogen.sh 204 2011-05-15 02:08:31Z ctrondlp $"
     __version="`echo $__id | sed 's/.*\([0-9][0-9][0-9][0-9]\)[-\/]\([0-9][0-9]\)[-\/]\([0-9][0-9]\).*/\1\2\3/'`"
     if [ "x$__version" = "x" ] ; then
 	__version=""
