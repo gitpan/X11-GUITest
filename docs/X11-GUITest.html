@@ -26,6 +26,7 @@
 	<li><a href="#other_documentation">OTHER DOCUMENTATION</a></li>
 	<li><a href="#copyright">COPYRIGHT</a></li>
 	<li><a href="#author">AUTHOR</a></li>
+	<li><a href="#contributors">CONTRIBUTORS</a></li>
 	<li><a href="#credits">CREDITS</a></li>
 </ul>
 
@@ -42,10 +43,10 @@
 </p>
 <hr />
 <h1><a name="version">VERSION</a></h1>
-<p>0.25</p>
+<p>0.26</p>
 <p>Updates are made available at the following sites:</p>
 <pre>
-  ttp://sourceforge.net/projects/x11guitest 
+  <a href="http://sourceforge.net/projects/x11guitest">http://sourceforge.net/projects/x11guitest</a>
   <a href="http://www.cpan.org">http://www.cpan.org</a></pre>
 <p>Please consult 'docs/Changes' for the list of changes between
 module revisions.</p>
@@ -69,8 +70,8 @@ server configuration (i.e., XF86Config).</p>
 <p>The standard DISPLAY environment variable is utilized to determine
 the host, display, and screen to work with.  By default it is usually set
 to &quot;:0.0&quot; for the localhost.  However, by altering this variable one can
-interact with applications under a remote host's X server.  To change this 
-from a terminal window, one can utilize the following basic syntax: 
+interact with applications under a remote host's X server.  To change this
+from a terminal window, one can utilize the following basic syntax:
 export DISPLAY=&lt;hostname-or-ipaddress&gt;:&lt;display&gt;.&lt;screen&gt;  Please note that
 under most circumstances, xhost will need to be executed properly on the remote
 host as well.</p>
@@ -112,7 +113,7 @@ sub-directory from the installation folder.</p>
   # Start gedit application
   StartApp('gedit');</pre>
 <pre>
-  # Wait for application window to come up and become viewable. 
+  # Wait for application window to come up and become viewable.
   my ($GEditWinId) = WaitWindowViewable('gedit');
   if (!$GEditWinId) {
     die(&quot;Couldn't find gedit window in time!&quot;);
@@ -138,14 +139,14 @@ sub-directory from the installation folder.</p>
 <p>If there are multiple optional parameters available for a function
 and you would like to specify the last one, for example, you can
 utilize undef for those parameters you don't specify.</p>
-<p>REGEX in the documentation below denotes an item that is treated as 
+<p>REGEX in the documentation below denotes an item that is treated as
 a regular expression.  For example, the regex &quot;^OK$&quot; would look for
 an exact match for the word OK.</p>
 <dl>
 <dt><strong><a name="findwindowlike_titleregex_windowidstartunder" class="item">FindWindowLike TITLEREGEX [, WINDOWIDSTARTUNDER]</a></strong></dt>
 
 <dd>
-<p>Finds the window Ids of the windows matching the specified title regex.  
+<p>Finds the window Ids of the windows matching the specified title regex.
 Optionally one can specify the window to start under; which would allow
 one to constrain the search to child windows of that window.</p>
 <p>An array of window Ids is returned for the matches found.  An empty
@@ -160,7 +161,7 @@ array is returned if no matches were found.</p>
 <dt><strong><a name="waitwindowlike_titleregex_windowidstartunder_maxwaitinseconds" class="item">WaitWindowLike TITLEREGEX [, WINDOWIDSTARTUNDER] [, MAXWAITINSECONDS]</a></strong></dt>
 
 <dd>
-<p>Waits for a window to come up that matches the specified title regex.  
+<p>Waits for a window to come up that matches the specified title regex.
 Optionally one can specify the window to start under; which would allow
 one to constrain the search to child windows of that window.</p>
 <p>One can optionally specify an alternative wait amount in seconds.  A
@@ -258,7 +259,7 @@ line of the file as input to the SendKeys function, but didn't want
 any special interpretation of the characters in the file.</p>
 <p>Returns the quoted string, undef is returned on error.</p>
 <pre>
-  # Quote  ~, %, etc.  as  {~}, {%}, etc for literal use in SendKeys. 
+  # Quote  ~, %, etc.  as  {~}, {%}, etc for literal use in SendKeys.
   SendKeys( QuoteStringForSendKeys('Hello: ~%^(){}+#') );
   SendKeys( QSfSK('#+#') );</pre>
 </dd>
@@ -411,7 +412,7 @@ cursor.</p>
 <dd>
 <p>Presses the specified mouse button.  Available mouse buttons
 are: M_LEFT, M_MIDDLE, M_RIGHT, M_DOWN, M_UP.  Also, you could
-use the logical Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, 
+use the logical Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4,
 M_BTN5.  These are all available through the :CONST export tag.</p>
 <p>zero is returned on failure, non-zero for success.</p>
 </dd>
@@ -440,7 +441,7 @@ have special meaning, they are:</p>
         %       ALT
         +       SHIFT
         #       META
-                ALTGR</pre>
+        &amp;       ALTGR</pre>
 <pre>
         Other Keys:
         ~       ENTER
@@ -501,7 +502,7 @@ if you really wanted to.</p>
         CAN     Cancel
         CAP     Caps_Lock
         DEL     Delete
-        DOW     Down
+        DOWN    Down
         END     End
         ENT     Return
         ESC     Escape
@@ -553,7 +554,7 @@ listed above as outlined in the following example:</p>
 <pre>
   # Uppercase a
   PressKey('LSH'); # Left Shift
-  PressKey('a'); 
+  PressKey('a');
   ReleaseKey('a');
   ReleaseKey('LSH');</pre>
 <p>The ReleaseKey calls in the above example are there to set
@@ -842,13 +843,18 @@ returned list will be empty.</p>
 <hr />
 <h1><a name="copyright">COPYRIGHT</a></h1>
 <p>Copyright(c) 2003-2011 Dennis K. Paulsen, All Rights Reserved.  This
-program is free software; you can redistribute it and/or modify it 
+program is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License.</p>
 <p>
 </p>
 <hr />
 <h1><a name="author">AUTHOR</a></h1>
 <p>Dennis K. Paulsen &lt;<a href="mailto:ctrondlp@cpan.org">ctrondlp@cpan.org</a>&gt; (Des Moines, Iowa USA)</p>
+<p>
+</p>
+<hr />
+<h1><a name="contributors">CONTRIBUTORS</a></h1>
+<p>Paulo E. Castro &lt;pauloedgarcastro tata gmail.com&gt;</p>
 <p>
 </p>
 <hr />

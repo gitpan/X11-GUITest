@@ -1,7 +1,17 @@
-X11::GUITest ($Id: Changes 211 2011-05-21 14:06:02Z ctrondlp $)
+X11::GUITest ($Id: Changes 223 2013-02-02 14:31:02Z pecastro $)
 
 This is the list of module changes between revisions.
 --------------------------------------------------------------------
+
+0.26 Sat Feb 2 2013 14:20
+
+  - Replace legacy XKeycodeToKeysym calls
+
+  . Fix typo DOW to DOWN
+
+  - Add supoprt fot AltGr and right Control and Shift
+
+  - Enhanced GetWindowName() to check _NET_WM_NAME for text.
 
 0.25 Sat May 21 2011 09:00
 
@@ -12,7 +22,7 @@ This is the list of module changes between revisions.
 
   - Added -d (delaythreshold) option to recorder.   Allows for inclusion
     of more/less granular event delays.
-     
+
   - Added WaitSeconds() function, perhaps a little more intuitive then select.
 
   - Support for mouse wheel scrolling, using M_DOWN and M_UP
@@ -37,7 +47,7 @@ This is the list of module changes between revisions.
     zeros.
 
   - Added alias QSfSK() to QuoteStringForSendKeys() function.
- 
+
 0.22 Thu Jan 06 2011 20:00
 
   - Example script eg/FindControlVisually.pl added to help demonstrate
@@ -84,7 +94,7 @@ This is the list of module changes between revisions.
     with X11_GUITEST_USING_XINERAMA defined.  See Makefile.PL for details.
 
 0.20 Sat Feb 14 2004 09:43
-  
+
   - Now linking to Xext when building to support
     HP-UX 11 and possibly other OSs.
 
@@ -99,7 +109,7 @@ This is the list of module changes between revisions.
 
   - Added FindWindowLike.pl example script.
 
-  - Fixed a SendKeys bug spotted on RedHat 7.3 
+  - Fixed a SendKeys bug spotted on RedHat 7.3
     systems.
 
   - Added eg/templates/ScriptTemplate.pl for the
@@ -204,7 +214,7 @@ This is the list of module changes between revisions.
 
   - Added IsKeyPressed
 
-  - Added logical mouse button Ids to :CONST export tag: 
+  - Added logical mouse button Ids to :CONST export tag:
     M_BTN1 - M_BTN5
 
   - Added IsMouseButtonPressed
@@ -233,4 +243,3 @@ This is the list of module changes between revisions.
 0.10 Tue Mar 05 2003 18:00
 
   - Initial Release.
-

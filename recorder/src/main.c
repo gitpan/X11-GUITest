@@ -1,4 +1,4 @@
-/* X11::GUITest ($Id: main.c 208 2011-05-15 13:37:15Z ctrondlp $)
+/* X11::GUITest ($Id: main.c 215 2011-12-06 12:49:16Z ctrondlp $)
  *  
  * Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@cpan.org
@@ -54,18 +54,23 @@ int main (int argc, char *argv[])
 	bindtextdomain(APP_NAME, APP_TEXTDOMAIN);
 	textdomain(APP_NAME);
 	
-	// Handle Args
+	// Parse arguments
 	struct poptOption optTbl[] = {
 		{"script", 's', POPT_ARG_STRING, &scriptFile, 0, _("Script file to create"), NULL},
-		{"wait", 'w', POPT_ARG_INT, &waitSeconds, 0, _("Seconds to wait before recording"), NULL},
-		{"delaythreshold", 'd', POPT_ARG_INT, &delayThresholdMs, 0, _("Event delay (ms) threshold to account for / record (default: 50)"), NULL},
-		{"exitkey", 'e', POPT_ARG_STRING, &exitKey, 0, _("Exit key to stop recording (default: ESC)"), NULL},
+		{"wait", 'w', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &waitSeconds, 0, _("Seconds to wait before recording"), NULL},
+		{"delaythreshold", 'd', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &delayThresholdMs, 0, _("Event delay (ms) threshold to account for / record"), NULL},
+		{"exitkey", 'e', POPT_ARG_STRING | POPT_ARGFLAG_SHOW_DEFAULT, &exitKey, 0, _("Exit key to stop recording"), NULL},
 		{"nodelay", 'n', POPT_ARG_NONE, &excludeDelays, 0, _("Don't include user delays"), NULL},
-		{"granularity", 'g', POPT_ARG_INT, &granularity, 0, _("Level of granularity (mouse move frequency, default: 10 out of 1-10)"), NULL},
+		{"granularity", 'g', POPT_ARG_INT | POPT_ARGFLAG_SHOW_DEFAULT, &granularity, 0, _("Level of granularity, mouse move frequency, 1-10"), NULL},
 		POPT_AUTOHELP
-		{NULL, 0, 0, NULL, 0}
+		POPT_TABLEEND
 	};
 	optCon = poptGetContext(NULL, argc, (const char **)argv, optTbl, 0);
+	if (argc <= 1) {
+		PrintAppInfo();
+		poptPrintHelp(optCon, stderr, 0);
+		exit(1);
+	}
 	while (poptGetNextOpt(optCon) >= 0) {}
 	poptFreeContext(optCon);
 
@@ -103,8 +108,10 @@ int main (int argc, char *argv[])
 	printf(_("Recording Started, press %s to exit.\n"), exitKey);
 
 	WriteScript("#!/usr/bin/perl\n\n");
-	WriteScript("use X11::GUITest qw/:ALL/;\n\n");
-	WriteScript(_("\n# Begin (Recorder Version %s).\n"), APP_VERSION);
+	WriteScript("use X11::GUITest qw/:ALL/;\n");
+	WriteScript("use strict;\n");
+	WriteScript("use warnings;\n\n\n");
+	WriteScript(_("# Begin (Recorder Version %s).\n"), APP_VERSION);
 
 	////
 	RecordEvents(ProcessEvent);
@@ -115,6 +122,11 @@ int main (int argc, char *argv[])
 
 	printf(_("\nRecording Finished.\n"));
 	exit(0);
+}
+
+static void PrintAppInfo(void)
+{
+	printf("%s (%s: %s)\n\n", APP_NAME, _("Version"), APP_VERSION);
 }
 
 static BOOL GetMouseButtonFromIndex(int index, char *button)

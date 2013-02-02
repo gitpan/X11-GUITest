@@ -4,11 +4,11 @@ NAME
     Developed by Dennis K. Paulsen
 
 VERSION
-    0.25
+    0.26
 
     Updates are made available at the following sites:
 
-      ttp://sourceforge.net/projects/x11guitest 
+      http://sourceforge.net/projects/x11guitest
       http://www.cpan.org
 
     Please consult 'docs/Changes' for the list of changes between module
@@ -71,7 +71,7 @@ SYNOPSIS
       # Start gedit application
       StartApp('gedit');
 
-      # Wait for application window to come up and become viewable. 
+      # Wait for application window to come up and become viewable.
       my ($GEditWinId) = WaitWindowViewable('gedit');
       if (!$GEditWinId) {
         die("Couldn't find gedit window in time!");
@@ -205,7 +205,7 @@ FUNCTIONS
 
             Returns the quoted string, undef is returned on error.
 
-              # Quote  ~, %, etc.  as  {~}, {%}, etc for literal use in SendKeys. 
+              # Quote  ~, %, etc.  as  {~}, {%}, etc for literal use in SendKeys.
               SendKeys( QuoteStringForSendKeys('Hello: ~%^(){}+#') );
               SendKeys( QSfSK('#+#') );
 
@@ -330,7 +330,7 @@ FUNCTIONS
                     %       ALT
                     +       SHIFT
                     #       META
-                            ALTGR
+                    &       ALTGR
 
                     Other Keys:
                     ~       ENTER
@@ -404,7 +404,7 @@ FUNCTIONS
                     CAN     Cancel
                     CAP     Caps_Lock
                     DEL     Delete
-                    DOW     Down
+                    DOWN    Down
                     END     End
                     ENT     Return
                     ESC     Escape
@@ -455,7 +455,7 @@ FUNCTIONS
 
               # Uppercase a
               PressKey('LSH'); # Left Shift
-              PressKey('a'); 
+              PressKey('a');
               ReleaseKey('a');
               ReleaseKey('LSH');
 
@@ -696,6 +696,9 @@ COPYRIGHT
 
 AUTHOR
     Dennis K. Paulsen <ctrondlp@cpan.org> (Des Moines, Iowa USA)
+
+CONTRIBUTORS
+    Paulo E. Castro <pauloedgarcastro tata gmail.com>
 
 CREDITS
     Thanks to everyone; including those specifically mentioned below for

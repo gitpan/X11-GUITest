@@ -1,5 +1,5 @@
-# X11::GUITest ($Id: GUITest.pm 211 2011-05-21 14:06:02Z ctrondlp $) 
-#  
+# X11::GUITest ($Id: GUITest.pm 223 2013-02-02 14:31:02Z pecastro $)
+#
 # Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
 # Email: ctrondlp@cpan.org
 #
@@ -12,7 +12,7 @@
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, see <http://www.gnu.org/licenses>.
 #
@@ -26,11 +26,11 @@ Developed by Dennis K. Paulsen
 
 =head1 VERSION
 
-0.25
+0.26
 
 Updates are made available at the following sites:
 
-  ttp://sourceforge.net/projects/x11guitest 
+  http://sourceforge.net/projects/x11guitest
   http://www.cpan.org
 
 Please consult 'docs/Changes' for the list of changes between
@@ -55,8 +55,8 @@ server configuration (i.e., XF86Config).
 The standard DISPLAY environment variable is utilized to determine
 the host, display, and screen to work with.  By default it is usually set
 to ":0.0" for the localhost.  However, by altering this variable one can
-interact with applications under a remote host's X server.  To change this 
-from a terminal window, one can utilize the following basic syntax: 
+interact with applications under a remote host's X server.  To change this
+from a terminal window, one can utilize the following basic syntax:
 export DISPLAY=<hostname-or-ipaddress>:<display>.<screen>  Please note that
 under most circumstances, xhost will need to be executed properly on the remote
 host as well.
@@ -96,7 +96,7 @@ sub-directory from the installation folder.
   # Start gedit application
   StartApp('gedit');
 
-  # Wait for application window to come up and become viewable. 
+  # Wait for application window to come up and become viewable.
   my ($GEditWinId) = WaitWindowViewable('gedit');
   if (!$GEditWinId) {
     die("Couldn't find gedit window in time!");
@@ -132,7 +132,7 @@ require DynaLoader;
 # names by default without a very good reason. Use EXPORT_OK instead.
 # Do not simply export all your public functions/methods/constants.
 @EXPORT = qw(
-    
+
 );
 
 @EXPORT_OK = qw(
@@ -194,9 +194,9 @@ require DynaLoader;
 
 Exporter::export_ok_tags(keys %EXPORT_TAGS);
 
-$VERSION = '0.25';
+$VERSION = '0.26';
 
-# Module Constants 
+# Module Constants
 sub DEF_WAIT() { 10; }
 # Mouse Buttons
 sub M_BTN1() { 1; }
@@ -295,13 +295,13 @@ bootstrap X11::GUITest $VERSION;
 
 =head1 FUNCTIONS
 
-Parameters enclosed within [] are optional.  
+Parameters enclosed within [] are optional.
 
 If there are multiple optional parameters available for a function
 and you would like to specify the last one, for example, you can
 utilize undef for those parameters you don't specify.
 
-REGEX in the documentation below denotes an item that is treated as 
+REGEX in the documentation below denotes an item that is treated as
 a regular expression.  For example, the regex "^OK$" would look for
 an exact match for the word OK.
 
@@ -310,7 +310,7 @@ an exact match for the word OK.
 
 =item FindWindowLike TITLEREGEX [, WINDOWIDSTARTUNDER]
 
-Finds the window Ids of the windows matching the specified title regex.  
+Finds the window Ids of the windows matching the specified title regex.
 Optionally one can specify the window to start under; which would allow
 one to constrain the search to child windows of that window.
 
@@ -337,7 +337,7 @@ sub {
 	if (defined $winname && $winname =~ /$titlerx/i) {
 		push @wins, $start;
 	}
-	
+
 	# Match a child window?
 	foreach my $child (GetChildWindows($start)) {
 		$winname = GetWindowName($child);
@@ -370,9 +370,9 @@ sub FindWindowLike {
 
 =item WaitWindowLike TITLEREGEX [, WINDOWIDSTARTUNDER] [, MAXWAITINSECONDS]
 
-Waits for a window to come up that matches the specified title regex.  
+Waits for a window to come up that matches the specified title regex.
 Optionally one can specify the window to start under; which would allow
-one to constrain the search to child windows of that window.  
+one to constrain the search to child windows of that window.
 
 One can optionally specify an alternative wait amount in seconds.  A
 window will keep being looked for that matches the specified title regex
@@ -407,9 +407,9 @@ sub WaitWindowLike {
 		if (@wins) {
 			return(@wins);
 		}
-		# Wait 1 sec in order not to bog down the system	
+		# Wait 1 sec in order not to bog down the system
 		select(undef, undef, undef, 1);
-	}	
+	}
 	# Nothing
 	return(@wins);
 }
@@ -450,7 +450,7 @@ sub WaitWindowViewable {
 		}
 		# Wait 1 sec in order not to bog down the system.
 		select(undef, undef, undef, 1);
-	}	
+	}
 	# Nothing
 	return(@wins);
 }
@@ -477,14 +477,14 @@ sub WaitWindowClose {
 	my $win = shift;
 	my $wait = shift || DEF_WAIT;
 
-	# For each second we $wait, check window Id 
+	# For each second we $wait, check window Id
 	# twice (2 lookups * 500ms = ~1 second).
 	for (my $i = 0; $i < ($wait * 2); $i++) {
 		if (not IsWindow($win)) {
 			# Success, window isn't recognized
 			return(1);
 		}
-		# Wait 500 ms in order not to bog down the system.  If one 
+		# Wait 500 ms in order not to bog down the system.  If one
 		# changes this, the ($wait * 2) above will want to be changed
 		# in order to represent seconds correctly.
 		select(undef, undef, undef, 0.50);
@@ -577,7 +577,7 @@ sub GetWindowFromPoint {
 	}
 
 	# Note: Windows are returned in current stacking order, therefore
-	# the last match should be the top-most window.	
+	# the last match should be the top-most window.
 	foreach my $win ( GetChildWindows(GetRootWindow($scr)) ) {
 		my ($w_x1, $w_y1, $w_w, $w_h, $w_b) = GetWindowPos($win);
 		# Is window position invalid?
@@ -611,7 +611,7 @@ zero is returned for false, non-zero for true.
 sub IsChild {
 	my $parent = shift;
 	my $win = shift;
-	
+
 	foreach my $child ( GetChildWindows($parent) ) {
 		if ($child == $win && $child != $parent) {
 			return(1);
@@ -633,7 +633,7 @@ any special interpretation of the characters in the file.
 
 Returns the quoted string, undef is returned on error.
 
-  # Quote  ~, %, etc.  as  {~}, {%}, etc for literal use in SendKeys. 
+  # Quote  ~, %, etc.  as  {~}, {%}, etc for literal use in SendKeys.
   SendKeys( QuoteStringForSendKeys('Hello: ~%^(){}+#') );
   SendKeys( QSfSK('#+#') );
 
@@ -649,12 +649,12 @@ sub QuoteStringForSendKeys {
 
 	# Quote {} special characters (^, %, (, {, etc.)
 	$str =~ s/(\^|\%|\+|\~|\(|\)|\{|\})/\{$1\}/gm;
-	
+
 	return($str);
 }
 
-sub QSfSK { 
-	return QuoteStringForSendKeys(shift); 
+sub QSfSK {
+	return QuoteStringForSendKeys(shift);
 }
 
 =over 8
@@ -679,7 +679,7 @@ sub StartApp {
 	if ($pid) {
 		use POSIX qw(WNOHANG);
 		sleep 1;
-		waitpid($pid, WNOHANG) != $pid 
+		waitpid($pid, WNOHANG) != $pid
 			and kill(0, $pid) == 1
 			and return $pid;
 	} elsif (defined $pid) {
@@ -739,7 +739,7 @@ sub ClickMouseButton {
 
 # Subroutine: INIT
 # Description: Used to initialize the underlying mechanisms
-#			   that this package utilizes. 
+#			   that this package utilizes.
 # Note: Perl idiom not to return values for this subroutine.
 sub INIT {
 	if (!defined($ENV{'AUTOMATED_TESTING'}) || $ENV{'AUTOMATED_TESTING'} ne 1) {
@@ -762,7 +762,7 @@ sub END {
 Returns the screen number specified in the X display value used to open the
 display.
 
-Leverages the Xlib macro of the same name. 
+Leverages the Xlib macro of the same name.
 
 =back
 
@@ -774,7 +774,7 @@ Leverages the Xlib macro of the same name.
 
 Returns the number of screens in the X display specified when opening it.
 
-Leverages the Xlib macro of the same name. 
+Leverages the Xlib macro of the same name.
 
 =back
 
@@ -899,7 +899,7 @@ Zero is returned on failure, non-zero for success.
 Returns an array containing the position and the screen (number) of the mouse
 cursor.
 
-  my ($x, $y, $scr_num) = GetMousePos(); 
+  my ($x, $y, $scr_num) = GetMousePos();
 
 =back
 
@@ -911,7 +911,7 @@ cursor.
 
 Presses the specified mouse button.  Available mouse buttons
 are: M_LEFT, M_MIDDLE, M_RIGHT, M_DOWN, M_UP.  Also, you could
-use the logical Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4, 
+use the logical Id for the button: M_BTN1, M_BTN2, M_BTN3, M_BTN4,
 M_BTN5.  These are all available through the :CONST export tag.
 
 zero is returned on failure, non-zero for success.
@@ -949,7 +949,7 @@ have special meaning, they are:
         %    	ALT
         +    	SHIFT
         #       META
-                ALTGR
+        &       ALTGR
 
         Other Keys:
         ~    	ENTER
@@ -1018,7 +1018,7 @@ if you really wanted to.
         CAN     Cancel
         CAP     Caps_Lock
         DEL     Delete
-        DOW     Down
+        DOWN    Down
         END     End
         ENT     Return
         ESC     Escape
@@ -1060,9 +1060,9 @@ that don't support Alt_Left, Meta_Left is automatically used in its place.
 
 =over 8
 
-=item PressKey KEY 
+=item PressKey KEY
 
-Presses the specified key. 
+Presses the specified key.
 
 One can utilize the abbreviated key names from the table
 listed above as outlined in the following example:
@@ -1075,7 +1075,7 @@ listed above as outlined in the following example:
 
   # Uppercase a
   PressKey('LSH'); # Left Shift
-  PressKey('a'); 
+  PressKey('a');
   ReleaseKey('a');
   ReleaseKey('LSH');
 
@@ -1090,7 +1090,7 @@ zero is returned on failure, non-zero for success.
 
 =over 8
 
-=item ReleaseKey KEY 
+=item ReleaseKey KEY
 
 Releases the specified key.  Normally follows a PressKey call.
 
@@ -1107,7 +1107,7 @@ zero is returned on failure, non-zero for success.
 
 =over 8
 
-=item PressReleaseKey KEY 
+=item PressReleaseKey KEY
 
 Presses and releases the specified key.
 
@@ -1128,7 +1128,7 @@ zero is returned on failure, non-zero for success.
 
 =item IsKeyPressed KEY
 
-Determines if the specified key is currently being pressed.  
+Determines if the specified key is currently being pressed.
 
 You can specify such things as 'bac' or the unabbreviated form 'BackSpace' as
 covered in the SendKeys information.  Brace forms such as '{bac}' are
@@ -1148,7 +1148,7 @@ Returns non-zero for true, zero for false.
 
 =item IsMouseButtonPressed BUTTON
 
-Determines if the specified mouse button is currently being pressed.  
+Determines if the specified mouse button is currently being pressed.
 
 Available mouse buttons are: M_LEFT, M_MIDDLE, M_RIGHT.  Also, you
 could use the logical Id for the button: M_BTN1, M_BTN2, M_BTN3,
@@ -1466,12 +1466,16 @@ Not installed.
 =head1 COPYRIGHT
 
 Copyright(c) 2003-2011 Dennis K. Paulsen, All Rights Reserved.  This
-program is free software; you can redistribute it and/or modify it 
+program is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License.
 
 =head1 AUTHOR
 
 Dennis K. Paulsen <ctrondlp@cpan.org> (Des Moines, Iowa USA)
+
+=head1 CONTRIBUTORS
+
+Paulo E. Castro <pauloedgarcastro tata gmail.com>
 
 =head1 CREDITS
 

@@ -1,5 +1,5 @@
-/* X11::GUITest ($Id: GUITest.xs 209 2011-05-16 01:09:04Z ctrondlp $)
- *  
+/* X11::GUITest ($Id: GUITest.xs 218 2013-02-01 18:29:03Z pecastro $)
+ *
  * Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@cpan.org
  *
@@ -12,7 +12,7 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses>.
  *
@@ -37,6 +37,8 @@ extern "C" {
 #include <unistd.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <X11/Xatom.h>
+#include <X11/Xlocale.h>
 #include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
 #include <X11/keysym.h>
@@ -84,7 +86,7 @@ static void SetupXDisplay(void)
 	}
 
 	/* Ensure the XTest extension is available */
-	if (!XTestQueryExtension(TheXDisplay, &eventnum, &errornum, 
+	if (!XTestQueryExtension(TheXDisplay, &eventnum, &errornum,
 							 &majornum, &minornum)) {
 		croak("X11::GUITest - XServer %s doesn't support the XTest extensions!\n",
 			  DisplayString(TheXDisplay));
@@ -92,7 +94,7 @@ static void SetupXDisplay(void)
 
 	TheScreen = DefaultScreen(TheXDisplay);
 
-	/* Discard current events in queue. */	
+	/* Discard current events in queue. */
 	XSync(TheXDisplay, True);
 }
 
@@ -129,7 +131,7 @@ static BOOL IsNumber(const char *str)
 
 /* Function: GetRegKeySym
  * Description: Given a regular key name as a single character(i.e., a), this
- *				function obtains the appropriate keysym by calling GetKeySym(). 
+ *				function obtains the appropriate keysym by calling GetKeySym().
  * Note: Returns TRUE (non-zero) on success, FALSE (zero) on failure.  Also,
  *       on success, sym gets set to the appropriate keysym. On failure, sym
  * 		 will get set to NoSymbol.
@@ -138,7 +140,7 @@ static BOOL GetRegKeySym(const char name, KeySym *sym)
 {
 	#define MAX_REG_KEY 2
 	static char key[MAX_REG_KEY] = "";
-	
+
 	key[0] = name;
 	key[1] = NUL;
 
@@ -177,12 +179,12 @@ static BOOL PressKeyImp(KeySym sym)
 	}
 
 	retval = (BOOL)XTestFakeKeyEvent(TheXDisplay, kc, True, EventSendDelay);
-	
+
 	XFlush(TheXDisplay);
 	return(retval);
 }
 
-/* Function: ReleaseKeyImp 
+/* Function: ReleaseKeyImp
  * Description: Releases the key for the specified keysym.  Lower-level
  *			 	implementation.
  * Note: Returns TRUE (non-zero) on success, FALSE (zero) on failure.
@@ -191,7 +193,7 @@ static BOOL ReleaseKeyImp(KeySym sym)
 {
 	KeyCode kc = 0;
 	BOOL retval = 0;
-	
+
 	kc = GetKeycodeFromKeysym(TheXDisplay, sym);
 	if (kc == 0) {
 		return(FALSE);
@@ -216,7 +218,7 @@ static BOOL PressReleaseKeyImp(KeySym sym)
 	if (!ReleaseKeyImp(sym)) {
 		return(FALSE);
 	}
-	/* Possibly wait between(after) keystrokes */ 
+	/* Possibly wait between(after) keystrokes */
 	if (KeySendDelay > 0) {
 		/* usleep(500 * 1000) = ~500ms */
 		usleep(KeySendDelay * 1000);
@@ -226,7 +228,7 @@ static BOOL PressReleaseKeyImp(KeySym sym)
 
 /* Function: IsShiftNeeded
  * Description: Determines if the specified keysym needs the shift
- *				modifier. 
+ *				modifier.
  * Note: Returns TRUE (non-zero) on success, FALSE (zero) on failure.
  */
 static BOOL IsShiftNeeded(KeySym sym)
@@ -235,13 +237,13 @@ static BOOL IsShiftNeeded(KeySym sym)
 	KeyCode kc = 0;
 	int syms = 0;
 	BOOL needed = FALSE;
-	
+
 	kc = GetKeycodeFromKeysym(TheXDisplay, sym);
 	if (!kc) {
 		return(FALSE);
 	}
 
-	/* kc(grave) = kss(grave, asciitilde, ) */	
+	/* kc(grave) = kss(grave, asciitilde, ) */
 	kss = XGetKeyboardMapping(TheXDisplay, kc, 1, &syms);
 
 	XConvertCase(sym, &ksl, &ksu);
@@ -264,7 +266,7 @@ static BOOL IsShiftNeeded(KeySym sym)
 /* Function: ProcessBraceSet
  * Description: Takes a brace set such as: {Tab}, {Tab 3},
  *				{Tab Tab a b c}, {PAUSE 500}, {PAUSE 500 Tab}, etc.
- *              and breaks it into components, then proceeds to press 
+ *              and breaks it into components, then proceeds to press
  *				the appropriate keys or perform the	special functionality
  *				requested (i.e., PAUSE).  Numeric elements are used in the
  *				special functionality or simply to ensure the previous key
@@ -311,13 +313,13 @@ static BOOL ProcessBraceSet(const char *braceset, size_t *len)
 	/* Store brace set length for calling function.  Include
 	 * 2 for {} we ignored */
 	*len = strlen(buffer) + 2;
-	
+
 	/* Work on the space delimited items in the buffer. */
 	if ( !(token = strtok(buffer, " ")) ) {
 		safefree(buffer);
 		return(FALSE);
 	}
-	
+
 	do { /* } while ( (token = strtok(NULL, " ")) ); */
 		count = 0;
 		if (IsNumber(token)) {
@@ -325,14 +327,14 @@ static BOOL ProcessBraceSet(const char *braceset, size_t *len)
 			if ( (count = atoi(token)) <= 0 ) {
 				safefree(buffer);
 				return(FALSE);
-			}	
+			}
 		} else {
 			cmd = NONE;
 			/* Special functionality? */
 			if (strcasecmp(token, "PAUSE") == 0) {
 				/* Yes, PAUSE, so continue on to get the duration count */
 				cmd = PAUSE;
-				continue;	
+				continue;
 			} else {
 				/* No, just a key, so get symbol */
 				cmd = KEY;
@@ -351,7 +353,7 @@ static BOOL ProcessBraceSet(const char *braceset, size_t *len)
 					}
 					safefree(buffer);
 					return(FALSE);
-				}		
+				}
 				if (needshift) {
 					ReleaseKeyImp(XK_Shift_L);
 				}
@@ -391,12 +393,12 @@ static BOOL ProcessBraceSet(const char *braceset, size_t *len)
 				return(FALSE);
 			}; /* switch (cmd) { */
 		} /* if (count > 0) { */
-	} while ( (token = strtok(NULL, " ")) );	
-	
+	} while ( (token = strtok(NULL, " ")) );
+
 	safefree(buffer);
 	return(TRUE);
 }
- 
+
 /* Function: SendKeysImp
  * Description: Underlying implementation of the SendKeys routine.  Read
  * 				the SendKeys documentation below for some specifics.
@@ -409,7 +411,7 @@ static BOOL SendKeysImp(const char *keys)
 	KeySym sym = 0;
 	size_t keyslen = 0, bracelen = 0;
 	size_t x = 0;
-	BOOL retval = FALSE, shift = FALSE, ctrl = FALSE, altgr = FALSE, 
+	BOOL retval = FALSE, shift = FALSE, ctrl = FALSE, altgr = FALSE,
 		 alt = FALSE, meta = FALSE, modlock = FALSE, needshift = FALSE;
 
 	assert(keys != NULL);
@@ -427,7 +429,7 @@ static BOOL SendKeysImp(const char *keys)
 			continue;
 		/* Modifiers? */
 		case '~': retval = PressReleaseKeyImp(XK_Return); break;
-		case '+': /* Shift */ 
+		case '+': /* Shift */
 			retval = PressKeyImp(XK_Shift_L);
 			shift = TRUE;
 			break;
@@ -435,15 +437,15 @@ static BOOL SendKeysImp(const char *keys)
 			retval = PressKeyImp(XK_Control_L);
 			ctrl = TRUE;
 			break;
-		case '%': /* Alt */ 
+		case '%': /* Alt */
 			retval = PressKeyImp(XK_Alt_L);
-			alt = TRUE; 
+			alt = TRUE;
 			break;
 		case '#': /* Meta */
 			retval = PressKeyImp(XK_Meta_L);
-			meta = TRUE; 
+			meta = TRUE;
 			break;
-		case (char)167: /* AltGr */
+		case '&': /* AltGr */
 			retval = PressKeyImp(XK_ISO_Level3_Shift);
 			altgr = TRUE;
 			break;
@@ -458,12 +460,12 @@ static BOOL SendKeysImp(const char *keys)
 			needshift = IsShiftNeeded(sym);
 			if (!shift && needshift) {
 				PressKeyImp(XK_Shift_L);
-			} 
+			}
 			retval = PressReleaseKeyImp(sym);
-			/* Release shift if needed */	
+			/* Release shift if needed */
 			if (!shift && needshift) {
 				ReleaseKeyImp(XK_Shift_L);
-			} 
+			}
 			break;
 		}; /* switch (keys[x]) { */
 		/* If modlock coming up next, go on to process it */
@@ -473,19 +475,19 @@ static BOOL SendKeysImp(const char *keys)
 		/* Ensure modifiers are clear when needed */
 		if (!modlock) {
 			if (shift) {
-				ReleaseKeyImp(XK_Shift_L); 
-				shift = FALSE; 		
+				ReleaseKeyImp(XK_Shift_L);
+				shift = FALSE;
 			}
-			if (ctrl) { 
-				ReleaseKeyImp(XK_Control_L); 
+			if (ctrl) {
+				ReleaseKeyImp(XK_Control_L);
 				ctrl = FALSE;
-			}	
+			}
 			if (alt) {
-				ReleaseKeyImp(XK_Alt_L); 
+				ReleaseKeyImp(XK_Alt_L);
 				alt = FALSE;
 			}
 			if (meta) {
-				ReleaseKeyImp(XK_Meta_L); 
+				ReleaseKeyImp(XK_Meta_L);
 				meta = FALSE;
 			}
 			if (altgr) {
@@ -543,7 +545,7 @@ static BOOL AddChildWindow(Window win)
 		/* Grow */
 		/* Note: Did not use [insert fancy algorythm name here] algorythm here on purpose */
 		Window *TempIds = NULL;
-		TempIds = (Window *)saferealloc(ChildWindows.Ids, 
+		TempIds = (Window *)saferealloc(ChildWindows.Ids,
 						(GROW * ChildWindows.Max) * sizeof(Window));
 		if (TempIds == NULL) {
 			return(FALSE);
@@ -561,7 +563,7 @@ static BOOL AddChildWindow(Window win)
 /* Function: ClearChildWindows
  * Description: Clears the table of window Ids.  Memory allocated
  *				in AddChildWindow is not freed here, because
- *				we'll probably want to take advantage of it again. 
+ *				we'll probably want to take advantage of it again.
  * Note: No return value.
  */
 static void ClearChildWindows(void)
@@ -575,7 +577,7 @@ static void ClearChildWindows(void)
 /* Function: FreeChildWindows
  * Description: Deallocates the memory of the window Id table
  * 				that was allocated through AddChildWindow.  This
- *				should be called on exit. 
+ *				should be called on exit.
  * Note: No return value.
  */
 static void FreeChildWindows(void)
@@ -600,7 +602,7 @@ static BOOL EnumChildWindowsAux(Window win)
 	UINT i = 0;
 
 	/* get list of child windows */
-	if (XQueryTree(TheXDisplay, win, &root, &parent, &children, 
+	if (XQueryTree(TheXDisplay, win, &root, &parent, &children,
 				   &childcount)) {
 	   	for (i = 0; i < childcount; i++) {
 			/* Add Child */
@@ -628,7 +630,7 @@ static BOOL EnumChildWindowsAux(Window win)
 static void EnumChildWindows(Window win)
 {
 	BOOL success = 0;
-	
+
 	for (;;) {
 		if (!IsWindowImp(win)) {
 			return;
@@ -645,6 +647,7 @@ static void EnumChildWindows(Window win)
 		usleep(500000); /* 500000 = 1/2 second */
 	}
 }
+
 
 MODULE = X11::GUITest			PACKAGE = X11::GUITest
 PROTOTYPES: DISABLE
@@ -725,15 +728,26 @@ GetWindowName(win)
 	Window win
 PREINIT:
 	char *name = NULL;
+	XTextProperty wm_name = {0};
+	Atom wm_name_prop = None;
 CODE:
-	if (IsWindowImp(win) && XFetchName(TheXDisplay, win, &name)) {
-		RETVAL = newSVpv(name, strlen(name));
-		XFree(name);
-	} else {
-		RETVAL = &PL_sv_undef; 
+	RETVAL = &PL_sv_undef;
+	if (IsWindowImp(win)) {
+		if (XFetchName(TheXDisplay, win, &name)) {
+			RETVAL = newSVpv(name, strlen(name));
+			XFree(name);
+		} else {
+			wm_name_prop = XInternAtom(TheXDisplay, "_NET_WM_NAME", False);
+			if (wm_name_prop != None) {
+				if (XGetTextProperty(TheXDisplay, win, &wm_name, wm_name_prop)) {
+					RETVAL = newSVpv((char *)wm_name.value, strlen((char *)wm_name.value));
+					XFree(wm_name.value);
+				}
+			}
+		}
 	}
 OUTPUT:
-	RETVAL		
+	RETVAL
 
 
 BOOL
@@ -769,7 +783,7 @@ CODE:
 								PropModeReplace, (unsigned char *)name, namelen);
 			}
 		}
-	}	
+	}
 OUTPUT:
 	RETVAL
 
@@ -785,7 +799,7 @@ CODE:
 	else
 		RETVAL = None;
 OUTPUT:
-	RETVAL 
+	RETVAL
 
 
 void
@@ -951,7 +965,7 @@ PREINIT:
 CODE:
 	if (key && GetKeySym(key, &sym)) {
 		kc = GetKeycodeFromKeysym(TheXDisplay, sym);
-		skc = GetKeycodeFromKeysym(TheXDisplay, XK_Shift_L); 
+		skc = GetKeycodeFromKeysym(TheXDisplay, XK_Shift_L);
 		XQueryKeymap(TheXDisplay, keys_return);
 		for (pos = 0; pos < (KEYMAP_VECTOR_SIZE * KEYMAP_BIT_COUNT); pos++) {
 			/* For the derived keycode, are we at the correct bit position for it? */
@@ -972,14 +986,14 @@ CODE:
 			}
 		} /* for (pos = 0; pos < (KEYMAP_VECTOR_SIZE * KEYMAP_BIT_COUNT); pos++) { */
 	} /* if (key && GetKeySym(key, &sym)) { */
-	
+
 	/* Determine result */
 	if (keyon) {
 		/* Key is on, so use its keysym to determine if shift modifier needs to be verified also */
 		if (IsShiftNeeded(sym)) {
 			RETVAL = (shifton);
 		} else {
-			RETVAL = (!shifton);	
+			RETVAL = (!shifton);
 		}
 	} else {
 		/* Key not on, so it is not pressed */
@@ -1035,7 +1049,7 @@ CODE:
 OUTPUT:
 	RETVAL
 
-BOOL 
+BOOL
 IsWindow(win)
 	Window win
 CODE:
@@ -1053,7 +1067,7 @@ CODE:
 	OldErrorHandler = XSetErrorHandler(IgnoreBadWindow);
 	if (!XGetWindowAttributes(TheXDisplay, win, &wattrs)) {
 		RETVAL = FALSE;
-	} else { 
+	} else {
 		RETVAL = (wattrs.map_state == IsViewable);
 	}
 	XSetErrorHandler(OldErrorHandler);
@@ -1226,18 +1240,17 @@ PPCODE:
 	XSetErrorHandler(OldErrorHandler);
 	XSRETURN(num_ret);
 
-
 Window
 GetParentWindow(win)
 	Window win
 PREINIT:
 	Window parent = 0, *children = NULL, root = 0;
-	UINT childcount = 0; 
+	UINT childcount = 0;
 CODE:
 	RETVAL = 0;
 	if (XQueryTree(TheXDisplay, win, &root, &parent, &children, &childcount)) {
 		XFree(children);
-		RETVAL = parent;		
+		RETVAL = parent;
 	}
 OUTPUT:
 	RETVAL
@@ -1261,7 +1274,6 @@ PPCODE:
 	}
 	XSRETURN(num_ret);
 
-
 int
 GetScreenDepth(scr_num = NO_INIT)
 	int scr_num
@@ -1275,5 +1287,3 @@ CODE:
 	}
 OUTPUT:
 	RETVAL
-
-

@@ -1,4 +1,4 @@
-/* X11::GUITest ($Id: main.h 203 2011-05-15 02:03:11Z ctrondlp $)
+/* X11::GUITest ($Id: main.h 215 2011-12-06 12:49:16Z ctrondlp $)
  *  
  * Copyright (c) 2003-2011 Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@cpan.org
@@ -37,6 +37,7 @@
 #define MIN_GRANULARITY 1
 #define MAX_GRANULARITY 10
 
+static void PrintAppInfo(void);
 static BOOL GetMouseButtonFromIndex(int index, char *button);
 static void HandleDelay(unsigned long delay);
 static void HandleKeyBuffer(BOOL forceKeyFlush);

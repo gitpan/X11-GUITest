@@ -1,5 +1,5 @@
-/* X11::GUITest ($Id: Common.h 211 2011-05-21 14:06:02Z ctrondlp $)
- *  
+/* X11::GUITest ($Id: Common.h 223 2013-02-02 14:31:02Z pecastro $)
+ *
  * Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@cpan.org
  *
@@ -12,15 +12,15 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses>.
  *
  */
-#ifndef COMMON_H 
+#ifndef COMMON_H
 #define COMMON_H
 
-#define APP_VERSION "0.25"
+#define APP_VERSION "0.26"
 #define APP_TEXTDOMAIN "/usr/share/locale"
 
 #ifndef _

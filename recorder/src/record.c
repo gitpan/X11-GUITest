@@ -1,4 +1,4 @@
-/* X11::GUITest ($Id: record.c 203 2011-05-15 02:03:11Z ctrondlp $)
+/* X11::GUITest ($Id: record.c 221 2013-02-01 18:31:48Z pecastro $)
  *  
  * Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@cpan.org
@@ -25,7 +25,7 @@
 #include <libintl.h>
 #include <sys/time.h>
 #include <X11/X.h>
-#include <X11/Xlib.h>
+#include <X11/XKBlib.h>
 #include <X11/Xproto.h>
 #include <X11/extensions/record.h>
 #include <X11/keysym.h>
@@ -182,7 +182,7 @@ void EventCallback(XPointer p, XRecordInterceptData *idata)
 	 		{
 				//printf("key code: %d\n", xev->u.u.detail);
 			    KeyCode kc = xev->u.u.detail;
-			    KeySym ks = XKeycodeToKeysym(disp, kc, 0);
+			    KeySym ks = XkbKeycodeToKeysym(disp, kc, 0, 0);
 				re.dataname = XKeysymToString(ks);
 				re.data = ks;
 				re.type = KEY;
