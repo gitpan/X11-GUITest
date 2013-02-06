@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# X11::GUITest ($Id: Makefile.PL 203 2011-05-15 02:03:11Z ctrondlp $)
+# X11::GUITest ($Id: Makefile.PL 225 2013-02-05 23:56:46Z pecastro $)
 
 use strict;
 use warnings;
@@ -32,13 +32,19 @@ WriteMakefile(
 	'INC'   => '-I/usr/X11R6/include -I/usr/X/include', # e.g., '-I/usr/include/other'
 	'CCFLAGS' => '-Wall',
 	'OBJECT' => 'GUITest$(OBJ_EXT) KeyUtil$(OBJ_EXT)',
-	'OPTIMIZE' => '-O2'
+	'OPTIMIZE' => '-O2',
+        'META_MERGE' => {
+            resources => {
+                repository => 'https://x11guitest.svn.sourceforge.net/svnroot/x11guitest',
+            },
+        },
+        'LICENSE' => 'gpl',
 );
 
 
 sub GetLibs {
 	my $un = `uname -a 2>&1` || "";
-	if ($un =~ /x86_64|amd64/i) {
+	if ($un =~ /x86_64|amd64/i && $un !~ /OpenBSD/) {
 		# In case of x64, lets make sure we use x64 libs, system might have both.
 		return ['-L/usr/X11R6/lib64 -L/usr/X/lib64 -lXtst -lXext -lX11'];
 	} else {
@@ -46,18 +52,18 @@ sub GetLibs {
 	}
 }
 
-# Subroutine: BuildDocumentation 
+# Subroutine: BuildDocumentation
 # Description: This function is implemented to generate the
-#			   documentation in HTML/plain-text formats. 
+#			   documentation in HTML/plain-text formats.
 sub BuildDocumentation {
 	my $podfile = 'GUITest.pm';
 
 	# Check POD
 	if ( system("podchecker $podfile &>/dev/null") != 0 ) {
 		print "POD validation failed!  Documentation will not be written.\n";
-		return(0);	
+		return(0);
 	}
-	
+
 	# Generate Text and HTML documents
 	print "Writing documentation for X11::GUITest\n";
 	system("pod2text $podfile docs/X11-GUITest.txt");
@@ -67,7 +73,6 @@ sub BuildDocumentation {
 	# Cleanup
 	unlink <pod*.x??>;
 	unlink <pod*.tmp>;
-	
-	return(1);	
-}
 
+	return(1);
+}

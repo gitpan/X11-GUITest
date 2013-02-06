@@ -1,4 +1,4 @@
-# X11::GUITest ($Id: GUITest.pm 223 2013-02-02 14:31:02Z pecastro $)
+# X11::GUITest ($Id: GUITest.pm 228 2013-02-06 00:03:24Z pecastro $)
 #
 # Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
 # Email: ctrondlp@cpan.org
@@ -26,7 +26,7 @@ Developed by Dennis K. Paulsen
 
 =head1 VERSION
 
-0.26
+0.27
 
 Updates are made available at the following sites:
 
@@ -194,7 +194,7 @@ require DynaLoader;
 
 Exporter::export_ok_tags(keys %EXPORT_TAGS);
 
-$VERSION = '0.26';
+$VERSION = '0.27';
 
 # Module Constants
 sub DEF_WAIT() { 10; }
@@ -1439,9 +1439,9 @@ returned list will be empty.
 
 =begin html
 
-<a href='Changes'>Module Changes</a><br>
+<a href='../Changes'>Module Changes</a><br>
 <a href='CodingStyle'>Coding-Style Guidelines</a><br>
-<a href='ToDo'>ToDo List</a><br>
+<a href='../ToDo'>ToDo List</a><br>
 <a href='Copying'>Copy of the GPL License</a><br>
 
 =end html
@@ -1450,9 +1450,7 @@ returned list will be empty.
 =begin text
 
   Available under the docs sub-directory.
-    Changes (Module Changes)
     CodingStyle (Coding-Style Guidelines)
-    ToDo (ToDo List)
     Copying (Copy of the GPL License)
 
 =end text

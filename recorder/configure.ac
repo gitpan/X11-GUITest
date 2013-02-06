@@ -2,8 +2,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.66])
-AC_INIT(x11guirecord, 0.26, ctrondlp@cpan.org)
-AM_INIT_AUTOMAKE(x11guirecord, 0.26)
+AC_INIT(x11guirecord, 0.27, ctrondlp@cpan.org)
+AM_INIT_AUTOMAKE(x11guirecord, 0.27)
 AC_CONFIG_SRCDIR([src/script_file.c])
 AC_CONFIG_HEADERS([config.h])
 

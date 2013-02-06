@@ -1,9 +1,17 @@
-X11::GUITest ($Id: Changes 223 2013-02-02 14:31:02Z pecastro $)
+X11::GUITest ($Id: Changes 227 2013-02-05 23:57:55Z pecastro $)
 
 This is the list of module changes between revisions.
 --------------------------------------------------------------------
 
-0.26 Sat Feb 2 2013 14:20
+0.27 Wed Feb 05 2013 00:01
+
+  - Move some files to the project root dir.
+
+  - Fix RT #79751: Build on OpenBSD AMD64 failed
+
+  - Add repository and license info
+
+0.26 Sat Feb 02 2013 14:20
 
   - Replace legacy XKeycodeToKeysym calls
 
