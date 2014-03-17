@@ -1,6 +1,6 @@
-/* X11::GUITest ($Id: GUITest.xs 218 2013-02-01 18:29:03Z pecastro $)
+/* X11::GUITest ($Id: GUITest.xs 239 2014-03-16 10:43:17Z ctrondlp $)
  *
- * Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
+ * Copyright (c) 2003-2014  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@cpan.org
  *
  * This program is free software; you can redistribute it and/or
@@ -1284,6 +1284,33 @@ CODE:
 		RETVAL = DefaultDepth(TheXDisplay, scr_num);
 	} else {
 		RETVAL = -1;
+	}
+OUTPUT:
+	RETVAL
+
+unsigned long
+GetWindowPid(win)
+	Window win
+PREINIT:
+	Atom wm_pid_prop = None;
+	Atom actual_type = None;
+	int actual_format = 0;
+	int status = 0;
+	unsigned long nitems = 0;
+	unsigned long bytes_after = 0;
+	unsigned long *prop = NULL;
+CODE:
+	RETVAL = 0;
+	wm_pid_prop = XInternAtom(TheXDisplay, "_NET_WM_PID", False);
+
+	if (wm_pid_prop != None) {
+		status = XGetWindowProperty(TheXDisplay, win, wm_pid_prop, 0,
+			1, False, XA_CARDINAL, &actual_type, &actual_format,
+			&nitems, &bytes_after, (unsigned char **)&prop);
+		if (status == Success && actual_type != None) {
+			RETVAL = *prop;
+			XFree(prop);
+		}
 	}
 OUTPUT:
 	RETVAL

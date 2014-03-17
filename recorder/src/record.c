@@ -1,6 +1,6 @@
-/* X11::GUITest ($Id: record.c 221 2013-02-01 18:31:48Z pecastro $)
+/* X11::GUITest ($Id: record.c 231 2014-01-11 14:26:57Z ctrondlp $)
  *  
- * Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
+ * Copyright (c) 2003-2014  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@cpan.org
  *
  * This program is free software; you can redistribute it and/or

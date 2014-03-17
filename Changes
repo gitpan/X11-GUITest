@@ -1,8 +1,28 @@
-X11::GUITest ($Id: Changes 227 2013-02-05 23:57:55Z pecastro $)
+X11::GUITest ($Id: Changes 241 2014-03-16 11:39:42Z ctrondlp $)
 
 This is the list of module changes between revisions.
 --------------------------------------------------------------------
 
+0.28 Mon Mar 17 2014 07:15
+
+  - Fix RT #75728: X11-GUITest: Build Dependencies: libxt-dev and libxtst-dev
+
+  - Applied RT #88194: Correct minor typo and remove a link dependency
+
+  - Support for RT #69960: GetWindowPid() and GetWindowsFromPid()
+
+  - Fix RT #84053, #93677: With newer Perl (5.14), modules should include $Config{ccflags}
+	when also specifying their own
+
+  - Minor updates to file preambles, comments
+
+  - Updated for RT #93668 - Updated license file
+
+  - Updates for RT #93667 - For `make test`, support environments that may have 0 client
+    windows (xvfb-run)
+
+  - Various documentation updates
+ 
 0.27 Wed Feb 05 2013 00:01
 
   - Move some files to the project root dir.

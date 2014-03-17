@@ -1,6 +1,6 @@
-# X11::GUITest ($Id: GUITest.pm 228 2013-02-06 00:03:24Z pecastro $)
+# X11::GUITest ($Id: GUITest.pm 243 2014-03-17 12:09:14Z ctrondlp $)
 #
-# Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
+# Copyright (c) 2003-2014  Dennis K. Paulsen, All Rights Reserved.
 # Email: ctrondlp@cpan.org
 #
 # This program is free software; you can redistribute it and/or
@@ -22,11 +22,9 @@
 
 B<X11::GUITest> - Provides GUI testing/interaction routines.
 
-Developed by Dennis K. Paulsen
-
 =head1 VERSION
 
-0.27
+0.28
 
 Updates are made available at the following sites:
 
@@ -44,7 +42,7 @@ applications; which have been built upon the X library or toolkits
 (i.e., GTK+, Xt, Qt, Motif, etc.) that "wrap" the X library's functionality.
 
 A basic recorder (x11guirecord) is also available, and can be found in
-the source code respository.
+the source code repository.
 
 =head1 DEPENDENCIES
 
@@ -73,6 +71,9 @@ details.
   make
   make test
   make install
+
+  # If the build has errors, you may need to install the following dependencies:
+  #    libxt-dev, libxtst-dev
 
   # If you'd like to install the recorder, use these steps:
   cd recorder
@@ -151,7 +152,9 @@ require DynaLoader;
 	GetScreenRes
 	GetWindowFromPoint
 	GetWindowName
+	GetWindowPid
 	GetWindowPos
+	GetWindowsFromPid
 	IconifyWindow
 	IsChild
 	IsKeyPressed
@@ -194,7 +197,7 @@ require DynaLoader;
 
 Exporter::export_ok_tags(keys %EXPORT_TAGS);
 
-$VERSION = '0.27';
+$VERSION = '0.28';
 
 # Module Constants
 sub DEF_WAIT() { 10; }
@@ -552,6 +555,35 @@ sub ClickWindow {
 	return(1);
 }
 
+=over 8
+
+=item GetWindowsFromPid 
+
+Returns a list of window ids discovered for the specified process id (pid).
+
+undef is returned on error.
+
+=back
+
+=cut
+
+sub GetWindowsFromPid {
+	my $pid = shift;
+	my @wins = ();
+
+	if ($pid <= 0) {
+		return(undef);
+	}
+
+	my @all_wins = FindWindowLike('.*');
+	foreach my $aw (@all_wins) {
+		my $aw_pid = GetWindowPid($aw);
+		if ($aw_pid == $pid) {
+			push @wins, $aw;
+		}
+	}
+	return(@wins);
+}
 
 =over 8
 
@@ -637,6 +669,9 @@ Returns the quoted string, undef is returned on error.
   SendKeys( QuoteStringForSendKeys('Hello: ~%^(){}+#') );
   SendKeys( QSfSK('#+#') );
 
+The international AltGr key - modifier character (&) is not escaped by
+this function.  Escape this character manually ("{&}"), if used/needed.
+
 =back
 
 =cut
@@ -663,7 +698,7 @@ sub QSfSK {
 
 Uses the shell to execute a program.  This function returns as
 soon as the program is called.  Useful for starting GUI
-applications and then going on to work with them.
+/applications and then going on to work with them.
 
 zero is returned on failure, non-zero for success
 
@@ -843,6 +878,20 @@ is returned if name could not be obtained.
 
 =over 8
 
+=item GetWindowPid WINDOWID
+
+Returns the process id (pid) associated with the specified 
+window.  0 is returned if the pid is not available.
+
+  # Return the pid of the window that has the input focus.
+  my $pid = GetWindowPid(GetInputFocus());
+
+=back
+
+=cut
+
+=over 8
+
 =item SetWindowName WINDOWID, NAME
 
 Sets the window name for the specified window Id.
@@ -973,7 +1022,7 @@ Parenthesis allow a modifier to work on one or more characters.  For example:
 Braces are used to quote special characters, for utilizing aliased key
 names, or for special functionality. Multiple characters can be specified
 in a brace by space delimiting the entries.  Characters can be repeated using
-a number that is space delimited after the preceeding key.
+a number that is space delimited after the preceding key.
 
 Quote Special Characters
 
@@ -1448,11 +1497,11 @@ returned list will be empty.
 
 
 =begin text
-
+ 
   Available under the docs sub-directory.
     CodingStyle (Coding-Style Guidelines)
     Copying (Copy of the GPL License)
-
+ 
 =end text
 
 =begin man
@@ -1461,15 +1510,16 @@ Not installed.
 
 =end man
 
+
 =head1 COPYRIGHT
 
-Copyright(c) 2003-2011 Dennis K. Paulsen, All Rights Reserved.  This
+Copyright(c) 2003-2014 Dennis K. Paulsen, All Rights Reserved.  This
 program is free software; you can redistribute it and/or modify it
 under the terms of the GNU General Public License.
 
 =head1 AUTHOR
 
-Dennis K. Paulsen <ctrondlp@cpan.org> (Des Moines, Iowa USA)
+Dennis K. Paulsen <ctrondlp@cpan.org> (Iowa USA)
 
 =head1 CONTRIBUTORS
 
@@ -1480,6 +1530,7 @@ Paulo E. Castro <pauloedgarcastro tata gmail.com>
 Thanks to everyone; including those specifically mentioned below for patches,
 suggestions, etc.:
 
+  David Dick
   Alexey Tourbin
   Richard Clamp
   Gustav Larsson

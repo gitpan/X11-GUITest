@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #-----------------------------------------------------------------------------#
-# X11::GUITest ($Id: FindControlVisually.pl 203 2011-05-15 02:03:11Z ctrondlp $)
+# X11::GUITest ($Id: FindControlVisually.pl 236 2014-02-23 12:26:34Z ctrondlp $)
 # Notes: Example of script to locate a widget/control visually using an
 #        image baseline. 
 #-----------------------------------------------------------------------------#

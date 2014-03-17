@@ -1,6 +1,6 @@
-/* X11::GUITest ($Id: Common.h 227 2013-02-05 23:57:55Z pecastro $)
+/* X11::GUITest ($Id: Common.h 231 2014-01-11 14:26:57Z ctrondlp $)
  *
- * Copyright (c) 2003-2011  Dennis K. Paulsen, All Rights Reserved.
+ * Copyright (c) 2003-2014  Dennis K. Paulsen, All Rights Reserved.
  * Email: ctrondlp@cpan.org
  *
  * This program is free software; you can redistribute it and/or
@@ -20,7 +20,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#define APP_VERSION "0.27"
+#define APP_VERSION "0.28"
 #define APP_TEXTDOMAIN "/usr/share/locale"
 
 #ifndef _

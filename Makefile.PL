@@ -1,8 +1,9 @@
-#!/usr/bin/perl
-# X11::GUITest ($Id: Makefile.PL 225 2013-02-05 23:56:46Z pecastro $)
+
+# X11::GUITest ($Id: Makefile.PL 242 2014-03-16 12:11:48Z ctrondlp $)
 
 use strict;
 use warnings;
+use Config;
 use ExtUtils::MakeMaker;
 
 
@@ -30,7 +31,7 @@ WriteMakefile(
 	# (X server) extensions, use "-DX11_GUITEST_USING_XINERAMA".
 	'DEFINE' => '-DNDEBUG -DX11_GUITEST_ALT_L_FALLBACK_META_L', # e.g., '-DHAVE_SOMETHING'
 	'INC'   => '-I/usr/X11R6/include -I/usr/X/include', # e.g., '-I/usr/include/other'
-	'CCFLAGS' => '-Wall',
+	'CCFLAGS' => $Config{ccflags} . ' -Wall',
 	'OBJECT' => 'GUITest$(OBJ_EXT) KeyUtil$(OBJ_EXT)',
 	'OPTIMIZE' => '-O2',
         'META_MERGE' => {
@@ -38,7 +39,7 @@ WriteMakefile(
                 repository => 'https://x11guitest.svn.sourceforge.net/svnroot/x11guitest',
             },
         },
-        'LICENSE' => 'gpl',
+        'LICENSE' => 'gpl_2',
 );
 
 
@@ -46,9 +47,9 @@ sub GetLibs {
 	my $un = `uname -a 2>&1` || "";
 	if ($un =~ /x86_64|amd64/i && $un !~ /OpenBSD/) {
 		# In case of x64, lets make sure we use x64 libs, system might have both.
-		return ['-L/usr/X11R6/lib64 -L/usr/X/lib64 -lXtst -lXext -lX11'];
+		return ['-L/usr/X11R6/lib64 -L/usr/X/lib64 -lXtst -lX11'];
 	} else {
-		return ['-L/usr/X11R6/lib -L/usr/X/lib -lXtst -lXext -lX11'];
+		return ['-L/usr/X11R6/lib -L/usr/X/lib -lXtst -lX11'];
 	}
 }
 

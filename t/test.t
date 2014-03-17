@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# X11::GUITest ($Id: test.t 203 2011-05-15 02:03:11Z ctrondlp $)
+# X11::GUITest ($Id: test.t 241 2014-03-16 11:39:42Z ctrondlp $)
 # Note: Functions that might be too intrusive are not checked
 
 BEGIN {
@@ -20,12 +20,13 @@ BEGIN {
 		exit(0);	
 	}
 
-	# All seems ok, so plan on running the tests.
-	print "1..23\n";
+	# Pre-checks ok, so plan on running the tests.
+	print "1..24\n";
 }
 END {
 	print "not ok 1\n" unless $loaded;
 }
+
 use X11::GUITest qw/
 	:ALL
 /;
@@ -39,10 +40,17 @@ use warnings;
 my $BadWinTitle = 'BadWindowNameNotToBeFound';
 my $BadWinId = '898989899';
 my @Windows = ();
+my $HasWindows = 0;
+
+# Determine if there are windows to use.  If tester
+# is using xvfb-run, we'll likely have 0 windows.
+$HasWindows = (scalar FindWindowLike(".*"));
 
 
 # FindWindowLike
-print "not " unless FindWindowLike(".*");
+if ($HasWindows) {
+	print "not " unless FindWindowLike(".*");
+}
 print "not " unless not FindWindowLike($BadWinTitle);
 print "ok 2\n";
 
@@ -51,12 +59,16 @@ print "not " unless WaitWindowClose($BadWinId);
 print "ok 3\n";
 
 # WaitWindowLike
-print "not " unless WaitWindowLike(".*");
+if ($HasWindows) {
+	print "not " unless WaitWindowLike(".*");
+}
 print "not " unless not WaitWindowLike($BadWinTitle, undef, 1);
 print "ok 4\n";
 
 # WaitWindowViewable
-print "not " unless WaitWindowViewable(".*");
+if ($HasWindows) {
+	print "not " unless WaitWindowViewable(".*");
+}
 print "not " unless not WaitWindowViewable($BadWinTitle, undef, 1);
 print "ok 5\n";
 
@@ -89,7 +101,11 @@ print "not " unless GetRootWindow();
 print "ok 7\n";
 
 # GetChildWindows
-print "not " unless GetChildWindows(GetRootWindow());
+if ($HasWindows) {
+	print "not " unless GetChildWindows(GetRootWindow());
+} else {
+	print "not " unless not GetChildWindows(GetRootWindow());
+}
 print "ok 8\n";
 
 # MoveMouseAbs
@@ -109,11 +125,13 @@ print "not " unless not IsWindow($BadWinId);
 print "ok 10\n";
 
 # IsWindowViewable
-@Windows = WaitWindowViewable(".*");
-if (not IsWindow($Windows[0])) { # First window not viewable
-	$Windows[0] = GetRootWindow(); # Fall-back to root
+if ($HasWindows) {
+	@Windows = WaitWindowViewable(".*");
+	if (not IsWindow($Windows[0])) { # First window not viewable
+		$Windows[0] = GetRootWindow(); # Fall-back to root
+	}
+	print "not " unless IsWindowViewable($Windows[0]);
 }
-print "not " unless IsWindowViewable($Windows[0]);
 print "not " unless not IsWindowViewable($BadWinId);
 print "ok 11\n";
 
@@ -150,12 +168,14 @@ print "not " unless ( @coords = GetMousePos() );
 print "ok 16\n";
 
 # IsChild
-print "not " unless ( @Windows = GetChildWindows(GetRootWindow()) );
-# Note: Limiting check to a certain number of windows (10)
-foreach my $win ( @Windows[0..(9 < $#Windows ? 9 : $#Windows)] ) {
-	if (!IsChild(GetRootWindow(), $win)) {
-		print "not ";
-		last;
+if ($HasWindows) {
+	print "not " unless ( @Windows = GetChildWindows(GetRootWindow()) );
+	# Note: Limiting check to a certain number of windows (10)
+	foreach my $win ( @Windows[0..(9 < $#Windows ? 9 : $#Windows)] ) {
+		if (!IsChild(GetRootWindow(), $win)) {
+			print "not ";
+			last;
+		}
 	}
 }
 print "ok 17\n";
@@ -166,25 +186,33 @@ print "ok 17\n";
 # QuoteStringForSendKeys
 print "not " unless defined( QuoteStringForSendKeys('~!@#$%^&*()_+') );
 print "ok 18\n";
-print "not " unless not defined ( QuoteStringForSendKeys(undef) );
+print "not " unless (QSfSK('~!@#$%^&*()_+') eq '{~}!@#${%}{^}&*{(}{)}_{+}');
 print "ok 19\n";
+print "not " unless not defined ( QuoteStringForSendKeys(undef) );
+print "ok 20\n";
 
 # GetParentWindow
 print "not " unless not GetParentWindow(GetRootWindow());
-print "ok 20\n";
-print "not " unless GetParentWindow($Windows[0]);
 print "ok 21\n";
+if ($HasWindows) {
+	print "not " unless GetParentWindow($Windows[0]);
+}
+print "ok 22\n";
 
 # GetWindowFromPoint
 # Note: Using invalid window position of (-1500 x -1500) for testing. 
 print "not " unless not GetWindowFromPoint(-1500, -1500);
-print "ok 22\n";
-print "not " unless GetWindowFromPoint(0, 0);
 print "ok 23\n";
+if ($HasWindows) {
+	print "not " unless GetWindowFromPoint(0, 0);
+}
+print "ok 24\n";
 
 # PressKey
 # ReleaseKey
 # PressReleaseKey
 # PressMouseButton
 # ReleaseMouseButton
+# GetWindowPid
+# GetWindowsFromPid
 
